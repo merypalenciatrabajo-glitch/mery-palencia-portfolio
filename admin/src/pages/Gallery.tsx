@@ -1,0 +1,289 @@
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
+} from "firebase/firestore";
+import { Edit2, Plus, Trash2, Upload, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { db } from "@/lib/firebase";
+import { uploadToCloudinary } from "@/lib/cloudinary";
+import { cn } from "@/lib/utils";
+
+interface GalleryItem {
+  id: string;
+  title: string;
+  image: string;
+  publicId: string;
+  category: string;
+  description: string;
+  order: number;
+}
+
+const CATEGORIES = ["personajes", "escenarios", "props", "abstracto", "otro"];
+
+const EMPTY_FORM = {
+  title: "",
+  category: "personajes",
+  description: "",
+};
+
+export default function Gallery() {
+  const [items, setItems] = useState<GalleryItem[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<GalleryItem | null>(null);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string>("");
+  const [progress, setProgress] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const q = query(collection(db, "gallery"), orderBy("order", "asc"));
+    const unsub = onSnapshot(q, (snap) => {
+      setItems(
+        snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GalleryItem, "id">) }))
+      );
+    });
+    return unsub;
+  }, []);
+
+  const openCreate = () => {
+    setEditing(null);
+    setForm(EMPTY_FORM);
+    setFile(null);
+    setPreview("");
+    setShowForm(true);
+  };
+
+  const openEdit = (item: GalleryItem) => {
+    setEditing(item);
+    setForm({ title: item.title, category: item.category, description: item.description });
+    setPreview(item.image);
+    setFile(null);
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditing(null);
+    setFile(null);
+    setPreview("");
+    setProgress(0);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setFile(f);
+    setPreview(URL.createObjectURL(f));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      if (editing) {
+        let imageData: { image?: string; publicId?: string } = {};
+        if (file) {
+          const { url, publicId } = await uploadToCloudinary(file, setProgress);
+          imageData = { image: url, publicId };
+        }
+        await updateDoc(doc(db, "gallery", editing.id), { ...form, ...imageData });
+      } else {
+        if (!file) return;
+        const { url, publicId } = await uploadToCloudinary(file, setProgress);
+        await addDoc(collection(db, "gallery"), {
+          ...form,
+          image: url,
+          publicId,
+          order: items.length,
+        });
+      }
+      closeForm();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (item: GalleryItem) => {
+    if (!confirm(`¿Eliminar "${item.title}"?`)) return;
+    setDeletingId(item.id);
+    try {
+      await deleteDoc(doc(db, "gallery", item.id));
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Galería</h1>
+          <p className="text-muted-foreground mt-1">{items.length} ilustraciones</p>
+        </div>
+        <button
+          onClick={openCreate}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+        >
+          <Plus size={16} />
+          Nueva ilustración
+        </button>
+      </div>
+
+      {items.length === 0 ? (
+        <div className="text-center py-20 text-muted-foreground border border-dashed border-border rounded-xl">
+          No hay ilustraciones aún. Sube la primera.
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {items.map((item) => (
+            <div key={item.id} className="group relative bg-card border border-border rounded-xl overflow-hidden">
+              <img src={item.image} alt={item.title} className="w-full aspect-square object-cover" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                <button
+                  onClick={() => openEdit(item)}
+                  className="p-2 bg-white rounded-lg text-foreground hover:bg-secondary transition-colors"
+                >
+                  <Edit2 size={16} />
+                </button>
+                <button
+                  onClick={() => handleDelete(item)}
+                  disabled={deletingId === item.id}
+                  className="p-2 bg-white rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+              <div className="p-3">
+                <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+                <p className="text-xs text-muted-foreground capitalize">{item.category}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-lg shadow-xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+              <h2 className="font-semibold text-foreground">
+                {editing ? "Editar ilustración" : "Nueva ilustración"}
+              </h2>
+              <button onClick={closeForm} className="text-muted-foreground hover:text-foreground">
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Imagen {!editing && <span className="text-destructive">*</span>}
+                </label>
+                {preview ? (
+                  <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-secondary mb-2">
+                    <img src={preview} alt="preview" className="w-full h-full object-contain" />
+                    <button
+                      type="button"
+                      onClick={() => { setFile(null); setPreview(editing?.image || ""); }}
+                      className="absolute top-2 right-2 p-1 bg-black/60 rounded-full text-white"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    className="w-full aspect-video border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  >
+                    <Upload size={24} />
+                    <span className="text-sm">Haz clic para subir imagen</span>
+                  </button>
+                )}
+                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                {saving && progress > 0 && progress < 100 && (
+                  <div className="mt-2">
+                    <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                      <div className="h-full bg-primary transition-all" style={{ width: `${progress}%` }} />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{Math.round(progress)}%</p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Título <span className="text-destructive">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.title}
+                  onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+                  required
+                  className="w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Ej: Retrato Botánico"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Categoría</label>
+                <select
+                  value={form.category}
+                  onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
+                  className="w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  {CATEGORIES.map((c) => (
+                    <option key={c} value={c} className="capitalize">{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Descripción</label>
+                <textarea
+                  value={form.description}
+                  onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+                  rows={3}
+                  className="w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                  placeholder="Descripción breve de la ilustración"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={closeForm}
+                  className="flex-1 py-2.5 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving || (!editing && !file)}
+                  className={cn(
+                    "flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                    "bg-primary text-primary-foreground hover:bg-primary/90",
+                    (saving || (!editing && !file)) && "opacity-60 cursor-not-allowed"
+                  )}
+                >
+                  {saving ? "Guardando..." : editing ? "Guardar cambios" : "Publicar"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,99 @@
+import {
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  type QueryConstraint,
+} from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { db } from "@/lib/firebase";
+
+export function useCollection<T>(
+  collectionName: string,
+  constraints: QueryConstraint[] = []
+) {
+  const [data, setData] = useState<T[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const q = query(collection(db, collectionName), ...constraints);
+    const unsub = onSnapshot(q, (snap) => {
+      setData(snap.docs.map((d) => ({ id: d.id, ...d.data() } as T)));
+      setLoading(false);
+    });
+    return unsub;
+  }, [collectionName]);
+
+  return { data, loading };
+}
+
+// Hooks específicos para cada colección
+export function useGallery() {
+  return useCollection<{
+    id: string;
+    title: string;
+    image: string;
+    category: string;
+    description: string;
+    order: number;
+  }>("gallery", [orderBy("order", "asc")]);
+}
+
+export function useBlogPosts() {
+  return useCollection<{
+    id: string;
+    title: string;
+    excerpt: string;
+    content: string;
+    date: string;
+    category: string;
+    readTime: number;
+    image: string;
+    author: string;
+    published: boolean;
+  }>("blogPosts", [orderBy("date", "desc")]);
+}
+
+export function useCommissions() {
+  return useCollection<{
+    id: string;
+    name: string;
+    price: string;
+    description: string;
+    includes: string[];
+    featured: boolean;
+    order: number;
+  }>("commissions", [orderBy("order", "asc")]);
+}
+
+export function useProcessSteps() {
+  return useCollection<{
+    id: string;
+    number: string;
+    title: string;
+    description: string;
+    order: number;
+  }>("processSteps", [orderBy("order", "asc")]);
+}
+
+export function useHeroImage() {
+  const [data, setData] = useState<{ imageUrl: string | null; position: { x: number; y: number } }>({
+    imageUrl: null,
+    position: { x: 50, y: 50 },
+  });
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "settings", "hero"), (snap) => {
+      if (snap.exists()) {
+        setData({
+          imageUrl: snap.data().imageUrl ?? null,
+          position: snap.data().position ?? { x: 50, y: 50 },
+        });
+      }
+    });
+    return unsub;
+  }, []);
+
+  return data;
+}
