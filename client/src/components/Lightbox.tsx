@@ -16,13 +16,17 @@ export default function Lightbox({ isOpen, image, title, category, description, 
   const total = allImages.length;
 
   const [index, setIndex] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
   const touchStartXRef = useRef(0);
   const touchStartYRef = useRef(0);
+  const isHorizontalRef = useRef<boolean | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
       setIndex(0);
+      setDragOffset(0);
     } else {
       document.body.style.overflow = 'unset';
     }
@@ -31,25 +35,53 @@ export default function Lightbox({ isOpen, image, title, category, description, 
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
-  const prev = () => setIndex((i) => (i - 1 + total) % total);
-  const next = () => setIndex((i) => (i + 1) % total);
+  const goTo = (i: number) => {
+    setDragOffset(0);
+    setIndex(Math.max(0, Math.min(i, total - 1)));
+  };
+
+  const prev = () => goTo(index - 1);
+  const next = () => goTo(index + 1);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartXRef.current = e.touches[0].clientX;
     touchStartYRef.current = e.touches[0].clientY;
+    isHorizontalRef.current = null;
+    setDragging(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const dx = e.touches[0].clientX - touchStartXRef.current;
+    const dy = e.touches[0].clientY - touchStartYRef.current;
+
+    if (isHorizontalRef.current === null) {
+      isHorizontalRef.current = Math.abs(dx) > Math.abs(dy);
+    }
+
+    if (!isHorizontalRef.current) return;
+    e.stopPropagation();
+
+    // Resist at edges
+    let offset = dx;
+    if ((index === 0 && dx > 0) || (index === total - 1 && dx < 0)) {
+      offset = dx * 0.25;
+    }
+    setDragOffset(offset);
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     const dx = e.changedTouches[0].clientX - touchStartXRef.current;
-    const dy = e.changedTouches[0].clientY - touchStartYRef.current;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+    setDragging(false);
+    setDragOffset(0);
+    if (isHorizontalRef.current && Math.abs(dx) > 50) {
       dx < 0 ? next() : prev();
     }
   };
 
   if (!isOpen) return null;
 
-  const current = allImages[index];
+  // translateX = -(index * 100%) + dragOffset mapped to percentage of container
+  const translateBase = -(index * 100);
 
   return (
     <div
@@ -61,7 +93,6 @@ export default function Lightbox({ isOpen, image, title, category, description, 
         className="relative animate-in fade-in zoom-in-95 duration-300 w-full"
         style={{ maxWidth: '480px' }}
         onClick={(e) => e.stopPropagation()}
-        onTouchMove={(e) => e.stopPropagation()}
       >
         {/* Close */}
         <button
@@ -72,39 +103,59 @@ export default function Lightbox({ isOpen, image, title, category, description, 
           <X size={28} />
         </button>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl overflow-y-auto scrollbar-hide flex flex-col" style={{ maxHeight: '90vh' }}>
-
-          {/* Slider */}
+        <div
+          className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl overflow-y-auto scrollbar-hide flex flex-col"
+          style={{ maxHeight: '90vh' }}
+        >
+          {/* Slider viewport */}
           <div
-            className="relative overflow-hidden flex-shrink-0 bg-black select-none"
+            className="relative overflow-hidden flex-shrink-0 bg-black"
             onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <img
-              key={current.url}
-              src={current.url}
-              alt={`${title} ${index + 1}`}
-              className="w-full object-cover"
-              style={{ maxHeight: '520px', minHeight: '260px' }}
-            />
+            {/* Track */}
+            <div
+              className="flex"
+              style={{
+                transform: `translateX(calc(${translateBase}% + ${dragOffset}px))`,
+                transition: dragging ? 'none' : 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                willChange: 'transform',
+              }}
+            >
+              {allImages.map((img, i) => (
+                <div key={img.publicId} className="flex-none w-full">
+                  <img
+                    src={img.url}
+                    alt={`${title} ${i + 1}`}
+                    className="w-full object-cover"
+                    style={{ maxHeight: '520px', minHeight: '260px', display: 'block' }}
+                  />
+                </div>
+              ))}
+            </div>
 
-            {/* Flechas — solo si hay más de 1 imagen */}
+            {/* Flechas */}
             {total > 1 && (
               <>
-                <button
-                  onClick={(e) => { e.stopPropagation(); prev(); }}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
-                  aria-label="Anterior"
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); next(); }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
-                  aria-label="Siguiente"
-                >
-                  <ChevronRight size={18} />
-                </button>
+                {index > 0 && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); prev(); }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                    aria-label="Anterior"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                )}
+                {index < total - 1 && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); next(); }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                    aria-label="Siguiente"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                )}
 
                 {/* Contador */}
                 <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm">
@@ -116,11 +167,9 @@ export default function Lightbox({ isOpen, image, title, category, description, 
                   {allImages.map((_, i) => (
                     <button
                       key={i}
-                      onClick={(e) => { e.stopPropagation(); setIndex(i); }}
+                      onClick={(e) => { e.stopPropagation(); goTo(i); }}
                       className={`rounded-full transition-all duration-200 ${
-                        i === index
-                          ? 'w-2 h-2 bg-white'
-                          : 'w-1.5 h-1.5 bg-white/50'
+                        i === index ? 'w-2 h-2 bg-white' : 'w-1.5 h-1.5 bg-white/50'
                       }`}
                       aria-label={`Foto ${i + 1}`}
                     />
@@ -144,7 +193,6 @@ export default function Lightbox({ isOpen, image, title, category, description, 
               )}
             </div>
           </div>
-
         </div>
       </div>
     </div>
