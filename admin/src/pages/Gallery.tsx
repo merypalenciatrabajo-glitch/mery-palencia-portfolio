@@ -22,6 +22,7 @@ interface GalleryItem {
   category: string;
   description: string;
   order: number;
+  extraImages?: { url: string; publicId: string }[];
 }
 
 const CATEGORIES = ["personajes", "escenarios", "props", "abstracto", "otro"];
@@ -43,6 +44,13 @@ export default function Gallery() {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const extraFileRef = useRef<HTMLInputElement>(null);
+
+  // Extra images state
+  const [extraFiles, setExtraFiles] = useState<File[]>([]);
+  const [extraPreviews, setExtraPreviews] = useState<string[]>([]);
+  const [existingExtras, setExistingExtras] = useState<{ url: string; publicId: string }[]>([]);
+  const [extrasError, setExtrasError] = useState("");
 
   useEffect(() => {
     const q = query(collection(db, "gallery"), orderBy("order", "asc"));
@@ -59,6 +67,10 @@ export default function Gallery() {
     setForm(EMPTY_FORM);
     setFile(null);
     setPreview("");
+    setExtraFiles([]);
+    setExtraPreviews([]);
+    setExistingExtras([]);
+    setExtrasError("");
     setShowForm(true);
   };
 
@@ -67,6 +79,10 @@ export default function Gallery() {
     setForm({ title: item.title, category: item.category, description: item.description });
     setPreview(item.image);
     setFile(null);
+    setExtraFiles([]);
+    setExtraPreviews([]);
+    setExistingExtras(item.extraImages ?? []);
+    setExtrasError("");
     setShowForm(true);
   };
 
@@ -76,6 +92,10 @@ export default function Gallery() {
     setFile(null);
     setPreview("");
     setProgress(0);
+    setExtraFiles([]);
+    setExtraPreviews([]);
+    setExistingExtras([]);
+    setExtrasError("");
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,17 +105,55 @@ export default function Gallery() {
     setPreview(URL.createObjectURL(f));
   };
 
+  const handleExtraFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(e.target.files ?? []);
+    if (!selected.length) return;
+    const total = existingExtras.length + extraFiles.length + selected.length;
+    if (total > 4) {
+      setExtrasError(`Máximo 4 fotos extras. Ya tienes ${existingExtras.length + extraFiles.length}.`);
+      e.target.value = "";
+      return;
+    }
+    setExtrasError("");
+    setExtraFiles((prev) => [...prev, ...selected]);
+    setExtraPreviews((prev) => [...prev, ...selected.map((f) => URL.createObjectURL(f))]);
+    e.target.value = "";
+  };
+
+  const removeExtraFile = (index: number) => {
+    setExtraFiles((prev) => prev.filter((_, i) => i !== index));
+    setExtraPreviews((prev) => prev.filter((_, i) => i !== index));
+    setExtrasError("");
+  };
+
+  const removeExistingExtra = (index: number) => {
+    setExistingExtras((prev) => prev.filter((_, i) => i !== index));
+    setExtrasError("");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
+      // Upload new extra files
+      const uploadedExtras: { url: string; publicId: string }[] = [];
+      for (const extraFile of extraFiles) {
+        const { url, publicId } = await uploadToCloudinary(extraFile, setProgress);
+        uploadedExtras.push({ url, publicId });
+      }
+      const finalExtras = [...existingExtras, ...uploadedExtras];
+
       if (editing) {
         let imageData: { image?: string; publicId?: string } = {};
         if (file) {
           const { url, publicId } = await uploadToCloudinary(file, setProgress);
           imageData = { image: url, publicId };
         }
-        await updateDoc(doc(db, "gallery", editing.id), { ...form, ...imageData });
+        await updateDoc(doc(db, "gallery", editing.id), {
+          ...form,
+          ...imageData,
+          extraImages: finalExtras,
+        });
       } else {
         if (!file) return;
         const { url, publicId } = await uploadToCloudinary(file, setProgress);
@@ -104,6 +162,7 @@ export default function Gallery() {
           image: url,
           publicId,
           order: items.length,
+          extraImages: finalExtras,
         });
       }
       closeForm();
@@ -188,7 +247,7 @@ export default function Gallery() {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">
-                  Imagen {!editing && <span className="text-destructive">*</span>}
+                  Foto de portada {!editing && <span className="text-destructive">*</span>}
                 </label>
                 {preview ? (
                   <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-secondary mb-2">
@@ -219,6 +278,65 @@ export default function Gallery() {
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">{Math.round(progress)}%</p>
                   </div>
+                )}
+              </div>
+
+              {/* Fotos extras */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Fotos extras <span className="text-muted-foreground font-normal">(máx. 4)</span>
+                </label>
+
+                {/* Thumbnails grid */}
+                {(existingExtras.length > 0 || extraPreviews.length > 0) && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {existingExtras.map((img, i) => (
+                      <div key={`existing-${i}`} className="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary">
+                        <img src={img.url} alt={`extra ${i + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeExistingExtra(i)}
+                          className="absolute top-0.5 right-0.5 p-0.5 bg-black/60 rounded-full text-white"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                    {extraPreviews.map((src, i) => (
+                      <div key={`new-${i}`} className="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary">
+                        <img src={src} alt={`nueva ${i + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeExtraFile(i)}
+                          className="absolute top-0.5 right-0.5 p-0.5 bg-black/60 rounded-full text-white"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {existingExtras.length + extraFiles.length < 4 && (
+                  <button
+                    type="button"
+                    onClick={() => extraFileRef.current?.click()}
+                    className="flex items-center gap-2 px-3 py-2 border border-dashed border-border rounded-lg text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  >
+                    <Upload size={14} />
+                    Agregar fotos
+                  </button>
+                )}
+                <input
+                  ref={extraFileRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleExtraFilesChange}
+                />
+                {extrasError && (
+                  <p className="text-xs text-destructive mt-1">{extrasError}</p>
                 )}
               </div>
 

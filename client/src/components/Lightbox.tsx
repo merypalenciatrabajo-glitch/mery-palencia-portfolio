@@ -7,10 +7,11 @@ interface LightboxProps {
   title: string;
   category?: string;
   description?: string;
+  extraImages?: { url: string; publicId: string }[];
   onClose: () => void;
 }
 
-export default function Lightbox({ isOpen, image, title, category, description, onClose }: LightboxProps) {
+export default function Lightbox({ isOpen, image, title, category, description, extraImages = [], onClose }: LightboxProps) {
   const [expanded, setExpanded] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -90,7 +91,7 @@ export default function Lightbox({ isOpen, image, title, category, description, 
           </div>
 
           {/* Info panel */}
-          <div className="px-6 py-4 border-t border-border flex items-start justify-between gap-4">
+          <div className="px-6 py-4 border-t border-border">
             <div className="space-y-1 min-w-0">
               {category && (
                 <span className="inline-block px-2 py-0.5 rounded-full bg-accent/10 text-accent text-[11px] font-semibold tracking-widest uppercase">
@@ -103,6 +104,25 @@ export default function Lightbox({ isOpen, image, title, category, description, 
               )}
             </div>
           </div>
+
+          {/* Extra images grid */}
+          {extraImages.length > 0 && (
+            <div className="px-6 pb-5 border-t border-border pt-4">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-3">
+                Más fotos
+              </p>
+              <div className="grid grid-cols-4 gap-2">
+                {extraImages.map((img, i) => (
+                  <img
+                    key={img.publicId || i}
+                    src={img.url}
+                    alt={`${title} — foto extra ${i + 1}`}
+                    className="w-full aspect-square object-cover rounded-lg"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

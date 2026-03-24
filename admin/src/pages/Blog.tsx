@@ -227,61 +227,59 @@ export default function Blog() {
           {posts.map((post) => {
             const status = getStatusBadge(post);
             return (
-              <div key={post.id} className="flex items-center gap-4 bg-card border border-border rounded-xl p-4">
-                <img src={post.image} alt={post.title} className="w-16 h-16 rounded-lg object-cover shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                      {getCategoryLabel(post.category)}
-                    </span>
-                    <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", status.cls)}>
-                      {status.label}
-                    </span>
-                    {post.scheduledAt && !post.published && (
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock size={11} />
-                        {new Date(post.scheduledAt).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" })}
+              <div key={post.id} className="bg-card border border-border rounded-xl p-4 space-y-3">
+                <div className="flex items-start gap-3">
+                  <img src={post.image} alt={post.title} className="w-14 h-14 rounded-lg object-cover shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                        {getCategoryLabel(post.category)}
                       </span>
-                    )}
-                  </div>
-                  <p className="font-medium text-foreground truncate">{post.title}</p>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                    <span className="flex items-center gap-1">
-                      <Calendar size={11} />
-                      {new Date(post.date).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Eye size={11} />
-                      {post.views ?? 0} lecturas
-                    </span>
+                      <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", status.cls)}>
+                        {status.label}
+                      </span>
+                    </div>
+                    <p className="font-medium text-foreground truncate">{post.title}</p>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5 flex-wrap">
+                      <span className="flex items-center gap-1">
+                        <Calendar size={11} />
+                        {new Date(post.date).toLocaleDateString("es-ES", { dateStyle: "short" })}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Eye size={11} />
+                        {post.views ?? 0} lecturas
+                      </span>
+                      {post.scheduledAt && !post.published && (
+                        <span className="flex items-center gap-1">
+                          <Clock size={11} />
+                          {new Date(post.scheduledAt).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" })}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  {/* Toggle publicar/borrador rápido */}
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => togglePublish(post)}
                     className={cn(
-                      "px-2.5 py-1 rounded-lg text-xs font-medium transition-colors",
+                      "flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors",
                       post.published
                         ? "bg-secondary text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                         : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400"
                     )}
-                    title={post.published ? "Pasar a borrador" : "Publicar ahora"}
                   >
                     {post.published ? "Despublicar" : "Publicar"}
                   </button>
                   <button
                     onClick={() => openEdit(post)}
-                    className="p-2 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-                    title="Editar"
+                    className="p-2 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors border border-border"
                   >
                     <Edit2 size={16} />
                   </button>
                   <button
                     onClick={() => handleDelete(post)}
                     disabled={deletingId === post.id}
-                    className="p-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-                    title="Eliminar"
+                    className="p-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors border border-border"
                   >
                     <Trash2 size={16} />
                   </button>

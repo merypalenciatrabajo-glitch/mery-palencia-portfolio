@@ -30,14 +30,24 @@ export function useCollection<T>(
 
 // Hooks específicos para cada colección
 export function useGallery() {
-  return useCollection<{
+  const result = useCollection<{
     id: string;
     title: string;
     image: string;
     category: string;
     description: string;
     order: number;
+    extraImages?: { url: string; publicId: string }[];
   }>("gallery", [orderBy("order", "asc")]);
+
+  // Normalize legacy items that have no extraImages field
+  return {
+    ...result,
+    data: result.data.map((item) => ({
+      ...item,
+      extraImages: item.extraImages ?? [],
+    })),
+  };
 }
 
 export function useBlogPosts() {

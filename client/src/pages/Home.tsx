@@ -20,7 +20,7 @@ const EMAILJS_PUBLIC_KEY = 'ZLrXjIYd_3R2ZklPB';
  */
 
 
-type GalleryItem = { id: string; title: string; image: string; category?: string; description?: string };
+type GalleryItem = { id: string; title: string; image: string; category?: string; description?: string; extraImages?: { url: string; publicId: string }[] };
 
 function InfiniteCarousel({
   items,
@@ -33,6 +33,9 @@ function InfiniteCarousel({
   const offsetRef = useRef(0);
   const rafRef = useRef<number>(0);
   const pausedRef = useRef(false);
+  const touchStartXRef = useRef(0);
+  const touchStartYRef = useRef(0);
+  const isDraggingRef = useRef(false);
   const SPEED = 0.5; // px per frame
   const CARD_WIDTH = 260;
   const GAP = 24;
@@ -77,6 +80,43 @@ function InfiniteCarousel({
     }
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+    isDraggingRef.current = false;
+    pausedRef.current = true;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const deltaX = e.touches[0].clientX - touchStartXRef.current;
+    const deltaY = e.touches[0].clientY - touchStartYRef.current;
+
+    // Only hijack horizontal swipes
+    if (!isDraggingRef.current && Math.abs(deltaX) < Math.abs(deltaY)) {
+      pausedRef.current = false;
+      return;
+    }
+    isDraggingRef.current = true;
+    e.preventDefault();
+
+    const totalWidth = items.length * STEP;
+    let newOffset = offsetRef.current - deltaX;
+    if (newOffset < 0) newOffset += totalWidth;
+    if (newOffset >= totalWidth * 2) newOffset -= totalWidth;
+
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translateX(-${newOffset}px)`;
+    }
+    // Update offset continuously so touchend picks up the right position
+    offsetRef.current = newOffset;
+    touchStartXRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    isDraggingRef.current = false;
+    pausedRef.current = false;
+  };
+
   return (
     <div className="relative">
       <button
@@ -105,6 +145,9 @@ function InfiniteCarousel({
           style={{ gap: `${GAP}px`, willChange: 'transform' }}
           onMouseEnter={() => (pausedRef.current = true)}
           onMouseLeave={() => (pausedRef.current = false)}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           {repeated.map((item, index) => (
             <div
@@ -144,7 +187,7 @@ export default function Home() {
   const FALLBACK_HERO = "https://d2xsxph8kpxj0f.cloudfront.net/310519663465006084/aYyNo4PkGRweszF78jfNEU/hero-illustration-h59MrgKS7TnNgq7RSR34Vn.webp";
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<{ id: string; title: string; image: string; category?: string; description?: string } | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{ id: string; title: string; image: string; category?: string; description?: string; extraImages?: { url: string; publicId: string }[] } | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -154,7 +197,7 @@ export default function Home() {
   });
   const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
-  const openLightbox = (item: { id: string; title: string; image: string; category?: string; description?: string }) => {
+  const openLightbox = (item: { id: string; title: string; image: string; category?: string; description?: string; extraImages?: { url: string; publicId: string }[] }) => {
     setSelectedImage(item);
     setLightboxOpen(true);
   };
@@ -568,6 +611,7 @@ export default function Home() {
           title={selectedImage.title}
           category={selectedImage.category}
           description={selectedImage.description}
+          extraImages={selectedImage.extraImages}
           onClose={() => setLightboxOpen(false)}
         />
       )}
