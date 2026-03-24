@@ -88,19 +88,19 @@ export function useProcessSteps() {
 }
 
 export function useHeroImage() {
-  const [data, setData] = useState<{ imageUrl: string | null; position: { x: number; y: number } }>({
+  const [data, setData] = useState<{ imageUrl: string | null; position: { x: number; y: number }; loading: boolean }>({
     imageUrl: null,
     position: { x: 50, y: 50 },
+    loading: true,
   });
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "settings", "hero"), (snap) => {
-      if (snap.exists()) {
-        setData({
-          imageUrl: snap.data().imageUrl ?? null,
-          position: snap.data().position ?? { x: 50, y: 50 },
-        });
-      }
+      setData({
+        imageUrl: snap.exists() ? (snap.data().imageUrl ?? null) : null,
+        position: snap.exists() ? (snap.data().position ?? { x: 50, y: 50 }) : { x: 50, y: 50 },
+        loading: false,
+      });
     });
     return unsub;
   }, []);
