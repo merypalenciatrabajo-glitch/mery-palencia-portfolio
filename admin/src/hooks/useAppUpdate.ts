@@ -3,7 +3,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 // Versión embebida en este APK — se actualiza automáticamente con el script
-export const CURRENT_VERSION = "1.3.2";
+export const CURRENT_VERSION = "1.4.0";
 
 export interface AppUpdateInfo {
   version: string;
