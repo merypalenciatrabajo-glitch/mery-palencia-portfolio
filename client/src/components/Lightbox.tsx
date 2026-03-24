@@ -45,26 +45,26 @@ export default function Lightbox({ isOpen, image, title, category, description, 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="relative animate-in fade-in zoom-in-95 duration-300 mx-4"
-        style={{ width: isVertical ? 'auto' : '100%', maxWidth: isVertical ? '420px' : '720px' }}
+        className="relative animate-in fade-in zoom-in-95 duration-300 w-full flex flex-col"
+        style={{ maxWidth: isVertical ? '420px' : '720px', maxHeight: '90vh' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute -top-11 right-0 text-white hover:text-gray-300 transition-colors"
+          className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors z-10"
           aria-label="Cerrar"
         >
           <X size={28} />
         </button>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-2xl">
+        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl overflow-y-auto flex flex-col">
           {/* Image container */}
-          <div className="relative overflow-hidden">
+          <div className="relative overflow-hidden flex-shrink-0">
             <img
               ref={imgRef}
               src={image}
