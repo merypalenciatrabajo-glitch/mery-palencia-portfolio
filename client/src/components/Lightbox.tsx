@@ -1,4 +1,4 @@
-import { X, Expand, Shrink } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 interface LightboxProps {
@@ -12,87 +12,127 @@ interface LightboxProps {
 }
 
 export default function Lightbox({ isOpen, image, title, category, description, extraImages = [], onClose }: LightboxProps) {
-  const [expanded, setExpanded] = useState(false);
-  const [isOverflowing, setIsOverflowing] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const allImages = [{ url: image, publicId: 'cover' }, ...extraImages];
+  const total = allImages.length;
+
+  const [index, setIndex] = useState(0);
+  const touchStartXRef = useRef(0);
+  const touchStartYRef = useRef(0);
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      setExpanded(false);
+      setIndex(0);
     } else {
       document.body.style.overflow = 'unset';
     }
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-
+    const handleEscape = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     if (isOpen) document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
-  const isVertical = isOverflowing; // reuse same flag: naturalHeight > naturalWidth
+  const prev = () => setIndex((i) => (i - 1 + total) % total);
+  const next = () => setIndex((i) => (i + 1) % total);
 
-  const handleImageLoad = () => {
-    const img = imgRef.current;
-    if (img) {
-      setIsOverflowing(img.naturalHeight > img.naturalWidth);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartXRef.current;
+    const dy = e.changedTouches[0].clientY - touchStartYRef.current;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      dx < 0 ? next() : prev();
     }
   };
 
   if (!isOpen) return null;
 
+  const current = allImages[index];
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
+      onTouchMove={(e) => e.stopPropagation()}
     >
       <div
-        className="relative animate-in fade-in zoom-in-95 duration-300 w-full flex flex-col"
-        style={{ maxWidth: isVertical ? '420px' : '720px', maxHeight: '90vh' }}
+        className="relative animate-in fade-in zoom-in-95 duration-300 w-full"
+        style={{ maxWidth: '480px' }}
         onClick={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
+        {/* Close */}
         <button
           onClick={onClose}
-          className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors z-10"
+          className="absolute -top-10 right-0 text-white hover:text-gray-300 z-10"
           aria-label="Cerrar"
         >
           <X size={28} />
         </button>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl overflow-y-auto flex flex-col">
-          {/* Image container */}
-          <div className="relative overflow-hidden flex-shrink-0">
+        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl overflow-y-auto scrollbar-hide flex flex-col" style={{ maxHeight: '90vh' }}>
+
+          {/* Slider */}
+          <div
+            className="relative overflow-hidden flex-shrink-0 bg-black select-none"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <img
-              ref={imgRef}
-              src={image}
-              alt={title}
-              onLoad={handleImageLoad}
-              className="w-full h-auto block"
-              style={{
-                maxHeight: isVertical ? (expanded ? '85vh' : '520px') : '480px',
-                objectFit: isVertical ? 'cover' : 'contain',
-              }}
+              key={current.url}
+              src={current.url}
+              alt={`${title} ${index + 1}`}
+              className="w-full object-cover"
+              style={{ maxHeight: '520px', minHeight: '260px' }}
             />
 
-            {/* Expand / Shrink — only for vertical images that get cropped */}
-            {isVertical && (
-              <button
-                onClick={() => setExpanded((v) => !v)}
-                className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/80 text-white text-xs font-medium backdrop-blur-sm transition-all"
-                aria-label={expanded ? 'Reducir' : 'Expandir imagen'}
-              >
-                {expanded ? <Shrink size={14} /> : <Expand size={14} />}
-                {expanded ? 'Reducir' : 'Ver completa'}
-              </button>
+            {/* Flechas — solo si hay más de 1 imagen */}
+            {total > 1 && (
+              <>
+                <button
+                  onClick={(e) => { e.stopPropagation(); prev(); }}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                  aria-label="Anterior"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); next(); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                  aria-label="Siguiente"
+                >
+                  <ChevronRight size={18} />
+                </button>
+
+                {/* Contador */}
+                <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm">
+                  {index + 1}/{total}
+                </div>
+
+                {/* Dots */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {allImages.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={(e) => { e.stopPropagation(); setIndex(i); }}
+                      className={`rounded-full transition-all duration-200 ${
+                        i === index
+                          ? 'w-2 h-2 bg-white'
+                          : 'w-1.5 h-1.5 bg-white/50'
+                      }`}
+                      aria-label={`Foto ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </div>
 
-          {/* Info panel */}
+          {/* Info */}
           <div className="px-6 py-4 border-t border-border">
-            <div className="space-y-1 min-w-0">
+            <div className="space-y-1">
               {category && (
                 <span className="inline-block px-2 py-0.5 rounded-full bg-accent/10 text-accent text-[11px] font-semibold tracking-widest uppercase">
                   {category}
@@ -105,24 +145,6 @@ export default function Lightbox({ isOpen, image, title, category, description, 
             </div>
           </div>
 
-          {/* Extra images grid */}
-          {extraImages.length > 0 && (
-            <div className="px-6 pb-5 border-t border-border pt-4">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-3">
-                Más fotos
-              </p>
-              <div className="grid grid-cols-4 gap-2">
-                {extraImages.map((img, i) => (
-                  <img
-                    key={img.publicId || i}
-                    src={img.url}
-                    alt={`${title} — foto extra ${i + 1}`}
-                    className="w-full aspect-square object-cover rounded-lg"
-                  />
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
