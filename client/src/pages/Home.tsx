@@ -183,7 +183,7 @@ export default function Home() {
   const { data: galleryItems } = useGallery();
   const { data: commissionTiers } = useCommissions();
   const { data: processSteps } = useProcessSteps();
-  const { imageUrl: heroImageUrl, position: heroPosition } = useHeroImage();
+  const { imageUrl: heroImageUrl, position: heroPosition, loading: heroLoading } = useHeroImage();
   const FALLBACK_HERO = "https://d2xsxph8kpxj0f.cloudfront.net/310519663465006084/aYyNo4PkGRweszF78jfNEU/hero-illustration-h59MrgKS7TnNgq7RSR34Vn.webp";
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -303,13 +303,15 @@ export default function Home() {
             
             {/* Imagen Hero */}
             <div className="relative animate-in fade-in slide-in-from-right-4 duration-700 delay-200">
-              <div className="relative rounded-2xl overflow-hidden shadow-soft-lg aspect-video">
-                <img
-                  src={heroImageUrl ?? FALLBACK_HERO}
-                  alt="Mery Palencia - Ilustradora Digital"
-                  className="absolute inset-0 w-full h-full object-cover"
-                  style={{ objectPosition: heroImageUrl ? `${heroPosition.x}% ${heroPosition.y}%` : 'center' }}
-                />
+              <div className="relative rounded-2xl overflow-hidden shadow-soft-lg aspect-video bg-muted">
+                {!heroLoading && (
+                  <img
+                    src={heroImageUrl ?? FALLBACK_HERO}
+                    alt="Mery Palencia - Ilustradora Digital"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{ objectPosition: heroImageUrl ? `${heroPosition.x}% ${heroPosition.y}%` : 'center' }}
+                  />
+                )}
               </div>
               {/* Elemento decorativo */}
               <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-gradient-to-br from-orange-100/40 to-orange-50/20 dark:from-orange-900/30 dark:to-orange-800/10 rounded-full blur-3xl -z-10" />
