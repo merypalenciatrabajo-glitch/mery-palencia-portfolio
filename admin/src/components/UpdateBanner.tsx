@@ -3,6 +3,7 @@ import { Download, RefreshCw, X } from "lucide-react";
 import { type AppUpdateInfo } from "@/hooks/useAppUpdate";
 import { Filesystem, Directory } from "@capacitor/filesystem";
 import { FileOpener } from "@capawesome-team/capacitor-file-opener";
+import { Capacitor } from "@capacitor/core";
 
 interface Props {
   update: AppUpdateInfo;
@@ -13,6 +14,9 @@ type State = "idle" | "downloading" | "done" | "error";
 export default function UpdateModal({ update }: Props) {
   const [dismissed, setDismissed] = useState(false);
   const [state, setState] = useState<State>("idle");
+
+  // Solo mostrar en app nativa Android, no en navegador web
+  if (!Capacitor.isNativePlatform()) return null;
   const [progress, setProgress] = useState(0);
   const [errorMsg, setErrorMsg] = useState("");
 
