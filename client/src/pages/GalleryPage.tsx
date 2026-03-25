@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'wouter';
 import Lightbox from '@/components/Lightbox';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useGalleryPage } from '@/hooks/useFirestore';
