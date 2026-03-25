@@ -6,6 +6,7 @@ import Blog from "./pages/Blog";
 import Commissions from "./pages/Commissions";
 import Dashboard from "./pages/Dashboard";
 import Gallery from "./pages/Gallery";
+import GaleriaPage from "./pages/GaleriaPage";
 import Login from "./pages/Login";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -54,6 +55,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Gallery />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/galeria"
+        element={
+          <ProtectedRoute>
+            <GaleriaPage />
           </ProtectedRoute>
         }
       />

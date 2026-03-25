@@ -2,6 +2,7 @@ import { useState } from "react";
 import { signOut } from "firebase/auth";
 import {
   BookOpen,
+  GalleryHorizontal,
   Image,
   LayoutDashboard,
   LogOut,
@@ -19,7 +20,8 @@ import { CURRENT_VERSION } from "@/hooks/useAppUpdate";
 
 const NAV_ITEMS = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/gallery", icon: Image, label: "Galería" },
+  { to: "/gallery", icon: Image, label: "Destacadas" },
+  { to: "/galeria", icon: GalleryHorizontal, label: "Galería" },
   { to: "/blog", icon: BookOpen, label: "Blog" },
   { to: "/commissions", icon: Layers, label: "Comisiones" },
 ];
