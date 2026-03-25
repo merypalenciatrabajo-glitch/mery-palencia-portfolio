@@ -124,12 +124,12 @@ export default function Lightbox({ isOpen, image, title, category, description, 
               }}
             >
               {allImages.map((img, i) => (
-                <div key={img.publicId} className="flex-none w-full">
+                <div key={img.publicId} className="flex-none w-full flex items-center justify-center" style={{ height: '420px' }}>
                   <img
                     src={img.url}
                     alt={`${title} ${i + 1}`}
-                    className="w-full object-cover"
-                    style={{ maxHeight: '520px', minHeight: '260px', display: 'block' }}
+                    className="w-full h-full object-contain"
+                    style={{ display: 'block' }}
                   />
                 </div>
               ))}
