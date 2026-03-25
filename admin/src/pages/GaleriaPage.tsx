@@ -8,7 +8,7 @@ import {
   query,
   updateDoc,
 } from "firebase/firestore";
-import { Edit2, Plus, Trash2, Upload, X } from "lucide-react";
+import { Edit2, Plus, Star, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
@@ -43,6 +43,7 @@ export default function GaleriaPage() {
   const [progress, setProgress] = useState(0);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [featuringId, setFeaturingId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const extraFileRef = useRef<HTMLInputElement>(null);
 
@@ -173,6 +174,25 @@ export default function GaleriaPage() {
     }
   };
 
+  const handleFeature = async (item: GalleryItem) => {
+    setFeaturingId(item.id);
+    try {
+      await addDoc(collection(db, "gallery"), {
+        title: item.title,
+        image: item.image,
+        publicId: item.publicId,
+        category: item.category,
+        description: item.description,
+        order: item.order,
+        extraImages: item.extraImages ?? [],
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFeaturingId(null);
+    }
+  };
+
   const handleDelete = async (item: GalleryItem) => {
     if (!confirm(`¿Eliminar "${item.title}"?`)) return;
     setDeletingId(item.id);
@@ -214,6 +234,14 @@ export default function GaleriaPage() {
                   className="p-2 bg-white rounded-lg text-foreground hover:bg-secondary transition-colors"
                 >
                   <Edit2 size={16} />
+                </button>
+                <button
+                  onClick={() => handleFeature(item)}
+                  disabled={featuringId === item.id}
+                  title="Destacar"
+                  className="p-2 bg-white rounded-lg text-yellow-500 hover:bg-yellow-50 transition-colors"
+                >
+                  <Star size={16} />
                 </button>
                 <button
                   onClick={() => handleDelete(item)}
