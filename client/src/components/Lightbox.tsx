@@ -124,12 +124,19 @@ export default function Lightbox({ isOpen, image, title, category, description, 
               }}
             >
               {allImages.map((img, i) => (
-                <div key={img.publicId} className="flex-none w-full flex items-center justify-center" style={{ height: '420px' }}>
+                <div key={img.publicId} className="flex-none w-full relative overflow-hidden" style={{ height: '420px' }}>
+                  {/* Fondo blur de la misma imagen */}
+                  <img
+                    src={img.url}
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full object-cover scale-110"
+                    style={{ filter: 'blur(20px)', transform: 'scale(1.15)' }}
+                  />
+                  {/* Imagen real encima */}
                   <img
                     src={img.url}
                     alt={`${title} ${i + 1}`}
-                    className="w-full h-full object-contain"
-                    style={{ display: 'block' }}
+                    className="relative w-full h-full object-contain"
                   />
                 </div>
               ))}
