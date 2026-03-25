@@ -50,6 +50,27 @@ export function useGallery() {
   };
 }
 
+export function useGalleryPage() {
+  const result = useCollection<{
+    id: string;
+    title: string;
+    image: string;
+    category: string;
+    description: string;
+    order: number;
+    extraImages?: { url: string; publicId: string }[];
+  }>("galleryPage", [orderBy("order", "asc")]);
+
+  // Normalize legacy items that have no extraImages field
+  return {
+    ...result,
+    data: result.data.map((item) => ({
+      ...item,
+      extraImages: item.extraImages ?? [],
+    })),
+  };
+}
+
 export function useBlogPosts() {
   return useCollection<{
     id: string;

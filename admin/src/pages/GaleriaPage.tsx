@@ -33,7 +33,7 @@ const EMPTY_FORM = {
   description: "",
 };
 
-export default function Gallery() {
+export default function GaleriaPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<GalleryItem | null>(null);
@@ -53,7 +53,7 @@ export default function Gallery() {
   const [extrasError, setExtrasError] = useState("");
 
   useEffect(() => {
-    const q = query(collection(db, "gallery"), orderBy("order", "asc"));
+    const q = query(collection(db, "galleryPage"), orderBy("order", "asc"));
     const unsub = onSnapshot(q, (snap) => {
       setItems(
         snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GalleryItem, "id">) }))
@@ -149,7 +149,7 @@ export default function Gallery() {
           const { url, publicId } = await uploadToCloudinary(file, setProgress);
           imageData = { image: url, publicId };
         }
-        await updateDoc(doc(db, "gallery", editing.id), {
+        await updateDoc(doc(db, "galleryPage", editing.id), {
           ...form,
           ...imageData,
           extraImages: finalExtras,
@@ -157,7 +157,7 @@ export default function Gallery() {
       } else {
         if (!file) return;
         const { url, publicId } = await uploadToCloudinary(file, setProgress);
-        await addDoc(collection(db, "gallery"), {
+        await addDoc(collection(db, "galleryPage"), {
           ...form,
           image: url,
           publicId,
@@ -177,7 +177,7 @@ export default function Gallery() {
     if (!confirm(`¿Eliminar "${item.title}"?`)) return;
     setDeletingId(item.id);
     try {
-      await deleteDoc(doc(db, "gallery", item.id));
+      await deleteDoc(doc(db, "galleryPage", item.id));
     } finally {
       setDeletingId(null);
     }
@@ -187,8 +187,8 @@ export default function Gallery() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Destacadas</h1>
-          <p className="text-muted-foreground mt-1">Imágenes del carrusel del Home · {items.length} ilustraciones</p>
+          <h1 className="text-2xl font-bold text-foreground">Galería</h1>
+          <p className="text-muted-foreground mt-1">Ilustraciones de la página /galeria · {items.length} ilustraciones</p>
         </div>
         <button
           onClick={openCreate}
@@ -201,7 +201,7 @@ export default function Gallery() {
 
       {items.length === 0 ? (
         <div className="text-center py-20 text-muted-foreground border border-dashed border-border rounded-xl">
-          No hay ilustraciones aún. Sube la primera.
+          No hay ilustraciones aún. Sube la primera para la página /galeria.
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">

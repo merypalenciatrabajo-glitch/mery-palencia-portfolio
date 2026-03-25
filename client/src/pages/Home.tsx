@@ -243,6 +243,12 @@ export default function Home() {
             >
               Blog
             </button>
+            <button
+              onClick={() => window.location.href = '/galeria'}
+              className="text-foreground hover:text-accent transition-colors font-medium"
+            >
+              Galería
+            </button>
             <ThemeToggle />
           </div>
         </div>
@@ -297,6 +303,14 @@ export default function Home() {
                 onClick={() => window.location.href = '/blog'}
               >
                 Leer Blog
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-accent text-foreground dark:text-accent hover:bg-accent/5 dark:hover:bg-accent/10 rounded-lg"
+                onClick={() => window.location.href = '/galeria'}
+              >
+                Ver Galería
               </Button>
               </div>
             </div>
