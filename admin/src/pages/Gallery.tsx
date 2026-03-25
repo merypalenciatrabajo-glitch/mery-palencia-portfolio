@@ -216,34 +216,33 @@ export default function Gallery() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {items.map((item) => (
-            <div key={item.id} className="group relative bg-card border border-border rounded-xl overflow-hidden">
+            <div key={item.id} className="bg-card border border-border rounded-xl overflow-hidden">
               <img src={item.image} alt={item.title} className="w-full aspect-square object-cover" />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                <button
-                  onClick={() => openEdit(item)}
-                  className="p-2 bg-white rounded-lg text-foreground hover:bg-secondary transition-colors"
-                >
-                  <Edit2 size={16} />
-                </button>
-                <button
-                  onClick={() => handleUnfeature(item)}
-                  disabled={deletingId === item.id}
-                  title="Quitar destaque"
-                  className="p-2 bg-white rounded-lg text-yellow-500 hover:bg-yellow-50 transition-colors"
-                >
-                  <StarOff size={16} />
-                </button>
-                <button
-                  onClick={() => handleDelete(item)}
-                  disabled={deletingId === item.id}
-                  className="p-2 bg-white rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
               <div className="p-3">
                 <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
-                <p className="text-xs text-muted-foreground capitalize">{item.category}</p>
+                <p className="text-xs text-muted-foreground capitalize mb-2">{item.category}</p>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => openEdit(item)}
+                    className="flex-1 flex items-center justify-center gap-1 py-1.5 border border-border rounded-lg text-xs text-foreground hover:bg-secondary transition-colors"
+                  >
+                    <Edit2 size={12} /> Editar
+                  </button>
+                  <button
+                    onClick={() => handleUnfeature(item)}
+                    disabled={deletingId === item.id}
+                    className="flex-1 flex items-center justify-center gap-1 py-1.5 border border-yellow-300 rounded-lg text-xs text-yellow-600 hover:bg-yellow-50 transition-colors disabled:opacity-50"
+                  >
+                    <StarOff size={12} /> Quitar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item)}
+                    disabled={deletingId === item.id}
+                    className="p-1.5 border border-destructive/30 rounded-lg text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
