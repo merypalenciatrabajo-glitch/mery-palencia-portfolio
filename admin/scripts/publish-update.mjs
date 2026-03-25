@@ -145,4 +145,15 @@ console.log("✅ Firestore actualizado");
 writeFileSync(hookPath, hookContent.replace(/CURRENT_VERSION = "[^"]+"/, `CURRENT_VERSION = "${newVersion}"`));
 console.log(`✅ CURRENT_VERSION → ${newVersion}`);
 
+// ── Actualizar build.gradle ───────────────────────────────────────────────────
+const gradlePath = resolve(__dir, "../android/app/build.gradle");
+const gradleContent = readFileSync(gradlePath, "utf-8");
+// versionCode: convierte "1.4.4" → 144 (quita puntos)
+const versionCode = parseInt(newVersion.replace(/\./g, ""), 10);
+const updatedGradle = gradleContent
+  .replace(/versionCode\s+\d+/, `versionCode ${versionCode}`)
+  .replace(/versionName\s+"[^"]+"/, `versionName "${newVersion}"`);
+writeFileSync(gradlePath, updatedGradle);
+console.log(`✅ build.gradle → versionCode ${versionCode}, versionName "${newVersion}"`);
+
 console.log(`\n🚀 v${newVersion} lista. Ahora: pnpm release:sync → generar APK → instalar.\n`);
