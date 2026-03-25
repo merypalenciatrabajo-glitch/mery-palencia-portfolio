@@ -40,7 +40,7 @@ const newVersion = nextVersion(currentVersion);
 console.log(`\n🔖 ${currentVersion} → ${newVersion}`);
 
 // ── Verificar APK ─────────────────────────────────────────────────────────────
-const apkPath = resolve(__dir, "../android/app/build/outputs/apk/release/app-release.apk");
+const apkPath = resolve(__dir, "../android/app/release/app-release.apk");
 if (!existsSync(apkPath)) {
   console.error("❌ APK no encontrado. Genera el APK desde Android Studio primero.");
   process.exit(1);
