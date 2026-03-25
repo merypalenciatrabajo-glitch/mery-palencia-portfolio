@@ -8,7 +8,7 @@ import {
   query,
   updateDoc,
 } from "firebase/firestore";
-import { Edit2, Plus, Trash2, Upload, X } from "lucide-react";
+import { Edit2, Plus, StarOff, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
@@ -173,6 +173,16 @@ export default function Gallery() {
     }
   };
 
+  const handleUnfeature = async (item: GalleryItem) => {
+    if (!confirm(`¿Quitar "${item.title}" de destacadas?`)) return;
+    setDeletingId(item.id);
+    try {
+      await deleteDoc(doc(db, "gallery", item.id));
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const handleDelete = async (item: GalleryItem) => {
     if (!confirm(`¿Eliminar "${item.title}"?`)) return;
     setDeletingId(item.id);
@@ -214,6 +224,14 @@ export default function Gallery() {
                   className="p-2 bg-white rounded-lg text-foreground hover:bg-secondary transition-colors"
                 >
                   <Edit2 size={16} />
+                </button>
+                <button
+                  onClick={() => handleUnfeature(item)}
+                  disabled={deletingId === item.id}
+                  title="Quitar destaque"
+                  className="p-2 bg-white rounded-lg text-yellow-500 hover:bg-yellow-50 transition-colors"
+                >
+                  <StarOff size={16} />
                 </button>
                 <button
                   onClick={() => handleDelete(item)}
