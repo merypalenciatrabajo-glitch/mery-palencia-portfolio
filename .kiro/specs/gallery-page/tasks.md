@@ -11,7 +11,7 @@ Implementación incremental de la página pública `/galeria`, la sección admin
   - Normalizar `extraImages` a `[]` cuando el campo no existe en el documento
   - _Requirements: 1.1, 1.2, 1.3_
 
-  - [ ]* 1.1 Escribir property test para normalización de extraImages
+  - [x]* 1.1 Escribir property test para normalización de extraImages
     - **Property 1: Normalización de extraImages**
     - **Validates: Requirements 1.2**
 
@@ -23,15 +23,15 @@ Implementación incremental de la página pública `/galeria`, la sección admin
   - Mostrar placeholder cuando la colección está vacía
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
 
-  - [ ]* 2.1 Escribir property test: grid muestra todos los items
+  - [x]* 2.1 Escribir property test: grid muestra todos los items
     - **Property 2: Grid muestra todos los items**
     - **Validates: Requirements 2.2**
 
-  - [ ]* 2.2 Escribir property test: click en tarjeta abre Lightbox con datos correctos
+  - [x]* 2.2 Escribir property test: click en tarjeta abre Lightbox con datos correctos
     - **Property 3: Click en tarjeta abre Lightbox con datos correctos**
     - **Validates: Requirements 2.3**
 
-  - [ ]* 2.3 Escribir unit tests para GalleryPage
+  - [x]* 2.3 Escribir unit tests para GalleryPage
     - Verificar que el header contiene logo, link Blog, link Galería y ThemeToggle
     - Verificar que con lista vacía se muestra el placeholder
     - _Requirements: 2.5, 2.6_
@@ -40,7 +40,7 @@ Implementación incremental de la página pública `/galeria`, la sección admin
   - En `client/src/App.tsx`, añadir `<Route path="/galeria" component={GalleryPage} />`
   - _Requirements: 6.1, 6.2_
 
-  - [ ]* 3.1 Escribir unit test para la ruta /galeria del client
+  - [x]* 3.1 Escribir unit test para la ruta /galeria del client
     - Verificar que navegar a `/galeria` renderiza `GalleryPage`
     - _Requirements: 6.1_
 
@@ -49,7 +49,7 @@ Implementación incremental de la página pública `/galeria`, la sección admin
   - En la sección de botones del hero, añadir `<Button>` "Ver Galería" con `window.location.href = '/galeria'`, con el mismo estilo que "Leer Blog"
   - _Requirements: 3.1, 3.2_
 
-  - [ ]* 4.1 Escribir unit tests para los cambios en Home
+  - [x]* 4.1 Escribir unit tests para los cambios en Home
     - Verificar que el header contiene link "Ver Galería" → `/galeria`
     - Verificar que el hero contiene botón "Ver Galería" → `/galeria`
     - _Requirements: 3.1, 3.2_
@@ -60,7 +60,7 @@ Implementación incremental de la página pública `/galeria`, la sección admin
   - No modificar ninguna lógica de datos ni la colección Firestore `gallery`
   - _Requirements: 4.1, 4.2, 4.3_
 
-  - [ ]* 5.1 Escribir unit tests para el renombrado
+  - [x]* 5.1 Escribir unit tests para el renombrado
     - Verificar que el Sidebar muestra "Destacadas" para `/gallery`
     - Verificar que el heading de `Gallery.tsx` admin dice "Destacadas"
     - _Requirements: 4.1, 4.2_
@@ -71,19 +71,19 @@ Implementación incremental de la página pública `/galeria`, la sección admin
   - Mantener toda la lógica de CRUD, upload a Cloudinary y gestión de extraImages (máx 4)
   - _Requirements: 5.1, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
 
-  - [ ]* 6.1 Escribir property test: validación máximo 4 imágenes extra
+  - [x]* 6.1 Escribir property test: validación máximo 4 imágenes extra
     - **Property 4: Validación máximo 4 imágenes extra**
     - **Validates: Requirements 5.7**
 
-  - [ ]* 6.2 Escribir property test: creación de documento en galleryPage
+  - [x]* 6.2 Escribir property test: creación de documento en galleryPage
     - **Property 5: Creación de documento en galleryPage**
     - **Validates: Requirements 5.3, 5.6**
 
-  - [ ]* 6.3 Escribir property test: edición de documento en galleryPage
+  - [x]* 6.3 Escribir property test: edición de documento en galleryPage
     - **Property 6: Edición de documento en galleryPage**
     - **Validates: Requirements 5.4**
 
-  - [ ]* 6.4 Escribir property test: eliminación de documento en galleryPage
+  - [x]* 6.4 Escribir property test: eliminación de documento en galleryPage
     - **Property 7: Eliminación de documento en galleryPage**
     - **Validates: Requirements 5.5**
 
@@ -92,15 +92,15 @@ Implementación incremental de la página pública `/galeria`, la sección admin
   - En `admin/src/App.tsx`, importar `GaleriaPage` y añadir `<Route path="/galeria">` con `ProtectedRoute`
   - _Requirements: 5.2, 7.1, 7.2_
 
-  - [ ]* 7.1 Escribir unit test para el Sidebar actualizado
+  - [x]* 7.1 Escribir unit test para el Sidebar actualizado
     - Verificar que el Sidebar muestra "Galería" para `/galeria`
     - _Requirements: 5.2_
 
-  - [ ]* 7.2 Escribir property test: auth guard en admin /galeria
+  - [x]* 7.2 Escribir property test: auth guard en admin /galeria
     - **Property 8: Auth guard en admin /galeria**
     - **Validates: Requirements 7.2**
 
-  - [ ]* 7.3 Escribir unit test para la ruta /galeria del admin
+  - [x]* 7.3 Escribir unit test para la ruta /galeria del admin
     - Verificar que usuario autenticado en `/galeria` admin renderiza `GaleriaPage`
     - Verificar que usuario no autenticado es redirigido a `/login`
     - _Requirements: 7.1, 7.2_
