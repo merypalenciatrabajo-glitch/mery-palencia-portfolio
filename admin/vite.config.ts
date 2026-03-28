@@ -19,4 +19,8 @@ export default defineConfig({
     port: 3001,
     host: true,
   },
+  test: {
+    environment: "node",
+    globals: true,
+  },
 });

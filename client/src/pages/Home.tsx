@@ -304,6 +304,14 @@ export default function Home() {
               >
                 Leer Blog
               </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-accent text-foreground dark:text-accent hover:bg-accent/5 dark:hover:bg-accent/10 rounded-lg"
+                onClick={() => window.location.href = '/galeria'}
+              >
+                Ver Galería
+              </Button>
               </div>
             </div>
             
