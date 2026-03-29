@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link, useLocation } from 'wouter';
 import { ArrowRight, Calendar } from 'lucide-react';
 import { useBlogPosts } from '@/hooks/useFirestore';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -21,6 +22,8 @@ export default function Blog() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { theme } = useTheme();
   const { data: blogPosts } = useBlogPosts();
+  const [location] = useLocation();
+  const isActive = (path: string) => location === path;
 
   const filteredPosts = selectedCategory
     ? blogPosts.filter(post => post.published && post.category === selectedCategory)
@@ -49,14 +52,22 @@ export default function Blog() {
     <div className="min-h-screen bg-background">
       {/* HEADER */}
       <header className="border-b border-border sticky top-0 bg-white/80 dark:bg-background/80 backdrop-blur-sm z-40">
-        <div className="container py-6 flex items-center justify-between">
-          <button
-            onClick={() => window.location.href = '/'}
-            className="text-2xl font-display text-foreground hover:text-accent transition-colors"
-          >
+        <div className="container py-4 flex items-center justify-between">
+          <Link to="/" className="text-2xl font-display text-foreground hover:text-accent transition-colors">
             Mery Palencia
-          </button>
-          <ThemeToggle />
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="font-medium transition-colors text-foreground hover:text-accent">
+              Inicio
+            </Link>
+            <Link to="/blog" className={`font-medium transition-colors ${isActive('/blog') ? 'text-accent border-b-2 border-accent pb-0.5' : 'text-foreground hover:text-accent'}`}>
+              Blog
+            </Link>
+            <Link to="/galeria" className={`font-medium transition-colors ${isActive('/galeria') ? 'text-accent border-b-2 border-accent pb-0.5' : 'text-foreground hover:text-accent'}`}>
+              Galería
+            </Link>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
