@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { collection, getCountFromServer, doc, setDoc, onSnapshot } from "firebase/firestore";
-import { BookOpen, Image, Layers, TrendingUp, Upload, CheckCircle, Move, X } from "lucide-react";
+import { BookOpen, GalleryHorizontal, Image, Layers, TrendingUp, Upload, CheckCircle, Move, X } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { cn } from "@/lib/utils";
@@ -137,7 +137,8 @@ function PositionModal({
 
 export default function Dashboard() {
   const [stats, setStats] = useState<StatCard[]>([
-    { label: "Ilustraciones", count: 0, icon: Image, color: "text-blue-500" },
+    { label: "Destacadas", count: 0, icon: Image, color: "text-blue-500" },
+    { label: "Galería", count: 0, icon: GalleryHorizontal, color: "text-cyan-500" },
     { label: "Posts del Blog", count: 0, icon: BookOpen, color: "text-purple-500" },
     { label: "Comisiones", count: 0, icon: Layers, color: "text-emerald-500" },
   ]);
@@ -190,18 +191,25 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const [gallerySnap, blogSnap, commissionsSnap] = await Promise.all([
+        const [gallerySnap, galleryPageSnap, blogSnap, commissionsSnap] = await Promise.all([
           getCountFromServer(collection(db, "gallery")),
+          getCountFromServer(collection(db, "galleryPage")),
           getCountFromServer(collection(db, "blogPosts")),
           getCountFromServer(collection(db, "commissions")),
         ]);
 
         setStats([
           {
-            label: "Ilustraciones",
+            label: "Destacadas",
             count: gallerySnap.data().count,
             icon: Image,
             color: "text-blue-500",
+          },
+          {
+            label: "Galería",
+            count: galleryPageSnap.data().count,
+            icon: GalleryHorizontal,
+            color: "text-cyan-500",
           },
           {
             label: "Posts del Blog",
@@ -232,7 +240,7 @@ export default function Dashboard() {
           Resumen del contenido publicado
         </p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {stats.map(({ label, count, icon: Icon, color }) => (
           <div
             key={label}
@@ -321,9 +329,10 @@ export default function Dashboard() {
           <TrendingUp size={18} className="text-primary" />
           <h2 className="font-semibold text-foreground">Acciones rápidas</h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { href: "/gallery", label: "Subir ilustración", icon: Image },
+            { href: "/gallery", label: "Subir destacada", icon: Image },
+            { href: "/galeria", label: "Subir a galería", icon: GalleryHorizontal },
             { href: "/blog", label: "Nuevo post", icon: BookOpen },
             { href: "/commissions", label: "Editar comisiones", icon: Layers },
           ].map(({ href, label, icon: Icon }) => (

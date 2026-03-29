@@ -1,14 +1,14 @@
 import {
   addDoc,
   collection,
-  deleteDoc,
   doc,
   onSnapshot,
   orderBy,
   query,
   updateDoc,
+  where,
 } from "firebase/firestore";
-import { Edit2, Plus, StarOff, Trash2, Upload, X } from "lucide-react";
+import { Edit2, Plus, StarOff, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
@@ -22,6 +22,7 @@ interface GalleryItem {
   category: string;
   description: string;
   order: number;
+  featured: boolean;
   extraImages?: { url: string; publicId: string }[];
 }
 
@@ -34,7 +35,9 @@ const EMPTY_FORM = {
 };
 
 export default function Gallery() {
+  // Only show items from galleryPage that are featured
   const [items, setItems] = useState<GalleryItem[]>([]);
+  const [allItems, setAllItems] = useState<GalleryItem[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<GalleryItem | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -42,22 +45,22 @@ export default function Gallery() {
   const [preview, setPreview] = useState<string>("");
   const [progress, setProgress] = useState(0);
   const [saving, setSaving] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const extraFileRef = useRef<HTMLInputElement>(null);
 
-  // Extra images state
   const [extraFiles, setExtraFiles] = useState<File[]>([]);
   const [extraPreviews, setExtraPreviews] = useState<string[]>([]);
   const [existingExtras, setExistingExtras] = useState<{ url: string; publicId: string }[]>([]);
   const [extrasError, setExtrasError] = useState("");
 
   useEffect(() => {
-    const q = query(collection(db, "gallery"), orderBy("order", "asc"));
+    // Listen to all galleryPage items ordered by order
+    const q = query(collection(db, "galleryPage"), orderBy("order", "asc"));
     const unsub = onSnapshot(q, (snap) => {
-      setItems(
-        snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GalleryItem, "id">) }))
-      );
+      const all = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GalleryItem, "id">) }));
+      setAllItems(all);
+      setItems(all.filter((i) => i.featured));
     });
     return unsub;
   }, []);
@@ -135,7 +138,6 @@ export default function Gallery() {
     e.preventDefault();
     setSaving(true);
     try {
-      // Upload new extra files
       const uploadedExtras: { url: string; publicId: string }[] = [];
       for (const extraFile of extraFiles) {
         const { url, publicId } = await uploadToCloudinary(extraFile, setProgress);
@@ -144,24 +146,28 @@ export default function Gallery() {
       const finalExtras = [...existingExtras, ...uploadedExtras];
 
       if (editing) {
+        // Edit existing item in galleryPage
         let imageData: { image?: string; publicId?: string } = {};
         if (file) {
           const { url, publicId } = await uploadToCloudinary(file, setProgress);
           imageData = { image: url, publicId };
         }
-        await updateDoc(doc(db, "gallery", editing.id), {
+        await updateDoc(doc(db, "galleryPage", editing.id), {
           ...form,
           ...imageData,
           extraImages: finalExtras,
         });
       } else {
+        // New item: save to galleryPage with featured: true
+        // It will appear in both Galería and Destacadas
         if (!file) return;
         const { url, publicId } = await uploadToCloudinary(file, setProgress);
-        await addDoc(collection(db, "gallery"), {
+        await addDoc(collection(db, "galleryPage"), {
           ...form,
           image: url,
           publicId,
-          order: items.length,
+          order: allItems.length,
+          featured: true,
           extraImages: finalExtras,
         });
       }
@@ -173,23 +179,16 @@ export default function Gallery() {
     }
   };
 
+  // Remove from featured (set featured: false) — does NOT delete from galleryPage
   const handleUnfeature = async (item: GalleryItem) => {
-    if (!confirm(`¿Quitar "${item.title}" de destacadas?`)) return;
-    setDeletingId(item.id);
+    if (!confirm(`¿Quitar "${item.title}" de destacadas? La ilustración seguirá en Galería.`)) return;
+    setTogglingId(item.id);
     try {
-      await deleteDoc(doc(db, "gallery", item.id));
+      await updateDoc(doc(db, "galleryPage", item.id), { featured: false });
+    } catch (err) {
+      console.error(err);
     } finally {
-      setDeletingId(null);
-    }
-  };
-
-  const handleDelete = async (item: GalleryItem) => {
-    if (!confirm(`¿Eliminar "${item.title}"?`)) return;
-    setDeletingId(item.id);
-    try {
-      await deleteDoc(doc(db, "gallery", item.id));
-    } finally {
-      setDeletingId(null);
+      setTogglingId(null);
     }
   };
 
@@ -198,25 +197,27 @@ export default function Gallery() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Destacadas</h1>
-          <p className="text-muted-foreground mt-1">Imágenes del carrusel del Home · {items.length} ilustraciones</p>
+          <p className="text-muted-foreground mt-1">
+            Carrusel del Home · {items.length} ilustraciones destacadas
+          </p>
         </div>
         <button
           onClick={openCreate}
           className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
         >
           <Plus size={16} />
-          Nueva ilustración
+          Nueva destacada
         </button>
       </div>
 
       {items.length === 0 ? (
         <div className="text-center py-20 text-muted-foreground border border-dashed border-border rounded-xl">
-          No hay ilustraciones aún. Sube la primera.
+          No hay ilustraciones destacadas. Márcalas desde Galería o sube una nueva aquí.
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {items.map((item) => (
-            <div key={item.id} className="bg-card border border-border rounded-xl overflow-hidden">
+            <div key={item.id} className="bg-card border border-yellow-300 ring-1 ring-yellow-200 rounded-xl overflow-hidden">
               <img src={item.image} alt={item.title} className="w-full aspect-square object-cover" />
               <div className="p-3">
                 <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
@@ -230,17 +231,10 @@ export default function Gallery() {
                   </button>
                   <button
                     onClick={() => handleUnfeature(item)}
-                    disabled={deletingId === item.id}
+                    disabled={togglingId === item.id}
                     className="flex-1 flex items-center justify-center gap-1 py-1.5 border border-yellow-300 rounded-lg text-xs text-yellow-600 hover:bg-yellow-50 transition-colors disabled:opacity-50"
                   >
                     <StarOff size={12} /> Quitar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item)}
-                    disabled={deletingId === item.id}
-                    className="p-1.5 border border-destructive/30 rounded-lg text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
-                  >
-                    <Trash2 size={12} />
                   </button>
                 </div>
               </div>
@@ -251,11 +245,18 @@ export default function Gallery() {
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-lg shadow-xl">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-              <h2 className="font-semibold text-foreground">
-                {editing ? "Editar ilustración" : "Nueva ilustración"}
-              </h2>
+              <div>
+                <h2 className="font-semibold text-foreground">
+                  {editing ? "Editar ilustración" : "Nueva ilustración destacada"}
+                </h2>
+                {!editing && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Se añadirá a Galería y aparecerá en el carrusel del Home
+                  </p>
+                )}
+              </div>
               <button onClick={closeForm} className="text-muted-foreground hover:text-foreground">
                 <X size={20} />
               </button>
@@ -298,23 +299,16 @@ export default function Gallery() {
                 )}
               </div>
 
-              {/* Fotos extras */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">
                   Fotos extras <span className="text-muted-foreground font-normal">(máx. 4)</span>
                 </label>
-
-                {/* Thumbnails grid */}
                 {(existingExtras.length > 0 || extraPreviews.length > 0) && (
                   <div className="flex flex-wrap gap-2 mb-2">
                     {existingExtras.map((img, i) => (
                       <div key={`existing-${i}`} className="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary">
                         <img src={img.url} alt={`extra ${i + 1}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => removeExistingExtra(i)}
-                          className="absolute top-0.5 right-0.5 p-0.5 bg-black/60 rounded-full text-white"
-                        >
+                        <button type="button" onClick={() => removeExistingExtra(i)} className="absolute top-0.5 right-0.5 p-0.5 bg-black/60 rounded-full text-white">
                           <X size={10} />
                         </button>
                       </div>
@@ -322,39 +316,24 @@ export default function Gallery() {
                     {extraPreviews.map((src, i) => (
                       <div key={`new-${i}`} className="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary">
                         <img src={src} alt={`nueva ${i + 1}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => removeExtraFile(i)}
-                          className="absolute top-0.5 right-0.5 p-0.5 bg-black/60 rounded-full text-white"
-                        >
+                        <button type="button" onClick={() => removeExtraFile(i)} className="absolute top-0.5 right-0.5 p-0.5 bg-black/60 rounded-full text-white">
                           <X size={10} />
                         </button>
                       </div>
                     ))}
                   </div>
                 )}
-
                 {existingExtras.length + extraFiles.length < 4 && (
                   <button
                     type="button"
                     onClick={() => extraFileRef.current?.click()}
                     className="flex items-center gap-2 px-3 py-2 border border-dashed border-border rounded-lg text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                   >
-                    <Upload size={14} />
-                    Agregar fotos
+                    <Upload size={14} /> Agregar fotos
                   </button>
                 )}
-                <input
-                  ref={extraFileRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={handleExtraFilesChange}
-                />
-                {extrasError && (
-                  <p className="text-xs text-destructive mt-1">{extrasError}</p>
-                )}
+                <input ref={extraFileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleExtraFilesChange} />
+                {extrasError && <p className="text-xs text-destructive mt-1">{extrasError}</p>}
               </div>
 
               <div>
@@ -396,11 +375,7 @@ export default function Gallery() {
               </div>
 
               <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={closeForm}
-                  className="flex-1 py-2.5 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-secondary transition-colors"
-                >
+                <button type="button" onClick={closeForm} className="flex-1 py-2.5 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-secondary transition-colors">
                   Cancelar
                 </button>
                 <button
