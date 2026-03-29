@@ -31,7 +31,7 @@ export function useCollection<T>(
 
 // Hooks específicos para cada colección
 export function useGallery() {
-  // Featured items from galleryPage (shown in Home carousel)
+  // Featured items from gallery (shown in Home carousel)
   const result = useCollection<{
     id: string;
     title: string;
@@ -41,7 +41,7 @@ export function useGallery() {
     order: number;
     featured: boolean;
     extraImages?: { url: string; publicId: string }[];
-  }>("galleryPage", [where("featured", "==", true), orderBy("order", "asc")]);
+  }>("gallery", [where("featured", "==", true), orderBy("order", "asc")]);
 
   return {
     ...result,
@@ -61,7 +61,7 @@ export function useGalleryPage() {
     description: string;
     order: number;
     extraImages?: { url: string; publicId: string }[];
-  }>("galleryPage", [orderBy("order", "asc")]);
+  }>("gallery", [orderBy("order", "asc")]);
 
   // Normalize legacy items that have no extraImages field
   return {
