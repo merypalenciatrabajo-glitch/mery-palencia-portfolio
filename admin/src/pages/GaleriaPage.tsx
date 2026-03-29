@@ -8,7 +8,7 @@ import {
   query,
   updateDoc,
 } from "firebase/firestore";
-import { Edit2, Plus, Star, Trash2, Upload, X } from "lucide-react";
+import { Edit2, Plus, Star, StarOff, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
@@ -22,6 +22,7 @@ interface GalleryItem {
   category: string;
   description: string;
   order: number;
+  featured?: boolean;
   extraImages?: { url: string; publicId: string }[];
 }
 
@@ -43,11 +44,10 @@ export default function GaleriaPage() {
   const [progress, setProgress] = useState(0);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [featuringId, setFeaturingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const extraFileRef = useRef<HTMLInputElement>(null);
 
-  // Extra images state
   const [extraFiles, setExtraFiles] = useState<File[]>([]);
   const [extraPreviews, setExtraPreviews] = useState<string[]>([]);
   const [existingExtras, setExistingExtras] = useState<{ url: string; publicId: string }[]>([]);
@@ -56,9 +56,7 @@ export default function GaleriaPage() {
   useEffect(() => {
     const q = query(collection(db, "galleryPage"), orderBy("order", "asc"));
     const unsub = onSnapshot(q, (snap) => {
-      setItems(
-        snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GalleryItem, "id">) }))
-      );
+      setItems(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GalleryItem, "id">) })));
     });
     return unsub;
   }, []);
@@ -136,7 +134,6 @@ export default function GaleriaPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      // Upload new extra files
       const uploadedExtras: { url: string; publicId: string }[] = [];
       for (const extraFile of extraFiles) {
         const { url, publicId } = await uploadToCloudinary(extraFile, setProgress);
@@ -163,6 +160,7 @@ export default function GaleriaPage() {
           image: url,
           publicId,
           order: items.length,
+          featured: false,
           extraImages: finalExtras,
         });
       }
@@ -174,22 +172,15 @@ export default function GaleriaPage() {
     }
   };
 
-  const handleFeature = async (item: GalleryItem) => {
-    setFeaturingId(item.id);
+  // Toggle featured: true ↔ false en galleryPage
+  const handleToggleFeatured = async (item: GalleryItem) => {
+    setTogglingId(item.id);
     try {
-      await addDoc(collection(db, "gallery"), {
-        title: item.title,
-        image: item.image,
-        publicId: item.publicId,
-        category: item.category,
-        description: item.description,
-        order: item.order,
-        extraImages: item.extraImages ?? [],
-      });
+      await updateDoc(doc(db, "galleryPage", item.id), { featured: !item.featured });
     } catch (err) {
       console.error(err);
     } finally {
-      setFeaturingId(null);
+      setTogglingId(null);
     }
   };
 
@@ -203,12 +194,16 @@ export default function GaleriaPage() {
     }
   };
 
+  const featuredCount = items.filter((i) => i.featured).length;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Galería</h1>
-          <p className="text-muted-foreground mt-1">Ilustraciones de la página /galeria · {items.length} ilustraciones</p>
+          <p className="text-muted-foreground mt-1">
+            {items.length} ilustraciones · {featuredCount} destacadas
+          </p>
         </div>
         <button
           onClick={openCreate}
@@ -221,13 +216,26 @@ export default function GaleriaPage() {
 
       {items.length === 0 ? (
         <div className="text-center py-20 text-muted-foreground border border-dashed border-border rounded-xl">
-          No hay ilustraciones aún. Sube la primera para la página /galeria.
+          No hay ilustraciones aún. Sube la primera.
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {items.map((item) => (
-            <div key={item.id} className="bg-card border border-border rounded-xl overflow-hidden">
-              <img src={item.image} alt={item.title} className="w-full aspect-square object-cover" />
+            <div
+              key={item.id}
+              className={cn(
+                "bg-card border rounded-xl overflow-hidden",
+                item.featured ? "border-yellow-400 ring-1 ring-yellow-300" : "border-border"
+              )}
+            >
+              <div className="relative">
+                <img src={item.image} alt={item.title} className="w-full aspect-square object-cover" />
+                {item.featured && (
+                  <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 rounded-full p-1">
+                    <Star size={12} fill="currentColor" />
+                  </div>
+                )}
+              </div>
               <div className="p-3">
                 <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
                 <p className="text-xs text-muted-foreground capitalize mb-2">{item.category}</p>
@@ -239,11 +247,16 @@ export default function GaleriaPage() {
                     <Edit2 size={12} /> Editar
                   </button>
                   <button
-                    onClick={() => handleFeature(item)}
-                    disabled={featuringId === item.id}
-                    className="flex-1 flex items-center justify-center gap-1 py-1.5 border border-yellow-300 rounded-lg text-xs text-yellow-600 hover:bg-yellow-50 transition-colors disabled:opacity-50"
+                    onClick={() => handleToggleFeatured(item)}
+                    disabled={togglingId === item.id}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1 py-1.5 border rounded-lg text-xs transition-colors disabled:opacity-50",
+                      item.featured
+                        ? "border-yellow-300 text-yellow-600 hover:bg-yellow-50"
+                        : "border-border text-muted-foreground hover:bg-secondary"
+                    )}
                   >
-                    <Star size={12} /> Destacar
+                    {item.featured ? <><StarOff size={12} /> Quitar</> : <><Star size={12} /> Destacar</>}
                   </button>
                   <button
                     onClick={() => handleDelete(item)}
@@ -261,7 +274,7 @@ export default function GaleriaPage() {
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-lg shadow-xl">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="font-semibold text-foreground">
                 {editing ? "Editar ilustración" : "Nueva ilustración"}
@@ -308,23 +321,16 @@ export default function GaleriaPage() {
                 )}
               </div>
 
-              {/* Fotos extras */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">
                   Fotos extras <span className="text-muted-foreground font-normal">(máx. 4)</span>
                 </label>
-
-                {/* Thumbnails grid */}
                 {(existingExtras.length > 0 || extraPreviews.length > 0) && (
                   <div className="flex flex-wrap gap-2 mb-2">
                     {existingExtras.map((img, i) => (
                       <div key={`existing-${i}`} className="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary">
                         <img src={img.url} alt={`extra ${i + 1}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => removeExistingExtra(i)}
-                          className="absolute top-0.5 right-0.5 p-0.5 bg-black/60 rounded-full text-white"
-                        >
+                        <button type="button" onClick={() => removeExistingExtra(i)} className="absolute top-0.5 right-0.5 p-0.5 bg-black/60 rounded-full text-white">
                           <X size={10} />
                         </button>
                       </div>
@@ -332,39 +338,24 @@ export default function GaleriaPage() {
                     {extraPreviews.map((src, i) => (
                       <div key={`new-${i}`} className="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary">
                         <img src={src} alt={`nueva ${i + 1}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => removeExtraFile(i)}
-                          className="absolute top-0.5 right-0.5 p-0.5 bg-black/60 rounded-full text-white"
-                        >
+                        <button type="button" onClick={() => removeExtraFile(i)} className="absolute top-0.5 right-0.5 p-0.5 bg-black/60 rounded-full text-white">
                           <X size={10} />
                         </button>
                       </div>
                     ))}
                   </div>
                 )}
-
                 {existingExtras.length + extraFiles.length < 4 && (
                   <button
                     type="button"
                     onClick={() => extraFileRef.current?.click()}
                     className="flex items-center gap-2 px-3 py-2 border border-dashed border-border rounded-lg text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                   >
-                    <Upload size={14} />
-                    Agregar fotos
+                    <Upload size={14} /> Agregar fotos
                   </button>
                 )}
-                <input
-                  ref={extraFileRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={handleExtraFilesChange}
-                />
-                {extrasError && (
-                  <p className="text-xs text-destructive mt-1">{extrasError}</p>
-                )}
+                <input ref={extraFileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleExtraFilesChange} />
+                {extrasError && <p className="text-xs text-destructive mt-1">{extrasError}</p>}
               </div>
 
               <div>
@@ -406,11 +397,7 @@ export default function GaleriaPage() {
               </div>
 
               <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={closeForm}
-                  className="flex-1 py-2.5 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-secondary transition-colors"
-                >
+                <button type="button" onClick={closeForm} className="flex-1 py-2.5 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-secondary transition-colors">
                   Cancelar
                 </button>
                 <button

@@ -4,6 +4,7 @@ import {
   onSnapshot,
   orderBy,
   query,
+  where,
   type QueryConstraint,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -30,6 +31,7 @@ export function useCollection<T>(
 
 // Hooks específicos para cada colección
 export function useGallery() {
+  // Featured items from galleryPage (shown in Home carousel)
   const result = useCollection<{
     id: string;
     title: string;
@@ -37,10 +39,10 @@ export function useGallery() {
     category: string;
     description: string;
     order: number;
+    featured: boolean;
     extraImages?: { url: string; publicId: string }[];
-  }>("gallery", [orderBy("order", "asc")]);
+  }>("galleryPage", [where("featured", "==", true), orderBy("order", "asc")]);
 
-  // Normalize legacy items that have no extraImages field
   return {
     ...result,
     data: result.data.map((item) => ({
