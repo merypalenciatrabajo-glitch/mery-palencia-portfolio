@@ -37,10 +37,13 @@ export default function GalleryPage() {
             Mery Palencia
           </Link>
           <div className="flex items-center gap-4">
+            <Link to="/" className="font-medium transition-colors text-foreground hover:text-accent">
+              Inicio
+            </Link>
             <Link
               to="/blog"
               className={`font-medium transition-colors ${
-                isActive('/blog') ? 'text-accent' : 'text-foreground hover:text-accent'
+                isActive('/blog') ? 'text-accent border-b-2 border-accent pb-0.5' : 'text-foreground hover:text-accent'
               }`}
             >
               Blog

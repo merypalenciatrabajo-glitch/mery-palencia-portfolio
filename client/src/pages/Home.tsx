@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { Link } from 'wouter';
 import { Mail, Instagram, Linkedin, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Lightbox from '@/components/Lightbox';
@@ -237,18 +238,12 @@ export default function Home() {
         <div className="container py-4 flex items-center justify-between">
           <h1 className="text-2xl font-display text-foreground">Mery Palencia</h1>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => window.location.href = '/blog'}
-              className="text-foreground hover:text-accent transition-colors font-medium"
-            >
+            <Link to="/blog" className="text-foreground hover:text-accent transition-colors font-medium">
               Blog
-            </button>
-            <button
-              onClick={() => window.location.href = '/galeria'}
-              className="text-foreground hover:text-accent transition-colors font-medium"
-            >
+            </Link>
+            <Link to="/galeria" className="text-foreground hover:text-accent transition-colors font-medium">
               Galería
-            </button>
+            </Link>
             <ThemeToggle />
           </div>
         </div>
@@ -296,22 +291,24 @@ export default function Home() {
               >
                 Contactar
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-accent text-foreground dark:text-accent hover:bg-accent/5 dark:hover:bg-accent/10 rounded-lg"
-                onClick={() => window.location.href = '/blog'}
-              >
-                Leer Blog
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-accent text-foreground dark:text-accent hover:bg-accent/5 dark:hover:bg-accent/10 rounded-lg"
-                onClick={() => window.location.href = '/galeria'}
-              >
-                Ver Galería
-              </Button>
+              <Link to="/blog">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-accent text-foreground dark:text-accent hover:bg-accent/5 dark:hover:bg-accent/10 rounded-lg"
+                >
+                  Leer Blog
+                </Button>
+              </Link>
+              <Link to="/galeria">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-accent text-foreground dark:text-accent hover:bg-accent/5 dark:hover:bg-accent/10 rounded-lg"
+                >
+                  Ver Galería
+                </Button>
+              </Link>
               </div>
             </div>
             
@@ -352,13 +349,13 @@ export default function Home() {
           <InfiniteCarousel items={galleryItems} onItemClick={openLightbox} />
 
           <div className="text-center mt-12">
-            <button
-              onClick={() => window.location.href = '/galeria'}
+            <Link
+              to="/galeria"
               className="inline-flex items-center gap-2 px-6 py-3 border border-accent text-accent hover:bg-accent hover:text-white rounded-lg font-medium transition-colors duration-300"
             >
               Ver galería completa
               <ArrowRight size={18} />
-            </button>
+            </Link>
           </div>
         </div>
       </section>
