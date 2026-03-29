@@ -4,7 +4,7 @@ import { db } from "@/lib/firebase";
 import semver from "semver";
 
 // Versión embebida en este APK — se actualiza automáticamente con el script
-export const CURRENT_VERSION = "1.7.2";
+export const CURRENT_VERSION = "1.7.4";
 
 export interface AppUpdateInfo {
   version: string;
