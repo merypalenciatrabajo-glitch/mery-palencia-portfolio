@@ -56,7 +56,7 @@ export default function Gallery() {
 
   useEffect(() => {
     // Listen to all galleryPage items ordered by order
-    const q = query(collection(db, "galleryPage"), orderBy("order", "asc"));
+    const q = query(collection(db, "gallery"), orderBy("order", "asc"));
     const unsub = onSnapshot(q, (snap) => {
       const all = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GalleryItem, "id">) }));
       setAllItems(all);
@@ -152,7 +152,7 @@ export default function Gallery() {
           const { url, publicId } = await uploadToCloudinary(file, setProgress);
           imageData = { image: url, publicId };
         }
-        await updateDoc(doc(db, "galleryPage", editing.id), {
+        await updateDoc(doc(db, "gallery", editing.id), {
           ...form,
           ...imageData,
           extraImages: finalExtras,
@@ -162,7 +162,7 @@ export default function Gallery() {
         // It will appear in both Galería and Destacadas
         if (!file) return;
         const { url, publicId } = await uploadToCloudinary(file, setProgress);
-        await addDoc(collection(db, "galleryPage"), {
+        await addDoc(collection(db, "gallery"), {
           ...form,
           image: url,
           publicId,
@@ -184,7 +184,7 @@ export default function Gallery() {
     if (!confirm(`¿Quitar "${item.title}" de destacadas? La ilustración seguirá en Galería.`)) return;
     setTogglingId(item.id);
     try {
-      await updateDoc(doc(db, "galleryPage", item.id), { featured: false });
+      await updateDoc(doc(db, "gallery", item.id), { featured: false });
     } catch (err) {
       console.error(err);
     } finally {
