@@ -1,4 +1,4 @@
-import { useRoute } from 'wouter';
+import { useRoute, Link, useLocation } from 'wouter';
 import { Calendar, ArrowLeft, Share2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
@@ -50,6 +50,7 @@ function getYouTubeEmbedUrl(url: string): string | null {
 
 export default function BlogPost() {
   const [match, params] = useRoute('/blog/:id');
+  const [, navigate] = useLocation();
   const [post, setPost] = useState<BlogPost | null | undefined>(undefined);
   const { data: allPosts } = useBlogPosts();
 
@@ -86,21 +87,18 @@ export default function BlogPost() {
     <div className="min-h-screen bg-background">
       {/* HEADER */}
       <header className="border-b border-border sticky top-0 bg-white/80 dark:bg-background/80 backdrop-blur-sm z-40">
-        <div className="container py-6 flex items-center justify-between">
-          <button
-            onClick={() => window.location.href = '/'}
-            className="text-2xl font-display text-foreground hover:text-accent transition-colors"
-          >
+        <div className="container py-4 flex items-center justify-between">
+          <Link to="/" className="text-2xl font-display text-foreground hover:text-accent transition-colors">
             Mery Palencia
-          </button>
+          </Link>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => window.location.href = '/blog'}
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft size={20} />
-              Volver al Blog
-            </button>
+            <Link to="/" className="font-medium transition-colors text-foreground hover:text-accent">
+              Inicio
+            </Link>
+            <Link to="/blog" className="flex items-center gap-2 font-medium text-foreground hover:text-accent transition-colors">
+              <ArrowLeft size={18} />
+              Blog
+            </Link>
             <ThemeToggle />
           </div>
         </div>
@@ -238,7 +236,7 @@ export default function BlogPost() {
 
             <div className="space-y-8">
               {relatedPosts.map((relatedPost, index) => (
-                <div key={relatedPost.id} className="group block animate-in fade-in slide-in-from-bottom-4 duration-500 cursor-pointer" style={{ animationDelay: `${index * 100}ms` }} onClick={() => window.location.href = `/blog/${relatedPost.id}`}>
+                <div key={relatedPost.id} className="group block animate-in fade-in slide-in-from-bottom-4 duration-500 cursor-pointer" style={{ animationDelay: `${index * 100}ms` }} onClick={() => navigate(`/blog/${relatedPost.id}`)}>
                     <article className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start pb-8 border-b border-border last:border-b-0 hover:opacity-80 transition-opacity">
                       <div className="md:col-span-1">
                         <div className="relative overflow-hidden rounded-lg shadow-soft group-hover:shadow-soft-lg transition-all">
@@ -282,12 +280,12 @@ export default function BlogPost() {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Si te interesa mi trabajo o quieres discutir un proyecto, no dudes en contactarme.
           </p>
-          <button
-            onClick={() => window.location.href = '/#contact-section'}
+          <Link
+            to="/#contact-section"
             className="inline-block px-8 py-3 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-all duration-300"
           >
             Solicitar Comisión
-          </button>
+          </Link>
         </div>
       </section>
 

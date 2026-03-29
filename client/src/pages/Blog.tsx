@@ -22,7 +22,7 @@ export default function Blog() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { theme } = useTheme();
   const { data: blogPosts } = useBlogPosts();
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const isActive = (path: string) => location === path;
 
   const filteredPosts = selectedCategory
@@ -132,7 +132,7 @@ export default function Blog() {
           ) : (
             <div className="space-y-12">
               {filteredPosts.map((post, index) => (
-                <div key={post.id} className="group block animate-in fade-in slide-in-from-bottom-4 duration-500 cursor-pointer" style={{ animationDelay: `${index * 100}ms` }} onClick={() => window.location.href = `/blog/${post.id}`}>
+                <div key={post.id} className="group block animate-in fade-in slide-in-from-bottom-4 duration-500 cursor-pointer" style={{ animationDelay: `${index * 100}ms` }} onClick={() => navigate(`/blog/${post.id}`)}>
                     <article className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start pb-12 border-b border-border last:border-b-0 hover:opacity-80 transition-opacity">
                       {/* Imagen */}
                       <div className="md:col-span-1 order-2 md:order-1">
@@ -197,12 +197,12 @@ export default function Blog() {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Si te interesa mi trabajo o quieres discutir un proyecto, no dudes en contactarme.
           </p>
-          <button
-            onClick={() => window.location.href = '/#contact-section'}
+          <Link
+            to="/#contact-section"
             className="inline-block px-8 py-3 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-all duration-300 cursor-pointer"
           >
             Solicitar Comisión
-          </button>
+          </Link>
         </div>
       </section>
 
