@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { cn } from "@/lib/utils";
+import CategorySelect from "@/components/CategorySelect";
 
 interface GalleryItem {
   id: string;
@@ -366,24 +367,13 @@ export default function Gallery() {
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">Categoría</label>
-                <select
+                <CategorySelect
+                  categories={CATEGORIES}
                   value={form.category}
-                  onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
-                  className="w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  {CATEGORIES.map((c) => (
-                    <option key={c.id} value={c.id}>{c.label}</option>
-                  ))}
-                </select>
-                {form.category === "otros" && (
-                  <input
-                    type="text"
-                    value={customCategory}
-                    onChange={(e) => setCustomCategory(e.target.value)}
-                    placeholder="Escribe la categoría..."
-                    className="mt-2 w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                )}
+                  onChange={(val) => setForm((p) => ({ ...p, category: val }))}
+                  customValue={customCategory}
+                  onCustomChange={setCustomCategory}
+                />
               </div>
 
               <div>
