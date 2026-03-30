@@ -62,9 +62,12 @@ export default function GalleryPage() {
     return [...ordered, ...custom];
   }, [items]);
 
-  const filteredItems = activeCategory
-    ? items.filter((i) => i.category === activeCategory)
-    : items;
+  const filteredItems = useMemo(() => {
+    const result = activeCategory
+      ? items.filter((i) => i.category === activeCategory)
+      : items;
+    return [...result].sort((a, b) => a.order - b.order);
+  }, [items, activeCategory]);
 
   const getCategoryLabel = (cat: string) => CATEGORY_LABELS[cat] ?? cat;
 
@@ -102,15 +105,15 @@ export default function GalleryPage() {
       </header>
 
       {/* HERO */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-white via-white to-orange-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-orange-950/20">
-        <div className="container text-center space-y-4">
+      <section className="py-8 md:py-12 bg-gradient-to-br from-white via-white to-orange-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-orange-950/20">
+        <div className="container text-center space-y-2">
           <p className="text-sm tracking-widest text-muted-foreground uppercase">
             Fotografía & Arte
           </p>
-          <h1 className="text-5xl md:text-6xl font-display text-foreground">
+          <h1 className="text-4xl md:text-5xl font-display text-foreground">
             Galería
           </h1>
-          <p className="subtitle text-lg md:text-xl text-muted-foreground max-w-xl mx-auto">
+          <p className="subtitle text-base md:text-lg text-muted-foreground max-w-xl mx-auto">
             Explora todos mis trabajos y obras
           </p>
         </div>
@@ -162,7 +165,7 @@ export default function GalleryPage() {
       )}
 
       {/* GRID */}
-      <section className="py-16 md:py-24">
+      <section className="py-8 md:py-12">
         <div className="container">
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
