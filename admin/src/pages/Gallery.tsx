@@ -26,11 +26,20 @@ interface GalleryItem {
   extraImages?: { url: string; publicId: string }[];
 }
 
-const CATEGORIES = ["personajes", "escenarios", "props", "abstracto", "otro"];
+const CATEGORIES = [
+  { id: "fotografia-paisaje", label: "Fotografía paisaje" },
+  { id: "fotografia-infantil", label: "Fotografía infantil" },
+  { id: "fotografia-moda", label: "Fotografía de moda" },
+  { id: "fotografia-documental", label: "Fotografía documental" },
+  { id: "ilustracion-digital", label: "Ilustración digital" },
+  { id: "material-digital", label: "Material digital" },
+  { id: "trabajos-analogos", label: "Trabajos análogos" },
+  { id: "otros", label: "Otros" },
+];
 
 const EMPTY_FORM = {
   title: "",
-  category: "personajes",
+  category: "fotografia-paisaje",
   description: "",
 };
 
@@ -53,6 +62,7 @@ export default function Gallery() {
   const [extraPreviews, setExtraPreviews] = useState<string[]>([]);
   const [existingExtras, setExistingExtras] = useState<{ url: string; publicId: string }[]>([]);
   const [extrasError, setExtrasError] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
 
   useEffect(() => {
     // Listen to all galleryPage items ordered by order
@@ -74,12 +84,15 @@ export default function Gallery() {
     setExtraPreviews([]);
     setExistingExtras([]);
     setExtrasError("");
+    setCustomCategory("");
     setShowForm(true);
   };
 
   const openEdit = (item: GalleryItem) => {
     setEditing(item);
-    setForm({ title: item.title, category: item.category, description: item.description });
+    const isCustom = !CATEGORIES.find((c) => c.id === item.category);
+    setForm({ title: item.title, category: isCustom ? "otros" : item.category, description: item.description });
+    setCustomCategory(isCustom ? item.category : "");
     setPreview(item.image);
     setFile(null);
     setExtraFiles([]);
@@ -99,6 +112,7 @@ export default function Gallery() {
     setExtraPreviews([]);
     setExistingExtras([]);
     setExtrasError("");
+    setCustomCategory("");
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -137,6 +151,7 @@ export default function Gallery() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    const finalCategory = form.category === "otros" ? customCategory.trim() || "otros" : form.category;
     try {
       const uploadedExtras: { url: string; publicId: string }[] = [];
       for (const extraFile of extraFiles) {
@@ -146,7 +161,6 @@ export default function Gallery() {
       const finalExtras = [...existingExtras, ...uploadedExtras];
 
       if (editing) {
-        // Edit existing item in galleryPage
         let imageData: { image?: string; publicId?: string } = {};
         if (file) {
           const { url, publicId } = await uploadToCloudinary(file, setProgress);
@@ -154,16 +168,16 @@ export default function Gallery() {
         }
         await updateDoc(doc(db, "gallery", editing.id), {
           ...form,
+          category: finalCategory,
           ...imageData,
           extraImages: finalExtras,
         });
       } else {
-        // New item: save to galleryPage with featured: true
-        // It will appear in both Galería and Destacadas
         if (!file) return;
         const { url, publicId } = await uploadToCloudinary(file, setProgress);
         await addDoc(collection(db, "gallery"), {
           ...form,
+          category: finalCategory,
           image: url,
           publicId,
           order: allItems.length,
@@ -358,9 +372,18 @@ export default function Gallery() {
                   className="w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   {CATEGORIES.map((c) => (
-                    <option key={c} value={c} className="capitalize">{c}</option>
+                    <option key={c.id} value={c.id}>{c.label}</option>
                   ))}
                 </select>
+                {form.category === "otros" && (
+                  <input
+                    type="text"
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    placeholder="Escribe la categoría..."
+                    className="mt-2 w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                )}
               </div>
 
               <div>

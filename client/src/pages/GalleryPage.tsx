@@ -1,8 +1,19 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useLocation } from 'wouter';
 import Lightbox from '@/components/Lightbox';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useGalleryPage } from '@/hooks/useFirestore';
+
+const CATEGORY_LABELS: Record<string, string> = {
+  'fotografia-paisaje': 'Fotografía paisaje',
+  'fotografia-infantil': 'Fotografía infantil',
+  'fotografia-moda': 'Fotografía de moda',
+  'fotografia-documental': 'Fotografía documental',
+  'ilustracion-digital': 'Ilustración digital',
+  'material-digital': 'Material digital',
+  'trabajos-analogos': 'Trabajos análogos',
+  'otros': 'Otros',
+};
 
 type GalleryItem = {
   id: string;
@@ -20,6 +31,7 @@ export default function GalleryPage() {
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selected, setSelected] = useState<GalleryItem | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const openLightbox = (item: GalleryItem) => {
     setSelected(item);
@@ -27,6 +39,21 @@ export default function GalleryPage() {
   };
 
   const isActive = (path: string) => location.pathname === path;
+
+  // Categorías presentes en los ítems actuales, en orden predefinido
+  const availableCategories = useMemo(() => {
+    const inItems = new Set(items.map((i) => i.category));
+    const ordered = Object.keys(CATEGORY_LABELS).filter((k) => inItems.has(k));
+    // Categorías personalizadas (no predefinidas) al final
+    const custom = [...inItems].filter((k) => !CATEGORY_LABELS[k]);
+    return [...ordered, ...custom];
+  }, [items]);
+
+  const filteredItems = activeCategory
+    ? items.filter((i) => i.category === activeCategory)
+    : items;
+
+  const getCategoryLabel = (cat: string) => CATEGORY_LABELS[cat] ?? cat;
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,16 +92,49 @@ export default function GalleryPage() {
       <section className="py-16 md:py-24 bg-gradient-to-br from-white via-white to-orange-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-orange-950/20">
         <div className="container text-center space-y-4">
           <p className="text-sm tracking-widest text-muted-foreground uppercase">
-            Ilustración Digital
+            Fotografía & Arte
           </p>
           <h1 className="text-5xl md:text-6xl font-display text-foreground">
             Galería
           </h1>
           <p className="subtitle text-lg md:text-xl text-muted-foreground max-w-xl mx-auto">
-            Explora todas mis ilustraciones y obras de arte digital
+            Explora todos mis trabajos y obras
           </p>
         </div>
       </section>
+
+      {/* FILTROS */}
+      {!loading && availableCategories.length > 0 && (
+        <section className="py-6 border-b border-border bg-white dark:bg-slate-950">
+          <div className="container">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setActiveCategory(null)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  activeCategory === null
+                    ? 'bg-accent text-white'
+                    : 'bg-secondary text-foreground hover:bg-muted'
+                }`}
+              >
+                Todos
+              </button>
+              {availableCategories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    activeCategory === cat
+                      ? 'bg-accent text-white'
+                      : 'bg-secondary text-foreground hover:bg-muted'
+                  }`}
+                >
+                  {getCategoryLabel(cat)}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* GRID */}
       <section className="py-16 md:py-24">
@@ -85,13 +145,13 @@ export default function GalleryPage() {
                 <div key={i} className="aspect-square rounded-xl bg-muted animate-pulse" />
               ))}
             </div>
-          ) : items.length === 0 ? (
+          ) : filteredItems.length === 0 ? (
             <p className="text-center text-muted-foreground text-lg py-20">
-              No hay ilustraciones disponibles aún.
+              No hay trabajos en esta categoría aún.
             </p>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-              {items.map((item) => (
+              {filteredItems.map((item) => (
                 <div
                   key={item.id}
                   className="group cursor-pointer"
@@ -112,6 +172,7 @@ export default function GalleryPage() {
                   <h3 className="mt-3 text-base font-display text-foreground group-hover:text-accent transition-colors truncate">
                     {item.title}
                   </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">{getCategoryLabel(item.category)}</p>
                 </div>
               ))}
             </div>

@@ -26,11 +26,20 @@ interface GalleryItem {
   extraImages?: { url: string; publicId: string }[];
 }
 
-const CATEGORIES = ["personajes", "escenarios", "props", "abstracto", "otro"];
+const CATEGORIES = [
+  { id: "fotografia-paisaje", label: "Fotografía paisaje" },
+  { id: "fotografia-infantil", label: "Fotografía infantil" },
+  { id: "fotografia-moda", label: "Fotografía de moda" },
+  { id: "fotografia-documental", label: "Fotografía documental" },
+  { id: "ilustracion-digital", label: "Ilustración digital" },
+  { id: "material-digital", label: "Material digital" },
+  { id: "trabajos-analogos", label: "Trabajos análogos" },
+  { id: "otros", label: "Otros" },
+];
 
 const EMPTY_FORM = {
   title: "",
-  category: "personajes",
+  category: "fotografia-paisaje",
   description: "",
 };
 
@@ -52,6 +61,7 @@ export default function GaleriaPage() {
   const [extraPreviews, setExtraPreviews] = useState<string[]>([]);
   const [existingExtras, setExistingExtras] = useState<{ url: string; publicId: string }[]>([]);
   const [extrasError, setExtrasError] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
 
   useEffect(() => {
     const q = query(collection(db, "gallery"), orderBy("order", "asc"));
@@ -70,12 +80,15 @@ export default function GaleriaPage() {
     setExtraPreviews([]);
     setExistingExtras([]);
     setExtrasError("");
+    setCustomCategory("");
     setShowForm(true);
   };
 
   const openEdit = (item: GalleryItem) => {
     setEditing(item);
-    setForm({ title: item.title, category: item.category, description: item.description });
+    const isCustom = !CATEGORIES.find((c) => c.id === item.category);
+    setForm({ title: item.title, category: isCustom ? "otros" : item.category, description: item.description });
+    setCustomCategory(isCustom ? item.category : "");
     setPreview(item.image);
     setFile(null);
     setExtraFiles([]);
@@ -95,6 +108,7 @@ export default function GaleriaPage() {
     setExtraPreviews([]);
     setExistingExtras([]);
     setExtrasError("");
+    setCustomCategory("");
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,6 +147,7 @@ export default function GaleriaPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    const finalCategory = form.category === "otros" ? customCategory.trim() || "otros" : form.category;
     try {
       const uploadedExtras: { url: string; publicId: string }[] = [];
       for (const extraFile of extraFiles) {
@@ -149,6 +164,7 @@ export default function GaleriaPage() {
         }
         await updateDoc(doc(db, "gallery", editing.id), {
           ...form,
+          category: finalCategory,
           ...imageData,
           extraImages: finalExtras,
         });
@@ -157,6 +173,7 @@ export default function GaleriaPage() {
         const { url, publicId } = await uploadToCloudinary(file, setProgress);
         await addDoc(collection(db, "gallery"), {
           ...form,
+          category: finalCategory,
           image: url,
           publicId,
           order: items.length,
@@ -380,9 +397,18 @@ export default function GaleriaPage() {
                   className="w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   {CATEGORIES.map((c) => (
-                    <option key={c} value={c} className="capitalize">{c}</option>
+                    <option key={c.id} value={c.id}>{c.label}</option>
                   ))}
                 </select>
+                {form.category === "otros" && (
+                  <input
+                    type="text"
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    placeholder="Escribe la categoría..."
+                    className="mt-2 w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                )}
               </div>
 
               <div>
