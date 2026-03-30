@@ -150,7 +150,7 @@ const extraImageArb: fc.Arbitrary<ExtraImage> = fc.record({
   publicId: nonEmptyStringArb,
 });
 
-const CATEGORIES = ["personajes", "escenarios", "props", "abstracto", "otro"] as const;
+const CATEGORIES = ["fotografia-paisaje", "fotografia-infantil", "fotografia-moda", "fotografia-documental", "ilustracion-digital", "material-digital", "trabajos-analogos", "otros"] as const;
 
 const formArb: fc.Arbitrary<FormState> = fc.record({
   title: nonEmptyStringArb,

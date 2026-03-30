@@ -78,7 +78,7 @@ const extraImageArb: fc.Arbitrary<ExtraImage> = fc.record({
   publicId: nonEmptyStringArb,
 });
 
-const CATEGORIES = ["personajes", "escenarios", "props", "abstracto", "otro"] as const;
+const CATEGORIES = ["fotografia-paisaje", "fotografia-infantil", "fotografia-moda", "fotografia-documental", "ilustracion-digital", "material-digital", "trabajos-analogos", "otros"] as const;
 
 /** A single GalleryItem with a given id */
 const galleryItemArb = (id: string): fc.Arbitrary<GalleryItem> =>
