@@ -16,6 +16,17 @@ const CATEGORY_LABELS: Record<string, string> = {
   'otros': 'Otros',
 };
 
+// Aliases de categorías antiguas → nueva clave predefinida
+const CATEGORY_ALIASES: Record<string, string> = {
+  'otro': 'otros',
+  'personajes': 'ilustracion-digital',
+  'escenarios': 'ilustracion-digital',
+  'props': 'material-digital',
+  'abstracto': 'ilustracion-digital',
+};
+
+const normalizeCategory = (cat: string) => CATEGORY_ALIASES[cat] ?? cat;
+
 type GalleryItem = {
   id: string;
   title: string;
@@ -55,21 +66,20 @@ export default function GalleryPage() {
 
   // Categorías presentes en los ítems actuales, en orden predefinido
   const availableCategories = useMemo(() => {
-    const inItems = new Set(items.map((i) => i.category));
+    const inItems = new Set(items.map((i) => normalizeCategory(i.category)));
     const ordered = Object.keys(CATEGORY_LABELS).filter((k) => inItems.has(k));
-    // Categorías personalizadas (no predefinidas) al final
     const custom = [...inItems].filter((k) => !CATEGORY_LABELS[k]);
     return [...ordered, ...custom];
   }, [items]);
 
   const filteredItems = useMemo(() => {
     const result = activeCategory
-      ? items.filter((i) => i.category === activeCategory)
+      ? items.filter((i) => normalizeCategory(i.category) === activeCategory)
       : items;
     return [...result].sort((a, b) => a.order - b.order);
   }, [items, activeCategory]);
 
-  const getCategoryLabel = (cat: string) => CATEGORY_LABELS[cat] ?? cat;
+  const getCategoryLabel = (cat: string) => CATEGORY_LABELS[normalizeCategory(cat)] ?? cat;
 
   return (
     <div className="min-h-screen bg-background">
