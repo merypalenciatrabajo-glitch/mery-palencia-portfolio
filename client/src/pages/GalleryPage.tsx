@@ -64,12 +64,10 @@ export default function GalleryPage() {
 
   const isActive = (path: string) => location.pathname === path;
 
-  // Categorías presentes en los ítems actuales, en orden predefinido
+  // Solo mostrar categorías predefinidas que tengan ítems, en orden fijo
   const availableCategories = useMemo(() => {
     const inItems = new Set(items.map((i) => normalizeCategory(i.category)));
-    const ordered = Object.keys(CATEGORY_LABELS).filter((k) => inItems.has(k));
-    const custom = [...inItems].filter((k) => !CATEGORY_LABELS[k]);
-    return [...ordered, ...custom];
+    return Object.keys(CATEGORY_LABELS).filter((k) => inItems.has(k));
   }, [items]);
 
   const filteredItems = useMemo(() => {
