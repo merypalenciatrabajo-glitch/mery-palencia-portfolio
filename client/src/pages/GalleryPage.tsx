@@ -64,10 +64,24 @@ export default function GalleryPage() {
 
   const isActive = (path: string) => location.pathname === path;
 
-  // Solo mostrar categorías predefinidas que tengan ítems, en orden fijo
+  // Orden fijo de categorías predefinidas (sin "otros", va siempre al final)
+  const CATEGORY_ORDER = [
+    'fotografia-paisaje',
+    'fotografia-infantil',
+    'fotografia-moda',
+    'fotografia-documental',
+    'ilustracion-digital',
+    'material-digital',
+    'trabajos-analogos',
+  ];
+
+  // Categorías en dropdown: predefinidas con ítems → custom → "otros" al final
   const availableCategories = useMemo(() => {
     const inItems = new Set(items.map((i) => normalizeCategory(i.category)));
-    return Object.keys(CATEGORY_LABELS).filter((k) => inItems.has(k));
+    const predefined = CATEGORY_ORDER.filter((k) => inItems.has(k));
+    const custom = [...inItems].filter((k) => k !== 'otros' && !CATEGORY_LABELS[k]);
+    const hasOtros = inItems.has('otros');
+    return [...predefined, ...custom, ...(hasOtros ? ['otros'] : [])];
   }, [items]);
 
   const filteredItems = useMemo(() => {
