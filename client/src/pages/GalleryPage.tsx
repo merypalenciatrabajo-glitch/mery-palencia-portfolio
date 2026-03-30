@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import Lightbox from '@/components/Lightbox';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -32,6 +33,18 @@ export default function GalleryPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selected, setSelected] = useState<GalleryItem | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const openLightbox = (item: GalleryItem) => {
     setSelected(item);
@@ -106,32 +119,44 @@ export default function GalleryPage() {
       {/* FILTROS */}
       {!loading && availableCategories.length > 0 && (
         <section className="py-6 border-b border-border bg-white dark:bg-slate-950">
-          <div className="container">
-            <div className="flex flex-wrap gap-2">
+          <div className="container flex items-center gap-3">
+            <span className="text-sm text-muted-foreground">Filtrar por:</span>
+            <div ref={dropdownRef} className="relative">
+              <button
+                onClick={() => setDropdownOpen((o) => !o)}
+                className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg bg-background text-sm text-foreground hover:border-accent transition-colors"
+              >
+                <span>{activeCategory ? getCategoryLabel(activeCategory) : 'Todas las categorías'}</span>
+                <ChevronDown size={15} className={`text-muted-foreground transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {dropdownOpen && (
+                <div className="absolute left-0 top-full mt-1 z-50 min-w-[220px] bg-background border border-border rounded-lg shadow-lg overflow-hidden">
+                  <button
+                    onClick={() => { setActiveCategory(null); setDropdownOpen(false); }}
+                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-secondary ${activeCategory === null ? 'text-accent font-medium' : 'text-foreground'}`}
+                  >
+                    Todas las categorías
+                  </button>
+                  {availableCategories.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => { setActiveCategory(cat); setDropdownOpen(false); }}
+                      className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-secondary ${activeCategory === cat ? 'text-accent font-medium' : 'text-foreground'}`}
+                    >
+                      {getCategoryLabel(cat)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {activeCategory && (
               <button
                 onClick={() => setActiveCategory(null)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  activeCategory === null
-                    ? 'bg-accent text-white'
-                    : 'bg-secondary text-foreground hover:bg-muted'
-                }`}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
               >
-                Todos
+                Limpiar
               </button>
-              {availableCategories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                    activeCategory === cat
-                      ? 'bg-accent text-white'
-                      : 'bg-secondary text-foreground hover:bg-muted'
-                  }`}
-                >
-                  {getCategoryLabel(cat)}
-                </button>
-              ))}
-            </div>
+            )}
           </div>
         </section>
       )}
