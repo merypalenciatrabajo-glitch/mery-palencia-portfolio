@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "WSF Autofix — Error detectado",
+  "description": "Cuando WebSecure Forge detecta un error en un proyecto con plan de mantenimiento, escribe en wsf-pending-fix.json. Este hook lo detecta y activa el análisis automático de Kiro para proponer o aplicar el fix.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "wsf-pending-fix.json"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Se detectó un nuevo error en wsf-pending-fix.json enviado por WSF Monitor desde un proyecto con plan de mantenimiento activo.\n\nLee el archivo wsf-pending-fix.json y encuentra los errores con status \"pending\".\n\nPara cada error pendiente:\n1. Analiza el tipo de error (type), el mensaje (message) y el stack trace (stack) si está disponible\n2. Identifica el archivo y línea del problema basándote en el stack trace y la URL reportada\n3. Busca en el código del proyecto el origen del error\n4. Propón o aplica el fix mínimo necesario sin romper nada\n5. Actualiza el status del error en wsf-pending-fix.json de \"pending\" a \"fixed\" o \"needs-review\" según corresponda\n6. Explica brevemente qué encontraste y qué hiciste\n\nReglas importantes:\n- NO silencies errores con try/catch sin relanzarlos\n- NO modifiques ni elimines el snippet de WSF Monitor si existe\n- Si el error es crítico (severity: critical) trátalo con máxima prioridad\n- Si no puedes determinar el fix con certeza, márcalo como \"needs-review\" y explica por qué"
+  }
+}
