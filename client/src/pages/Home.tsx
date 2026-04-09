@@ -234,7 +234,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* HEADER CON BOTÓN DE TEMA */}
-      <header className="border-b border-border sticky top-0 bg-white/80 dark:bg-background/80 backdrop-blur-sm z-40">
+      <header className="sticky top-0 bg-white/80 dark:bg-background/80 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-border after:to-transparent">
         <div className="container py-4 flex items-center justify-between">
           <h1 className="text-2xl font-display text-foreground">Mery Palencia</h1>
           <div className="flex items-center gap-4">
