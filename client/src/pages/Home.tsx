@@ -253,6 +253,8 @@ export default function Home() {
       <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden">
         {/* Gradiente de fondo sutil */}
         <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-orange-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-orange-950/20 -z-10" />
+        {/* Transición hacia la siguiente sección */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-white dark:to-slate-950 pointer-events-none" />
         
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
@@ -332,7 +334,9 @@ export default function Home() {
       </section>
 
       {/* GALERÍA SECTION */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-white via-white to-orange-50/20 dark:from-slate-950 dark:via-slate-950 dark:to-orange-950/10">
+      <section className="relative py-20 md:py-32 bg-gradient-to-b from-white via-white to-orange-50/20 dark:from-slate-950 dark:via-slate-950 dark:to-orange-950/10">
+        {/* Transición hacia la siguiente sección */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-orange-50/30 dark:to-orange-950/10 pointer-events-none" />
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">
@@ -361,7 +365,9 @@ export default function Home() {
       </section>
 
       {/* PROCESO SECTION */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-orange-50/30 to-white dark:from-orange-950/10 dark:to-slate-950">
+      <section className="relative py-20 md:py-32 bg-gradient-to-b from-orange-50/30 to-white dark:from-orange-950/10 dark:to-slate-950">
+        {/* Transición hacia la siguiente sección */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-white dark:to-slate-950 pointer-events-none" />
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">
@@ -407,7 +413,9 @@ export default function Home() {
       </section>
 
       {/* COMISIONES SECTION */}
-      <section id="commission-section" className="py-20 md:py-32 bg-gradient-to-b from-white via-white to-orange-50/20 dark:from-slate-950 dark:via-slate-950 dark:to-orange-950/10">
+      <section id="commission-section" className="relative py-20 md:py-32 bg-gradient-to-b from-white via-white to-orange-50/20 dark:from-slate-950 dark:via-slate-950 dark:to-orange-950/10">
+        {/* Transición hacia la siguiente sección */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-orange-50/20 dark:to-orange-950/10 pointer-events-none" />
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">
