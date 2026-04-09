@@ -618,16 +618,16 @@ export default function Home() {
       </section>
 
       {/* PIE DE PÁGINA */}
-      <footer className="bg-foreground/5 dark:bg-slate-900 border-t border-border py-12">
+      <footer className="bg-accent py-12">
         <div className="container">
           <div className="text-center space-y-4">
-            <h3 className="text-2xl font-display text-foreground">
+            <h3 className="text-2xl font-display text-white">
               Mery Palencia
             </h3>
-            <p className="text-muted-foreground">
+            <p className="text-white/80">
               Ilustradora Digital | Diseño de Personajes | Arte Conceptual
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-white/60">
               © 2024 Mery Palencia. Todos los derechos reservados.
             </p>
           </div>
