@@ -160,11 +160,29 @@ export default function GalleryPage() {
       </section>
 
       {/* FOOTER */}
-      <footer style={{backgroundColor: C.dark, borderTop: `1px solid ${C.teal}20`}} className="py-10">
-        <div className="container text-center space-y-3">
-          <h3 className="text-xl font-display" style={{color: C.white}}>Mery Palencia</h3>
-          <p className="text-sm" style={{color: C.teal}}>Ilustradora Digital · Diseño de Personajes · Arte Conceptual</p>
-          <p className="text-xs" style={{color: `${C.white}30`}}>© 2024 Mery Palencia. Todos los derechos reservados.</p>
+      <footer style={{backgroundColor: '#041a1e'}} className="py-14">
+        <div className="container">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="text-center md:text-left space-y-2">
+              <h3 className="text-2xl font-display" style={{color: C.white}}>Mery Palencia</h3>
+              <p className="text-sm font-medium" style={{color: C.teal}}>Ilustradora Digital · Diseño de Personajes · Arte Conceptual</p>
+            </div>
+            <div className="flex items-center gap-6">
+              <Link to="/" className="text-sm transition-colors" style={{color: `${C.white}80`}}>Inicio</Link>
+              <Link to="/blog" className="text-sm transition-colors" style={{color: `${C.white}80`}}>Blog</Link>
+              <Link to="/galeria" className="text-sm transition-colors" style={{color: `${C.white}80`}}>Galería</Link>
+            </div>
+          </div>
+          <div className="mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-3"
+            style={{borderTop: `1px solid ${C.teal}25`}}>
+            <p className="text-sm" style={{color: `${C.white}60`}}>© 2024 Mery Palencia. Todos los derechos reservados.</p>
+            <div className="flex items-center gap-4">
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+                className="text-sm font-medium" style={{color: `${C.white}60`}}>Instagram</a>
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"
+                className="text-sm font-medium" style={{color: `${C.white}60`}}>LinkedIn</a>
+            </div>
+          </div>
         </div>
       </footer>
 
