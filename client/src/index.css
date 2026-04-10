@@ -49,7 +49,7 @@
   --primary: #00A9B3;
   --primary-foreground: #ffffff;
 
-  --background: #EBEFF0;
+  --background: #D8E4E6;
   --foreground: #003F44;
 
   --card: #f5f8f9;
@@ -98,7 +98,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-color: #EBEFF0;
+    background-color: #D8E4E6;
     color: #003F44;
     font-family: 'Inter', sans-serif;
   }
