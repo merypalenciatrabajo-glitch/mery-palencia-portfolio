@@ -228,7 +228,7 @@ export default function BlogPost() {
 
       {/* ARTÍCULOS RELACIONADOS */}
       {relatedPosts.length > 0 && (
-        <section className="relative py-16 md:py-24 bg-card border-t border-border">
+        <section className="relative py-16 md:py-24 bg-secondary border-t border-border">
           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-secondary/40 pointer-events-none" />
           <div className="container max-w-3xl">
             <h2 className="text-3xl md:text-4xl font-display text-foreground mb-12">
