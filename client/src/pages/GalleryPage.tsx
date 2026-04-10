@@ -142,7 +142,9 @@ export default function GalleryPage() {
 
       {/* FILTROS */}
       {!loading && availableCategories.length > 0 && (
-        <section className="py-6 border-b border-border bg-white">
+        <section className="relative py-6 bg-gradient-to-b from-white to-orange-50/10">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent pointer-events-none" />
           <div className="container flex items-center gap-3">
             <span className="text-sm text-muted-foreground">Filtrar por:</span>
             <div ref={dropdownRef} className="relative">
