@@ -167,10 +167,10 @@ export default function Home() {
       </header>
 
       {/* HERO — gradiente radial teal → oscuro */}
-      <section className="pt-16 pb-24 md:pt-24 md:pb-36" style={{background: `radial-gradient(ellipse at 65% 50%, ${C.teal}55 0%, ${C.dark} 65%)`}}>
+      <section className="pt-12 pb-16 md:pt-16 md:pb-20" style={{background: `radial-gradient(ellipse at 65% 50%, ${C.teal}55 0%, ${C.dark} 65%)`}}>
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
+            <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-700">
               <div className="space-y-4">
                 <p className="text-xs tracking-widest uppercase font-medium" style={{color: C.teal}}>Ilustración Digital</p>
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-display leading-tight" style={{color: C.white}}>Mery Palencia</h1>
@@ -214,9 +214,9 @@ export default function Home() {
       </section>
 
       {/* GALERÍA — fondo teal vibrante */}
-      <section className="py-20 md:py-32" style={{backgroundColor: C.teal}}>
+      <section className="py-12 md:py-16" style={{backgroundColor: C.teal}}>
         <div className="container">
-          <div className="space-y-3 mb-16 text-center">
+          <div className="space-y-3 mb-10 text-center">
             <p className="text-xs tracking-widest uppercase font-medium" style={{color: `${C.dark}99`}}>Trabajos Destacados</p>
             <h2 className="text-4xl md:text-5xl font-display" style={{color: C.dark}}>Galería de Arte</h2>
             <p className="text-lg max-w-2xl mx-auto" style={{color: `${C.dark}80`}}>
@@ -224,7 +224,7 @@ export default function Home() {
             </p>
           </div>
           <InfiniteCarousel items={galleryItems} onItemClick={openLightbox} />
-          <div className="text-center mt-12">
+          <div className="text-center mt-8">
             <Link to="/galeria" className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-semibold text-sm transition-all"
               style={{backgroundColor: C.dark, color: C.white}}>
               Ver galería completa <ArrowRight size={16} />
@@ -234,9 +234,9 @@ export default function Home() {
       </section>
 
       {/* PROCESO — oscuro */}
-      <section className="py-20 md:py-32" style={{backgroundColor: C.dark}}>
+      <section className="py-12 md:py-16" style={{backgroundColor: C.dark}}>
         <div className="container">
-          <div className="space-y-3 mb-16 text-center">
+          <div className="space-y-3 mb-10 text-center">
             <p className="text-xs tracking-widest uppercase font-medium" style={{color: C.teal}}>Mi Método</p>
             <h2 className="text-4xl md:text-5xl font-display" style={{color: C.white}}>Proceso Creativo</h2>
             <p className="text-lg max-w-2xl mx-auto" style={{color: `${C.white}70`}}>
@@ -256,9 +256,9 @@ export default function Home() {
       </section>
 
       {/* COMISIONES — oscuro */}
-      <section id="commission-section" className="py-20 md:py-32" style={{backgroundColor: C.dark}}>
+      <section id="commission-section" className="py-12 md:py-16" style={{backgroundColor: C.dark}}>
         <div className="container">
-          <div className="space-y-3 mb-16 text-center">
+          <div className="space-y-3 mb-10 text-center">
             <p className="text-xs tracking-widest uppercase font-medium" style={{color: C.teal}}>Servicios</p>
             <h2 className="text-4xl md:text-5xl font-display" style={{color: C.white}}>Niveles de Comisiones</h2>
             <p className="text-lg max-w-2xl mx-auto" style={{color: `${C.white}70`}}>
@@ -304,10 +304,10 @@ export default function Home() {
       </section>
 
       {/* CONTACTO — oscuro */}
-      <section id="contact-section" className="py-20 md:py-32" style={{backgroundColor: C.dark}}>
+      <section id="contact-section" className="py-12 md:py-16" style={{backgroundColor: C.dark}}>
         <div className="container">
           <div className="max-w-2xl mx-auto">
-            <div className="space-y-3 mb-12 text-center">
+            <div className="space-y-3 mb-8 text-center">
               <p className="text-xs tracking-widest uppercase font-medium" style={{color: C.teal}}>Ponte en Contacto</p>
               <h2 className="text-4xl md:text-5xl font-display" style={{color: C.white}}>Solicita una Comisión</h2>
               <p className="text-lg" style={{color: `${C.white}70`}}>Cuéntame sobre tu proyecto y te responderé en 24-48 horas.</p>
@@ -352,7 +352,7 @@ export default function Home() {
               {formStatus === 'sent' && <p className="text-center text-sm" style={{color: C.mint}}>¡Mensaje enviado! Te responderé pronto.</p>}
               {formStatus === 'error' && <p className="text-center text-sm text-red-400">Hubo un error al enviar. Intenta de nuevo.</p>}
             </form>
-            <div className="mt-10 text-center space-y-5">
+            <div className="mt-6 text-center space-y-5">
               <p style={{color: `${C.white}60`}}>O conecta conmigo en redes sociales</p>
               <div className="flex justify-center gap-4">
                 <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
@@ -393,7 +393,7 @@ export default function Home() {
               </button>
             </div>
           </div>
-          <div className="mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-3"
+          <div className="mt-6 pt-6 flex flex-col md:flex-row items-center justify-between gap-3"
             style={{borderTop: `1px solid ${C.teal}25`}}>
             <p className="text-sm" style={{color: `${C.white}60`}}>© 2024 Mery Palencia. Todos los derechos reservados.</p>
             <div className="flex items-center gap-4">

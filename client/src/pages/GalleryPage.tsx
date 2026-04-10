@@ -80,7 +80,7 @@ export default function GalleryPage() {
       </header>
 
       {/* HERO */}
-      <section className="py-12 md:py-16" style={{background: `radial-gradient(ellipse at 50% 80%, ${C.teal}35 0%, ${C.dark} 65%)`}}>
+      <section className="py-8 md:py-10" style={{background: `radial-gradient(ellipse at 50% 80%, ${C.teal}35 0%, ${C.dark} 65%)`}}>
         <div className="container text-center space-y-3">
           <p className="text-xs tracking-widest uppercase font-medium" style={{color: C.teal}}>Fotografía & Arte</p>
           <h1 className="text-4xl md:text-5xl font-display" style={{color: C.white}}>Galería</h1>
@@ -129,7 +129,7 @@ export default function GalleryPage() {
       )}
 
       {/* GRID */}
-      <section className="py-10 md:py-14" style={{backgroundColor: C.dark}}>
+      <section className="py-8 md:py-10" style={{backgroundColor: C.dark}}>
         <div className="container">
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">

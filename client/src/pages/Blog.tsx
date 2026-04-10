@@ -40,7 +40,7 @@ export default function Blog() {
       </header>
 
       {/* HERO */}
-      <section className="py-16 md:py-24" style={{background: `radial-gradient(ellipse at 30% 50%, ${C.teal}30 0%, ${C.dark} 60%)`}}>
+      <section className="py-10 md:py-14" style={{background: `radial-gradient(ellipse at 30% 50%, ${C.teal}30 0%, ${C.dark} 60%)`}}>
         <div className="container">
           <div className="max-w-3xl space-y-4">
             <p className="text-xs tracking-widest uppercase font-medium" style={{color: C.teal}}>Blog & Artículos</p>
@@ -84,7 +84,7 @@ export default function Blog() {
       </section>
 
       {/* ARTÍCULOS */}
-      <section className="py-16 md:py-24" style={{backgroundColor: C.dark}}>
+      <section className="py-10 md:py-14" style={{backgroundColor: C.dark}}>
         <div className="container">
           {filteredPosts.length === 0 ? (
             <p className="text-center py-12" style={{color: `${C.white}60`}}>No hay artículos en esta categoría aún.</p>
@@ -131,7 +131,7 @@ export default function Blog() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 md:py-20" style={{backgroundColor: C.teal}}>
+      <section className="py-10 md:py-12" style={{backgroundColor: C.teal}}>
         <div className="container text-center space-y-5">
           <h2 className="text-3xl md:text-4xl font-display" style={{color: C.dark}}>¿Listo para trabajar juntos?</h2>
           <p className="text-lg max-w-2xl mx-auto" style={{color: `${C.dark}80`}}>
