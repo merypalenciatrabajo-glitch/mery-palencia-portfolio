@@ -2,7 +2,6 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import Lightbox from '@/components/Lightbox';
-import ThemeToggle from '@/components/ThemeToggle';
 import { useGalleryPage } from '@/hooks/useFirestore';
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -96,7 +95,7 @@ export default function GalleryPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* HEADER */}
-      <header className="border-b border-border sticky top-0 bg-white/80 dark:bg-background/80 backdrop-blur-sm z-40">
+      <header className="sticky top-0 bg-white/80 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-border after:to-transparent">
         <div className="container py-4 flex items-center justify-between">
           <Link to="/" className="text-2xl font-display text-foreground hover:text-accent transition-colors">
             Mery Palencia
@@ -121,13 +120,12 @@ export default function GalleryPage() {
             >
               Galería
             </Link>
-            <ThemeToggle />
           </div>
         </div>
       </header>
 
       {/* HERO */}
-      <section className="py-8 md:py-12 bg-gradient-to-br from-white via-white to-orange-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-orange-950/20">
+      <section className="py-8 md:py-12 bg-gradient-to-br from-white via-white to-orange-50/20">
         <div className="container text-center space-y-2">
           <p className="text-sm tracking-widest text-muted-foreground uppercase">
             Fotografía & Arte

@@ -5,13 +5,13 @@ import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useBlogPosts } from '@/hooks/useFirestore';
 import NotFound from './NotFound';
-import ThemeToggle from '@/components/ThemeToggle';
+
 
 const categories = [
-  { id: 'proceso', label: 'Proceso Creativo', color: 'bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100' },
-  { id: 'industria', label: 'Industria', color: 'bg-purple-100 text-purple-800 dark:bg-purple-700 dark:text-purple-100' },
-  { id: 'tips', label: 'Tips & Herramientas', color: 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100' },
-  { id: 'experiencia', label: 'Experiencia', color: 'bg-orange-100 text-orange-800 dark:bg-orange-700 dark:text-orange-100' },
+  { id: 'proceso', label: 'Proceso Creativo', color: 'bg-blue-100 text-blue-800' },
+  { id: 'industria', label: 'Industria', color: 'bg-purple-100 text-purple-800' },
+  { id: 'tips', label: 'Tips & Herramientas', color: 'bg-green-100 text-green-800' },
+  { id: 'experiencia', label: 'Experiencia', color: 'bg-orange-100 text-orange-800' },
 ];
 
 interface BlogPost {
@@ -86,7 +86,7 @@ export default function BlogPost() {
   return (
     <div className="min-h-screen bg-background">
       {/* HEADER */}
-      <header className="border-b border-border sticky top-0 bg-white/80 dark:bg-background/80 backdrop-blur-sm z-40">
+      <header className="sticky top-0 bg-white/80 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-border after:to-transparent">
         <div className="container py-4 flex items-center justify-between">
           <Link to="/" className="text-2xl font-display text-foreground hover:text-accent transition-colors">
             Mery Palencia
@@ -99,7 +99,6 @@ export default function BlogPost() {
               <ArrowLeft size={18} />
               Blog
             </Link>
-            <ThemeToggle />
           </div>
         </div>
       </header>
