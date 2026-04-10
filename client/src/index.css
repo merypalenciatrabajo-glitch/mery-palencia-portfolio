@@ -45,53 +45,54 @@
 :root {
   --radius: 0.75rem;
 
-  /* Paleta inspirada en diseño teal oscuro */
-  --primary: #00A9B3;
-  --primary-foreground: #ffffff;
+  /* === PALETA MERY PALENCIA === */
+  /* #062126 — Verde oscuro profundo */
+  /* #52D5C1 — Teal vibrante (accent) */
+  /* #FCFCFC — Blanco casi puro */
+  /* #80FAE3 — Menta suave (hover/degradados) */
 
-  /* Fondo oscuro teal */
-  --background: #0D2B2E;
-  --foreground: #ffffff;
+  --primary: #52D5C1;
+  --primary-foreground: #062126;
 
-  /* Cards blancos/claros */
-  --card: #ffffff;
-  --card-foreground: #0D2B2E;
+  --background: #062126;
+  --foreground: #FCFCFC;
 
-  --popover: #ffffff;
-  --popover-foreground: #0D2B2E;
+  --card: #FCFCFC;
+  --card-foreground: #062126;
 
-  /* Secciones alternas teal medio */
-  --secondary: #0A3D42;
-  --secondary-foreground: #ffffff;
+  --popover: #FCFCFC;
+  --popover-foreground: #062126;
 
-  --muted: #0F3438;
-  --muted-foreground: #7ecfcf;
+  --secondary: #0a3540;
+  --secondary-foreground: #FCFCFC;
 
-  /* Accent teal brillante */
-  --accent: #00A9B3;
-  --accent-foreground: #ffffff;
+  --muted: #0d3d4a;
+  --muted-foreground: #80FAE3;
+
+  --accent: #52D5C1;
+  --accent-foreground: #062126;
 
   --destructive: #e05252;
-  --destructive-foreground: #ffffff;
+  --destructive-foreground: #FCFCFC;
 
-  --border: #1a4a4f;
-  --input: #1a4a4f;
-  --ring: #00A9B3;
+  --border: #1a4a52;
+  --input: #1a4a52;
+  --ring: #52D5C1;
 
-  --sidebar: #0A2426;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #00A9B3;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #00A9B3;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #1a4a4f;
-  --sidebar-ring: #00A9B3;
+  --sidebar: #062126;
+  --sidebar-foreground: #FCFCFC;
+  --sidebar-primary: #52D5C1;
+  --sidebar-primary-foreground: #062126;
+  --sidebar-accent: #52D5C1;
+  --sidebar-accent-foreground: #062126;
+  --sidebar-border: #1a4a52;
+  --sidebar-ring: #52D5C1;
 
-  --chart-1: #00A9B3;
-  --chart-2: #00C9B1;
-  --chart-3: #007880;
-  --chart-4: #005f66;
-  --chart-5: #003F44;
+  --chart-1: #52D5C1;
+  --chart-2: #80FAE3;
+  --chart-3: #3ab8a6;
+  --chart-4: #2a9b8a;
+  --chart-5: #062126;
 }
 
 
@@ -102,8 +103,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-color: #0D2B2E;
-    color: #ffffff;
+    background-color: #062126;
+    color: #FCFCFC;
     font-family: 'Inter', sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {

@@ -86,7 +86,7 @@ export default function BlogPost() {
   return (
     <div className="min-h-screen bg-background">
       {/* HEADER */}
-      <header className="sticky top-0 bg-background/80 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-border after:to-transparent">
+      <header className="sticky top-0 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-[#52D5C1]/30 after:to-transparent" style={{backgroundColor: '#062126e6'}}>
         <div className="container py-4 flex items-center justify-between">
           <Link to="/" className="text-2xl font-display text-foreground hover:text-accent transition-colors">
             Mery Palencia

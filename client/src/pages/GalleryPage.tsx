@@ -95,7 +95,7 @@ export default function GalleryPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* HEADER */}
-      <header className="sticky top-0 bg-background/80 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-border after:to-transparent">
+      <header className="sticky top-0 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-[#52D5C1]/30 after:to-transparent" style={{backgroundColor: '#062126e6'}}>
         <div className="container py-4 flex items-center justify-between">
           <Link to="/" className="text-2xl font-display text-foreground hover:text-accent transition-colors">
             Mery Palencia
@@ -125,8 +125,8 @@ export default function GalleryPage() {
       </header>
 
       {/* HERO */}
-      <section className="relative py-8 md:py-12 bg-gradient-to-br from-background via-background to-secondary/40">
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-background pointer-events-none" />
+      <section className="relative py-8 md:py-12" style={{background: 'linear-gradient(135deg, #062126 0%, #0a3540 100%)'}}>
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-[#FCFCFC] pointer-events-none" />
         <div className="container text-center space-y-2">
           <p className="text-sm tracking-widest text-muted-foreground uppercase">
             Fotografía & Arte
@@ -142,24 +142,24 @@ export default function GalleryPage() {
 
       {/* FILTROS */}
       {!loading && availableCategories.length > 0 && (
-        <section className="relative py-6 bg-gradient-to-b from-background to-secondary/30">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent pointer-events-none" />
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent pointer-events-none" />
+        <section className="relative py-6 bg-[#FCFCFC]">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#52D5C1]/40 to-transparent pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#52D5C1]/40 to-transparent pointer-events-none" />
           <div className="container flex items-center gap-3">
             <span className="text-sm text-muted-foreground">Filtrar por:</span>
             <div ref={dropdownRef} className="relative">
               <button
                 onClick={() => setDropdownOpen((o) => !o)}
-                className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg bg-background text-sm text-foreground hover:border-accent transition-colors"
+                className="flex items-center gap-2 px-4 py-2 border border-[#52D5C1]/40 rounded-lg bg-white text-sm text-[#062126] hover:border-[#52D5C1] transition-colors"
               >
                 <span>{activeCategory ? getCategoryLabel(activeCategory) : 'Todas las categorías'}</span>
                 <ChevronDown size={15} className={`text-muted-foreground transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               {dropdownOpen && (
-                <div className="absolute left-0 top-full mt-1 z-50 min-w-[220px] bg-background border border-border rounded-lg shadow-lg overflow-hidden">
+                <div className="absolute left-0 top-full mt-1 z-50 min-w-[220px] bg-white border border-[#52D5C1]/30 rounded-lg shadow-lg overflow-hidden">
                   <button
                     onClick={() => { setActiveCategory(null); setDropdownOpen(false); }}
-                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-secondary ${activeCategory === null ? 'text-accent font-medium' : 'text-foreground'}`}
+                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-[#80FAE3]/20 ${activeCategory === null ? 'text-[#52D5C1] font-medium' : 'text-[#062126]'}`}
                   >
                     Todas las categorías
                   </button>
@@ -167,7 +167,7 @@ export default function GalleryPage() {
                     <button
                       key={cat}
                       onClick={() => { setActiveCategory(cat); setDropdownOpen(false); }}
-                      className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-secondary ${activeCategory === cat ? 'text-accent font-medium' : 'text-foreground'}`}
+                      className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-[#80FAE3]/20 ${activeCategory === cat ? 'text-[#52D5C1] font-medium' : 'text-[#062126]'}`}
                     >
                       {getCategoryLabel(cat)}
                     </button>
@@ -221,10 +221,10 @@ export default function GalleryPage() {
                       </span>
                     </div>
                   </div>
-                  <h3 className="mt-3 text-base font-display text-foreground group-hover:text-accent transition-colors truncate">
+                  <h3 className="mt-3 text-base font-display text-[#062126] group-hover:text-[#52D5C1] transition-colors truncate">
                     {item.title}
                   </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">{getCategoryLabel(item.category)}</p>
+                  <p className="text-xs text-[#062126]/60 mt-0.5">{getCategoryLabel(item.category)}</p>
                 </div>
               ))}
             </div>

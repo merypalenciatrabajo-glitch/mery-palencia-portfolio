@@ -26,7 +26,7 @@ export default function Blog() {
   return (
     <div className="min-h-screen bg-background">
       {/* HEADER */}
-      <header className="sticky top-0 bg-background/80 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-border after:to-transparent">
+      <header className="sticky top-0 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-[#52D5C1]/30 after:to-transparent" style={{backgroundColor: '#062126e6'}}>
         <div className="container py-4 flex items-center justify-between">
           <Link to="/" className="text-2xl font-display text-foreground hover:text-accent transition-colors">Mery Palencia</Link>
           <div className="flex items-center gap-4">
@@ -38,8 +38,8 @@ export default function Blog() {
       </header>
 
       {/* HERO */}
-      <section className="relative py-16 md:py-24 bg-gradient-to-br from-background via-background to-secondary/40">
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-background pointer-events-none" />
+      <section className="relative py-16 md:py-24" style={{background: 'linear-gradient(135deg, #062126 0%, #0a3540 100%)'}}>
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-[#FCFCFC] pointer-events-none" />
         <div className="container">
           <div className="max-w-3xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">Blog & Artículos</p>
@@ -51,8 +51,8 @@ export default function Blog() {
 
       {/* FILTROS */}
       <section className="relative py-12 bg-gradient-to-b from-background to-secondary/30">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent pointer-events-none" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#52D5C1]/30 to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#52D5C1]/30 to-transparent pointer-events-none" />
         <div className="container">
           <div className="flex flex-wrap gap-3 items-center">
             <span className="text-sm font-medium text-muted-foreground">Filtrar por:</span>

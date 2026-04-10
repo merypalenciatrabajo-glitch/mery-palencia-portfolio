@@ -97,7 +97,7 @@ function InfiniteCarousel({ items, onItemClick }: { items: GalleryItem[]; onItem
                   <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium">Ver Detalle</span>
                 </div>
               </div>
-              <h3 className="mt-4 text-lg font-display text-white group-hover:text-white/80 transition-colors truncate">{item.title}</h3>
+              <h3 className="mt-4 text-lg font-display text-[#062126] group-hover:text-[#52D5C1] transition-colors truncate">{item.title}</h3>
             </div>
           ))}
         </div>
@@ -144,7 +144,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* HEADER */}
-      <header className="sticky top-0 bg-background/80 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-border after:to-transparent">
+      <header className="sticky top-0 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-[#52D5C1]/30 after:to-transparent" style={{backgroundColor: '#062126e6'}}>
         <div className="container py-4 flex items-center justify-between">
           <h1 className="text-2xl font-display text-foreground">Mery Palencia</h1>
           <div className="flex items-center gap-4">
@@ -155,8 +155,8 @@ export default function Home() {
       </header>
 
       {/* HERO */}
-      <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden" style={{background: 'linear-gradient(135deg, #0D2B2E 0%, #0A3D42 60%, #003F44 100%)'}}>
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-[#0D2B2E] pointer-events-none" />
+      <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden" style={{background: 'linear-gradient(135deg, #062126 0%, #0a3540 100%)'}}>
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#FCFCFC] pointer-events-none" />
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
@@ -200,17 +200,17 @@ export default function Home() {
       </section>
 
       {/* GALERÍA */}
-      <section className="relative py-20 md:py-32" style={{backgroundColor: '#00A9B3'}}>
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-[#0D2B2E] pointer-events-none" />
+      <section className="relative py-20 md:py-32" style={{backgroundColor: '#FCFCFC'}}>
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#062126] pointer-events-none" />
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
-            <p className="text-sm tracking-widest text-white/70 uppercase">Trabajos Destacados</p>
-            <h2 className="text-4xl md:text-5xl font-display text-white">Galería de Arte</h2>
-            <p className="text-lg text-white/80 max-w-2xl mx-auto">Explora una selección de mis trabajos más recientes. Haz clic en cualquier imagen para ampliarla.</p>
+            <p className="text-sm tracking-widest text-[#52D5C1] uppercase">Trabajos Destacados</p>
+            <h2 className="text-4xl md:text-5xl font-display text-[#062126]">Galería de Arte</h2>
+            <p className="text-lg text-[#062126]/70 max-w-2xl mx-auto">Explora una selección de mis trabajos más recientes. Haz clic en cualquier imagen para ampliarla.</p>
           </div>
           <InfiniteCarousel items={galleryItems} onItemClick={openLightbox} />
           <div className="text-center mt-12">
-            <Link to="/galeria" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#003F44] hover:bg-white/90 rounded-lg font-medium transition-colors duration-300">
+            <Link to="/galeria" className="inline-flex items-center gap-2 px-6 py-3 bg-[#52D5C1] text-[#062126] hover:bg-[#80FAE3] rounded-lg font-medium transition-colors duration-300">
               Ver galería completa <ArrowRight size={18} />
             </Link>
           </div>
@@ -218,8 +218,8 @@ export default function Home() {
       </section>
 
       {/* PROCESO */}
-      <section className="relative py-20 md:py-32" style={{backgroundColor: '#0D2B2E'}}>
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-[#003F44] pointer-events-none" />
+      <section className="relative py-20 md:py-32" style={{backgroundColor: '#062126'}}>
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#FCFCFC] pointer-events-none" />
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">Mi Método</p>
@@ -248,36 +248,36 @@ export default function Home() {
       </section>
 
       {/* COMISIONES */}
-      <section id="commission-section" className="relative py-20 md:py-32" style={{backgroundColor: '#003F44'}}>
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-[#0D2B2E] pointer-events-none" />
+      <section id="commission-section" className="relative py-20 md:py-32" style={{backgroundColor: '#FCFCFC'}}>
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#062126] pointer-events-none" />
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
-            <p className="text-sm tracking-widest text-muted-foreground uppercase">Servicios</p>
-            <h2 className="text-4xl md:text-5xl font-display text-foreground">Niveles de Comisiones</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Opciones flexibles para proyectos de cualquier escala. Todos los paquetes incluyen revisiones y archivos de alta calidad.</p>
+            <p className="text-sm tracking-widest text-[#52D5C1] uppercase">Servicios</p>
+            <h2 className="text-4xl md:text-5xl font-display text-[#062126]">Niveles de Comisiones</h2>
+            <p className="text-lg text-[#062126]/70 max-w-2xl mx-auto">Opciones flexibles para proyectos de cualquier escala. Todos los paquetes incluyen revisiones y archivos de alta calidad.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {commissionTiers.map((tier, index) => (
               <div key={tier.id}
                 className={`rounded-xl p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 ${
                   tier.featured
-                    ? 'bg-gradient-to-br from-accent/10 to-secondary/30 border-2 border-accent shadow-soft-lg scale-105 md:scale-110'
-                    : 'bg-transparent border-2 border-accent hover:bg-accent/5'
+                    ? 'bg-[#062126] border-2 border-[#52D5C1] shadow-soft-lg scale-105 md:scale-110'
+                    : 'bg-white border-2 border-[#52D5C1]/40 hover:border-[#52D5C1]'
                 }`}
                 style={{ animationDelay: `${index * 100}ms` }}>
                 {tier.featured && (
                   <div className="inline-block px-3 py-1 bg-accent text-white text-xs font-semibold rounded-full mb-4">Más Popular</div>
                 )}
-                <h3 className="text-2xl font-display text-foreground mb-2">{tier.name}</h3>
-                <p className="text-3xl font-display text-accent mb-4">{tier.price}</p>
-                <p className="text-muted-foreground mb-6 leading-relaxed">{tier.description}</p>
+                <h3 className="text-2xl font-display mb-2" style={{color: tier.featured ? '#FCFCFC' : '#062126'}}>{tier.name}</h3>
+                <p className="text-3xl font-display text-[#52D5C1] mb-4">{tier.price}</p>
+                <p className="mb-6 leading-relaxed" style={{color: tier.featured ? '#80FAE3' : '#062126cc'}}>{tier.description}</p>
                 <div className="space-y-3 mb-8">
                   {tier.includes.map((item, i) => (
                     <div key={i} className="flex items-start gap-3">
                       <div className="flex-shrink-0 w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center mt-0.5">
                         <div className="w-2 h-2 rounded-full bg-accent dot-animate" />
                       </div>
-                      <span className="text-foreground">{item}</span>
+                      <span style={{color: tier.featured ? '#FCFCFC' : '#062126'}}>{item}</span>
                     </div>
                   ))}
                 </div>
@@ -293,7 +293,7 @@ export default function Home() {
       </section>
 
       {/* CONTACTO */}
-      <section id="contact-section" className="py-20 md:py-32" style={{backgroundColor: '#0D2B2E'}}>
+      <section id="contact-section" className="py-20 md:py-32" style={{backgroundColor: '#062126'}}>
         <div className="container">
           <div className="max-w-2xl mx-auto">
             <div className="space-y-4 mb-12 text-center">
@@ -301,7 +301,7 @@ export default function Home() {
               <h2 className="text-4xl md:text-5xl font-display text-foreground">Solicita una Comisión</h2>
               <p className="text-lg text-muted-foreground">Cuéntame sobre tu proyecto y te responderé en 24-48 horas.</p>
             </div>
-            <form onSubmit={handleFormSubmit} className="space-y-6 bg-secondary p-8 rounded-xl shadow-soft">
+            <form onSubmit={handleFormSubmit} className="space-y-6 p-8 rounded-xl shadow-soft" style={{backgroundColor: '#0a3540'}}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">Nombre</label>
