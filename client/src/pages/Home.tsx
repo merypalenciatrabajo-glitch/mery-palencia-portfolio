@@ -255,13 +255,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* COMISIONES — blanco */}
-      <section id="commission-section" className="py-20 md:py-32" style={{backgroundColor: C.white}}>
+      {/* COMISIONES — oscuro */}
+      <section id="commission-section" className="py-20 md:py-32" style={{backgroundColor: C.dark}}>
         <div className="container">
           <div className="space-y-3 mb-16 text-center">
             <p className="text-xs tracking-widest uppercase font-medium" style={{color: C.teal}}>Servicios</p>
-            <h2 className="text-4xl md:text-5xl font-display" style={{color: C.dark}}>Niveles de Comisiones</h2>
-            <p className="text-lg max-w-2xl mx-auto" style={{color: `${C.dark}80`}}>
+            <h2 className="text-4xl md:text-5xl font-display" style={{color: C.white}}>Niveles de Comisiones</h2>
+            <p className="text-lg max-w-2xl mx-auto" style={{color: `${C.white}70`}}>
               Opciones flexibles para proyectos de cualquier escala.
             </p>
           </div>
@@ -269,25 +269,22 @@ export default function Home() {
             {commissionTiers.map((tier, index) => (
               <div key={tier.id} className="rounded-2xl p-8 transition-all duration-300"
                 style={{
-                  backgroundColor: tier.featured ? C.dark : C.white,
-                  border: `2px solid ${tier.featured ? C.teal : `${C.teal}30`}`,
+                  backgroundColor: tier.featured ? `${C.teal}15` : `${C.white}06`,
+                  border: `2px solid ${tier.featured ? C.teal : `${C.teal}25`}`,
                   transform: tier.featured ? 'scale(1.05)' : 'scale(1)',
-                  boxShadow: tier.featured ? `0 20px 40px ${C.dark}20` : 'none',
-                }}
-                onMouseEnter={e => { if (!tier.featured) (e.currentTarget as HTMLElement).style.borderColor = C.teal; }}
-                onMouseLeave={e => { if (!tier.featured) (e.currentTarget as HTMLElement).style.borderColor = `${C.teal}30`; }}>
+                }}>
                 {tier.featured && (
                   <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full mb-4"
                     style={{backgroundColor: C.teal, color: C.dark}}>Más Popular</span>
                 )}
-                <h3 className="text-2xl font-display mb-2" style={{color: tier.featured ? C.white : C.dark}}>{tier.name}</h3>
+                <h3 className="text-2xl font-display mb-2" style={{color: C.white}}>{tier.name}</h3>
                 <p className="text-3xl font-display mb-4" style={{color: C.teal}}>{tier.price}</p>
-                <p className="mb-6 leading-relaxed text-sm" style={{color: tier.featured ? `${C.mint}cc` : `${C.dark}80`}}>{tier.description}</p>
+                <p className="mb-6 leading-relaxed text-sm" style={{color: `${C.white}70`}}>{tier.description}</p>
                 <div className="space-y-2 mb-8">
                   {tier.includes.map((item, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{backgroundColor: C.teal}} />
-                      <span className="text-sm" style={{color: tier.featured ? `${C.white}cc` : `${C.dark}cc`}}>{item}</span>
+                      <span className="text-sm" style={{color: `${C.white}80`}}>{item}</span>
                     </div>
                   ))}
                 </div>
