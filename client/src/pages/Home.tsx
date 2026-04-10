@@ -174,15 +174,15 @@ export default function Home() {
                   onClick={() => document.getElementById('commission-section')?.scrollIntoView({ behavior: 'smooth' })}>
                   Ver Comisiones <ArrowRight className="ml-2" size={20} />
                 </Button>
-                <Button size="lg" variant="outline" className="border-accent text-foreground hover:bg-accent/5 rounded-lg"
+                <Button size="lg" variant="outline" className="border-accent text-accent hover:bg-accent/10 rounded-lg"
                   onClick={() => document.getElementById('contact-section')?.scrollIntoView({ behavior: 'smooth' })}>
                   Contactar
                 </Button>
                 <Link to="/blog">
-                  <Button size="lg" variant="outline" className="border-accent text-foreground hover:bg-accent/5 rounded-lg">Leer Blog</Button>
+                  <Button size="lg" variant="outline" className="border-accent text-accent hover:bg-accent/10 rounded-lg">Leer Blog</Button>
                 </Link>
                 <Link to="/galeria">
-                  <Button size="lg" variant="outline" className="border-accent text-foreground hover:bg-accent/5 rounded-lg">Ver Galería</Button>
+                  <Button size="lg" variant="outline" className="border-accent text-accent hover:bg-accent/10 rounded-lg">Ver Galería</Button>
                 </Link>
               </div>
             </div>
@@ -302,7 +302,7 @@ export default function Home() {
               <h2 className="text-4xl md:text-5xl font-display text-foreground">Solicita una Comisión</h2>
               <p className="text-lg text-muted-foreground">Cuéntame sobre tu proyecto y te responderé en 24-48 horas.</p>
             </div>
-            <form onSubmit={handleFormSubmit} className="space-y-6 bg-card p-8 rounded-xl shadow-soft">
+            <form onSubmit={handleFormSubmit} className="space-y-6 bg-secondary p-8 rounded-xl shadow-soft">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">Nombre</label>

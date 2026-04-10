@@ -45,46 +45,50 @@
 :root {
   --radius: 0.75rem;
 
-  /* Paleta principal */
+  /* Paleta inspirada en diseño teal oscuro */
   --primary: #00A9B3;
   --primary-foreground: #ffffff;
 
-  --background: #D8E4E6;
-  --foreground: #003F44;
+  /* Fondo oscuro teal */
+  --background: #0D2B2E;
+  --foreground: #ffffff;
 
-  --card: #f5f8f9;
-  --card-foreground: #003F44;
+  /* Cards blancos/claros */
+  --card: #ffffff;
+  --card-foreground: #0D2B2E;
 
-  --popover: #f5f8f9;
-  --popover-foreground: #003F44;
+  --popover: #ffffff;
+  --popover-foreground: #0D2B2E;
 
-  --secondary: #d8e2e4;
-  --secondary-foreground: #003F44;
+  /* Secciones alternas teal medio */
+  --secondary: #0A3D42;
+  --secondary-foreground: #ffffff;
 
-  --muted: #dde5e7;
-  --muted-foreground: #4a7a80;
+  --muted: #0F3438;
+  --muted-foreground: #7ecfcf;
 
+  /* Accent teal brillante */
   --accent: #00A9B3;
   --accent-foreground: #ffffff;
 
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: #e05252;
   --destructive-foreground: #ffffff;
 
-  --border: #c8d4d6;
-  --input: #c8d4d6;
+  --border: #1a4a4f;
+  --input: #1a4a4f;
   --ring: #00A9B3;
 
-  --sidebar: #f5f8f9;
-  --sidebar-foreground: #003F44;
+  --sidebar: #0A2426;
+  --sidebar-foreground: #ffffff;
   --sidebar-primary: #00A9B3;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #00A9B3;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #c8d4d6;
+  --sidebar-border: #1a4a4f;
   --sidebar-ring: #00A9B3;
 
   --chart-1: #00A9B3;
-  --chart-2: #00909a;
+  --chart-2: #00C9B1;
   --chart-3: #007880;
   --chart-4: #005f66;
   --chart-5: #003F44;
@@ -98,8 +102,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-color: #D8E4E6;
-    color: #003F44;
+    background-color: #0D2B2E;
+    color: #ffffff;
     font-family: 'Inter', sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {
