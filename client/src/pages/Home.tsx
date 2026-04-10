@@ -97,7 +97,7 @@ function InfiniteCarousel({ items, onItemClick }: { items: GalleryItem[]; onItem
                   <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium">Ver Detalle</span>
                 </div>
               </div>
-              <h3 className="mt-4 text-lg font-display text-[#062126] group-hover:text-[#52D5C1] transition-colors truncate">{item.title}</h3>
+              <h3 className="mt-4 text-lg font-display text-[#062126] group-hover:text-[#062126]/70 transition-colors truncate">{item.title}</h3>
             </div>
           ))}
         </div>
@@ -148,14 +148,15 @@ export default function Home() {
         <div className="container py-4 flex items-center justify-between">
           <h1 className="text-2xl font-display text-foreground">Mery Palencia</h1>
           <div className="flex items-center gap-4">
-            <Link to="/blog" className="text-foreground hover:text-accent transition-colors font-medium">Blog</Link>
-            <Link to="/galeria" className="text-foreground hover:text-accent transition-colors font-medium">Galería</Link>
+            <Link to="/blog" className="text-[#FCFCFC]/70 hover:text-[#52D5C1] transition-colors font-medium">Blog</Link>
+            <Link to="/galeria" className="text-[#FCFCFC]/70 hover:text-[#52D5C1] transition-colors font-medium">Galería</Link>
+            <Link to="/galeria" className="px-5 py-2 bg-[#52D5C1] text-[#062126] font-semibold rounded-full text-sm hover:bg-[#80FAE3] transition-colors">Ver Galería</Link>
           </div>
         </div>
       </header>
 
       {/* HERO */}
-      <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden" style={{background: 'linear-gradient(135deg, #062126 0%, #0a3540 100%)'}}>
+      <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden" style={{background: 'radial-gradient(circle at 70% 40%, #52D5C1 0%, #062126 65%)'}}>
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#FCFCFC] pointer-events-none" />
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
@@ -169,19 +170,19 @@ export default function Home() {
                 Transformo ideas en ilustraciones cautivadoras. Cada proyecto es una oportunidad para crear algo único y memorable que refleje tu visión.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button size="lg" className="bg-accent hover:bg-accent/90 text-white rounded-lg"
+                <Button size="lg" className="bg-[#52D5C1] hover:bg-[#80FAE3] text-[#062126] font-bold rounded-full"
                   onClick={() => document.getElementById('commission-section')?.scrollIntoView({ behavior: 'smooth' })}>
                   Ver Comisiones <ArrowRight className="ml-2" size={20} />
                 </Button>
-                <Button size="lg" variant="outline" className="border-accent text-accent hover:bg-accent/10 rounded-lg"
+                <Button size="lg" variant="outline" className="border-[#FCFCFC] text-[#FCFCFC] hover:bg-white/10 rounded-full"
                   onClick={() => document.getElementById('contact-section')?.scrollIntoView({ behavior: 'smooth' })}>
                   Contactar
                 </Button>
                 <Link to="/blog">
-                  <Button size="lg" variant="outline" className="border-accent text-accent hover:bg-accent/10 rounded-lg">Leer Blog</Button>
+                  <Button size="lg" variant="outline" className="border-[#FCFCFC] text-[#FCFCFC] hover:bg-white/10 rounded-full">Leer Blog</Button>
                 </Link>
                 <Link to="/galeria">
-                  <Button size="lg" variant="outline" className="border-accent text-accent hover:bg-accent/10 rounded-lg">Ver Galería</Button>
+                  <Button size="lg" variant="outline" className="border-[#FCFCFC] text-[#FCFCFC] hover:bg-white/10 rounded-full">Ver Galería</Button>
                 </Link>
               </div>
             </div>
@@ -199,25 +200,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* GALERÍA */}
-      <section className="relative py-20 md:py-32" style={{backgroundColor: '#FCFCFC'}}>
+      {/* GALERÍA — fondo #52D5C1, cards con rgba blanco */}
+      <section className="relative py-20 md:py-32" style={{backgroundColor: '#52D5C1'}}>
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#062126] pointer-events-none" />
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
-            <p className="text-sm tracking-widest text-[#52D5C1] uppercase">Trabajos Destacados</p>
+            <p className="text-sm tracking-widest text-[#062126]/70 uppercase">Trabajos Destacados</p>
             <h2 className="text-4xl md:text-5xl font-display text-[#062126]">Galería de Arte</h2>
-            <p className="text-lg text-[#062126]/70 max-w-2xl mx-auto">Explora una selección de mis trabajos más recientes. Haz clic en cualquier imagen para ampliarla.</p>
+            <p className="text-lg text-[#062126]/80 max-w-2xl mx-auto">Explora una selección de mis trabajos más recientes. Haz clic en cualquier imagen para ampliarla.</p>
           </div>
           <InfiniteCarousel items={galleryItems} onItemClick={openLightbox} />
           <div className="text-center mt-12">
-            <Link to="/galeria" className="inline-flex items-center gap-2 px-6 py-3 bg-[#52D5C1] text-[#062126] hover:bg-[#80FAE3] rounded-lg font-medium transition-colors duration-300">
+            <Link to="/galeria" className="inline-flex items-center gap-2 px-6 py-3 bg-[#062126] text-[#FCFCFC] hover:bg-[#062126]/80 rounded-full font-medium transition-colors duration-300">
               Ver galería completa <ArrowRight size={18} />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* PROCESO */}
+      {/* PROCESO — #062126 oscuro */}
       <section className="relative py-20 md:py-32" style={{backgroundColor: '#062126'}}>
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#FCFCFC] pointer-events-none" />
         <div className="container">
@@ -247,7 +248,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* COMISIONES */}
+      {/* COMISIONES — #FCFCFC blanco */}
       <section id="commission-section" className="relative py-20 md:py-32" style={{backgroundColor: '#FCFCFC'}}>
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#062126] pointer-events-none" />
         <div className="container">
@@ -354,12 +355,12 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-accent py-12">
+      <footer className="bg-[#062126] py-12">
         <div className="container">
           <div className="text-center space-y-4">
-            <h3 className="text-2xl font-display text-white">Mery Palencia</h3>
-            <p className="text-white/80">Ilustradora Digital | Diseño de Personajes | Arte Conceptual</p>
-            <p className="text-sm text-white/60">© 2024 Mery Palencia. Todos los derechos reservados.</p>
+            <h3 className="text-2xl font-display text-[#FCFCFC]">Mery Palencia</h3>
+            <p className="text-[#80FAE3]/80">Ilustradora Digital | Diseño de Personajes | Arte Conceptual</p>
+            <p className="text-sm text-[#FCFCFC]/40">© 2024 Mery Palencia. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
