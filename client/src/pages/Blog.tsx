@@ -38,7 +38,8 @@ export default function Blog() {
       </header>
 
       {/* HERO */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-white via-white to-orange-50/20">
+      <section className="relative py-16 md:py-24 bg-gradient-to-br from-white via-white to-orange-50/20">
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white pointer-events-none" />
         <div className="container">
           <div className="max-w-3xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">Blog & Artículos</p>
@@ -68,7 +69,8 @@ export default function Blog() {
       </section>
 
       {/* ARTÍCULOS */}
-      <section className="py-16 md:py-24 bg-background">
+      <section className="relative py-16 md:py-24 bg-background">
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-orange-50/30 pointer-events-none" />
         <div className="container">
           {filteredPosts.length === 0 ? (
             <div className="text-center py-12">

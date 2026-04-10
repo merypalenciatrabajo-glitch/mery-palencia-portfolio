@@ -125,7 +125,8 @@ export default function GalleryPage() {
       </header>
 
       {/* HERO */}
-      <section className="py-8 md:py-12 bg-gradient-to-br from-white via-white to-orange-50/20">
+      <section className="relative py-8 md:py-12 bg-gradient-to-br from-white via-white to-orange-50/20">
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white pointer-events-none" />
         <div className="container text-center space-y-2">
           <p className="text-sm tracking-widest text-muted-foreground uppercase">
             Fotografía & Arte
@@ -185,7 +186,8 @@ export default function GalleryPage() {
       )}
 
       {/* GRID */}
-      <section className="py-8 md:py-12">
+      <section className="relative py-8 md:py-12">
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-orange-50/20 pointer-events-none" />
         <div className="container">
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
