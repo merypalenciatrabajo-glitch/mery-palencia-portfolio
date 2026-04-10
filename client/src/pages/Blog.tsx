@@ -26,7 +26,7 @@ export default function Blog() {
   return (
     <div className="min-h-screen bg-background">
       {/* HEADER */}
-      <header className="sticky top-0 bg-white/80 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-border after:to-transparent">
+      <header className="sticky top-0 bg-background/80 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-border after:to-transparent">
         <div className="container py-4 flex items-center justify-between">
           <Link to="/" className="text-2xl font-display text-foreground hover:text-accent transition-colors">Mery Palencia</Link>
           <div className="flex items-center gap-4">
@@ -38,8 +38,8 @@ export default function Blog() {
       </header>
 
       {/* HERO */}
-      <section className="relative py-16 md:py-24 bg-gradient-to-br from-white via-white to-orange-50/20">
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white pointer-events-none" />
+      <section className="relative py-16 md:py-24 bg-gradient-to-br from-background via-background to-secondary/40">
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-background pointer-events-none" />
         <div className="container">
           <div className="max-w-3xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">Blog & Artículos</p>
@@ -50,7 +50,7 @@ export default function Blog() {
       </section>
 
       {/* FILTROS */}
-      <section className="relative py-12 bg-gradient-to-b from-white to-orange-50/10">
+      <section className="relative py-12 bg-gradient-to-b from-background to-secondary/30">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent pointer-events-none" />
         <div className="container">
@@ -72,7 +72,7 @@ export default function Blog() {
 
       {/* ARTÍCULOS */}
       <section className="relative py-16 md:py-24 bg-background">
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-orange-50/30 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-secondary/40 pointer-events-none" />
         <div className="container">
           {filteredPosts.length === 0 ? (
             <div className="text-center py-12">
@@ -114,7 +114,7 @@ export default function Blog() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-orange-50/30 to-white">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-secondary/50 to-background">
         <div className="container text-center space-y-6">
           <h2 className="text-3xl md:text-4xl font-display text-foreground">¿Listo para trabajar juntos?</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Si te interesa mi trabajo o quieres discutir un proyecto, no dudes en contactarme.</p>

@@ -86,7 +86,7 @@ export default function BlogPost() {
   return (
     <div className="min-h-screen bg-background">
       {/* HEADER */}
-      <header className="sticky top-0 bg-white/80 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-border after:to-transparent">
+      <header className="sticky top-0 bg-background/80 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-border after:to-transparent">
         <div className="container py-4 flex items-center justify-between">
           <Link to="/" className="text-2xl font-display text-foreground hover:text-accent transition-colors">
             Mery Palencia
@@ -115,7 +115,7 @@ export default function BlogPost() {
 
       {/* CONTENIDO PRINCIPAL */}
       <article className="relative py-16 md:py-24 bg-background">
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-white pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-background pointer-events-none" />
         <div className="container max-w-3xl">
           {/* Meta información */}
           <div className="space-y-6 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -228,8 +228,8 @@ export default function BlogPost() {
 
       {/* ARTÍCULOS RELACIONADOS */}
       {relatedPosts.length > 0 && (
-        <section className="relative py-16 md:py-24 bg-white border-t border-border">
-          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-orange-50/30 pointer-events-none" />
+        <section className="relative py-16 md:py-24 bg-card border-t border-border">
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-secondary/40 pointer-events-none" />
           <div className="container max-w-3xl">
             <h2 className="text-3xl md:text-4xl font-display text-foreground mb-12">
               Artículos Relacionados
@@ -273,7 +273,7 @@ export default function BlogPost() {
       )}
 
       {/* CTA FINAL */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-orange-50/30 to-white">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-secondary/50 to-background">
         <div className="container text-center space-y-6">
           <h2 className="text-3xl md:text-4xl font-display text-foreground">
             ¿Inspirado? Vamos a crear algo juntos

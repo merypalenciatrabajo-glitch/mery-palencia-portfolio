@@ -80,10 +80,10 @@ function InfiniteCarousel({ items, onItemClick }: { items: GalleryItem[]; onItem
   return (
     <div className="relative">
       <button onClick={() => step(-1)} onMouseEnter={() => (pausedRef.current = true)} onMouseLeave={() => (pausedRef.current = false)}
-        className="absolute left-0 top-[45%] -translate-y-1/2 -translate-x-4 z-10 w-10 h-10 rounded-full bg-white shadow-soft border border-border flex items-center justify-center hover:bg-accent hover:text-white hover:border-accent transition-all duration-300"
+        className="absolute left-0 top-[45%] -translate-y-1/2 -translate-x-4 z-10 w-10 h-10 rounded-full bg-card shadow-soft border border-border flex items-center justify-center hover:bg-accent hover:text-white hover:border-accent transition-all duration-300"
         aria-label="Anterior"><ChevronLeft size={20} /></button>
       <button onClick={() => step(1)} onMouseEnter={() => (pausedRef.current = true)} onMouseLeave={() => (pausedRef.current = false)}
-        className="absolute right-0 top-[45%] -translate-y-1/2 translate-x-4 z-10 w-10 h-10 rounded-full bg-white shadow-soft border border-border flex items-center justify-center hover:bg-accent hover:text-white hover:border-accent transition-all duration-300"
+        className="absolute right-0 top-[45%] -translate-y-1/2 translate-x-4 z-10 w-10 h-10 rounded-full bg-card shadow-soft border border-border flex items-center justify-center hover:bg-accent hover:text-white hover:border-accent transition-all duration-300"
         aria-label="Siguiente"><ChevronRight size={20} /></button>
       <div className="overflow-hidden">
         <div ref={trackRef} className="flex" style={{ gap: `${GAP}px`, willChange: 'transform' }}
@@ -144,7 +144,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* HEADER */}
-      <header className="sticky top-0 bg-white/80 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-border after:to-transparent">
+      <header className="sticky top-0 bg-background/80 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-border after:to-transparent">
         <div className="container py-4 flex items-center justify-between">
           <h1 className="text-2xl font-display text-foreground">Mery Palencia</h1>
           <div className="flex items-center gap-4">
@@ -156,8 +156,8 @@ export default function Home() {
 
       {/* HERO */}
       <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-orange-50/20 -z-10" />
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-white pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-secondary/50 -z-10" />
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-background pointer-events-none" />
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
@@ -194,15 +194,15 @@ export default function Home() {
                     style={{ objectPosition: heroImageUrl ? `${heroPosition.x}% ${heroPosition.y}%` : 'center' }} />
                 )}
               </div>
-              <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-gradient-to-br from-orange-100/40 to-orange-50/20 rounded-full blur-3xl -z-10" />
+              <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-gradient-to-br from-accent/10 to-secondary/30 rounded-full blur-3xl -z-10" />
             </div>
           </div>
         </div>
       </section>
 
       {/* GALERÍA */}
-      <section className="relative py-20 md:py-32 bg-gradient-to-b from-white via-white to-orange-50/20">
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-orange-50/30 pointer-events-none" />
+      <section className="relative py-20 md:py-32 bg-gradient-to-b from-background via-background to-secondary/40">
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-secondary/50 pointer-events-none" />
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">Trabajos Destacados</p>
@@ -219,8 +219,8 @@ export default function Home() {
       </section>
 
       {/* PROCESO */}
-      <section className="relative py-20 md:py-32 bg-gradient-to-b from-orange-50/30 to-white">
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-white pointer-events-none" />
+      <section className="relative py-20 md:py-32 bg-gradient-to-b from-secondary/50 to-background">
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-background pointer-events-none" />
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">Mi Método</p>
@@ -249,8 +249,8 @@ export default function Home() {
       </section>
 
       {/* COMISIONES */}
-      <section id="commission-section" className="relative py-20 md:py-32 bg-gradient-to-b from-white via-white to-orange-50/20">
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-orange-50/20 pointer-events-none" />
+      <section id="commission-section" className="relative py-20 md:py-32 bg-gradient-to-b from-background via-background to-secondary/40">
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-secondary/40 pointer-events-none" />
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">Servicios</p>
@@ -262,7 +262,7 @@ export default function Home() {
               <div key={tier.id}
                 className={`rounded-xl p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 ${
                   tier.featured
-                    ? 'bg-gradient-to-br from-accent/10 to-orange-50/20 border-2 border-accent shadow-soft-lg scale-105 md:scale-110'
+                    ? 'bg-gradient-to-br from-accent/10 to-secondary/30 border-2 border-accent shadow-soft-lg scale-105 md:scale-110'
                     : 'bg-transparent border-2 border-accent hover:bg-accent/5'
                 }`}
                 style={{ animationDelay: `${index * 100}ms` }}>
@@ -294,7 +294,7 @@ export default function Home() {
       </section>
 
       {/* CONTACTO */}
-      <section id="contact-section" className="py-20 md:py-32 bg-gradient-to-b from-orange-50/20 to-white">
+      <section id="contact-section" className="py-20 md:py-32 bg-gradient-to-b from-secondary/40 to-background">
         <div className="container">
           <div className="max-w-2xl mx-auto">
             <div className="space-y-4 mb-12 text-center">
@@ -302,7 +302,7 @@ export default function Home() {
               <h2 className="text-4xl md:text-5xl font-display text-foreground">Solicita una Comisión</h2>
               <p className="text-lg text-muted-foreground">Cuéntame sobre tu proyecto y te responderé en 24-48 horas.</p>
             </div>
-            <form onSubmit={handleFormSubmit} className="space-y-6 bg-white p-8 rounded-xl shadow-soft">
+            <form onSubmit={handleFormSubmit} className="space-y-6 bg-card p-8 rounded-xl shadow-soft">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">Nombre</label>
