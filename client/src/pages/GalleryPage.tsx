@@ -4,6 +4,8 @@ import { Link, useLocation } from 'wouter';
 import Lightbox from '@/components/Lightbox';
 import { useGalleryPage } from '@/hooks/useFirestore';
 
+const C = { dark: '#062126', teal: '#52D5C1', white: '#FCFCFC', mint: '#80FAE3' };
+
 const CATEGORY_LABELS: Record<string, string> = {
   'fotografia-paisaje': 'Fotografía paisaje',
   'fotografia-infantil': 'Fotografía infantil',
@@ -15,31 +17,21 @@ const CATEGORY_LABELS: Record<string, string> = {
   'otros': 'Otros',
 };
 
-// Aliases de categorías antiguas → nueva clave predefinida
 const CATEGORY_ALIASES: Record<string, string> = {
-  'otro': 'otros',
-  'personajes': 'ilustracion-digital',
-  'escenarios': 'ilustracion-digital',
-  'props': 'material-digital',
-  'abstracto': 'ilustracion-digital',
+  'otro': 'otros', 'personajes': 'ilustracion-digital',
+  'escenarios': 'ilustracion-digital', 'props': 'material-digital', 'abstracto': 'ilustracion-digital',
 };
 
 const normalizeCategory = (cat: string) => CATEGORY_ALIASES[cat] ?? cat;
 
 type GalleryItem = {
-  id: string;
-  title: string;
-  image: string;
-  category: string;
-  description: string;
-  order: number;
-  extraImages: { url: string; publicId: string }[];
+  id: string; title: string; image: string; category: string;
+  description: string; order: number; extraImages: { url: string; publicId: string }[];
 };
 
 export default function GalleryPage() {
   const { data: items, loading } = useGalleryPage();
   const location = useLocation();
-
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selected, setSelected] = useState<GalleryItem | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -48,127 +40,78 @@ export default function GalleryPage() {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-      }
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setDropdownOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const openLightbox = (item: GalleryItem) => {
-    setSelected(item);
-    setLightboxOpen(true);
-  };
-
   const isActive = (path: string) => location.pathname === path;
 
-  // Orden fijo de categorías predefinidas (sin "otros", va siempre al final)
-  const CATEGORY_ORDER = [
-    'fotografia-paisaje',
-    'fotografia-infantil',
-    'fotografia-moda',
-    'fotografia-documental',
-    'ilustracion-digital',
-    'material-digital',
-    'trabajos-analogos',
-  ];
+  const CATEGORY_ORDER = ['fotografia-paisaje','fotografia-infantil','fotografia-moda','fotografia-documental','ilustracion-digital','material-digital','trabajos-analogos'];
 
-  // Categorías en dropdown: predefinidas con ítems → custom → "otros" al final
   const availableCategories = useMemo(() => {
-    const inItems = new Set(items.map((i) => normalizeCategory(i.category)));
-    const predefined = CATEGORY_ORDER.filter((k) => inItems.has(k));
-    const custom = [...inItems].filter((k) => k !== 'otros' && !CATEGORY_LABELS[k]);
-    const hasOtros = inItems.has('otros');
-    return [...predefined, ...custom, ...(hasOtros ? ['otros'] : [])];
+    const inItems = new Set(items.map(i => normalizeCategory(i.category)));
+    const predefined = CATEGORY_ORDER.filter(k => inItems.has(k));
+    const custom = [...inItems].filter(k => k !== 'otros' && !CATEGORY_LABELS[k]);
+    return [...predefined, ...custom, ...(inItems.has('otros') ? ['otros'] : [])];
   }, [items]);
 
   const filteredItems = useMemo(() => {
-    const result = activeCategory
-      ? items.filter((i) => normalizeCategory(i.category) === activeCategory)
-      : items;
+    const result = activeCategory ? items.filter(i => normalizeCategory(i.category) === activeCategory) : items;
     return [...result].sort((a, b) => a.order - b.order);
   }, [items, activeCategory]);
 
   const getCategoryLabel = (cat: string) => CATEGORY_LABELS[normalizeCategory(cat)] ?? cat;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{backgroundColor: C.dark}}>
+
       {/* HEADER */}
-      <header className="sticky top-0 backdrop-blur-sm z-40 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-[#52D5C1]/30 after:to-transparent" style={{backgroundColor: '#062126e6'}}>
+      <header className="sticky top-0 z-40 backdrop-blur-md" style={{backgroundColor: `${C.dark}e6`, borderBottom: `1px solid ${C.teal}20`}}>
         <div className="container py-4 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-display text-foreground hover:text-accent transition-colors">
-            Mery Palencia
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link to="/" className="font-medium transition-colors text-foreground hover:text-accent">
-              Inicio
-            </Link>
-            <Link
-              to="/blog"
-              className={`font-medium transition-colors ${
-                isActive('/blog') ? 'text-accent border-b-2 border-accent pb-0.5' : 'text-foreground hover:text-accent'
-              }`}
-            >
-              Blog
-            </Link>
-            <Link
-              to="/galeria"
-              className={`font-medium transition-colors ${
-                isActive('/galeria') ? 'text-accent border-b-2 border-accent pb-0.5' : 'text-foreground hover:text-accent'
-              }`}
-            >
-              Galería
-            </Link>
+          <Link to="/" className="text-2xl font-display" style={{color: C.white}}>Mery Palencia</Link>
+          <div className="flex items-center gap-6">
+            <Link to="/" className="text-sm font-medium" style={{color: `${C.white}80`}}>Inicio</Link>
+            <Link to="/blog" className="text-sm font-medium" style={{color: isActive('/blog') ? C.teal : `${C.white}80`}}>Blog</Link>
+            <Link to="/galeria" className="text-sm font-medium" style={{color: isActive('/galeria') ? C.teal : `${C.white}80`}}>Galería</Link>
           </div>
         </div>
       </header>
 
       {/* HERO */}
-      <section className="relative py-8 md:py-12" style={{background: 'linear-gradient(135deg, #062126 0%, #0a3540 100%)'}}>
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-[#FCFCFC] pointer-events-none" />
-        <div className="container text-center space-y-2">
-          <p className="text-sm tracking-widest text-muted-foreground uppercase">
-            Fotografía & Arte
-          </p>
-          <h1 className="text-4xl md:text-5xl font-display text-foreground">
-            Galería
-          </h1>
-          <p className="subtitle text-base md:text-lg text-muted-foreground max-w-xl mx-auto">
-            Explora todos mis trabajos y obras
-          </p>
+      <section className="py-12 md:py-16" style={{background: `radial-gradient(ellipse at 50% 80%, ${C.teal}35 0%, ${C.dark} 65%)`}}>
+        <div className="container text-center space-y-3">
+          <p className="text-xs tracking-widest uppercase font-medium" style={{color: C.teal}}>Fotografía & Arte</p>
+          <h1 className="text-4xl md:text-5xl font-display" style={{color: C.white}}>Galería</h1>
+          <p className="text-lg max-w-xl mx-auto" style={{color: `${C.white}70`}}>Explora todos mis trabajos y obras</p>
         </div>
       </section>
 
       {/* FILTROS */}
       {!loading && availableCategories.length > 0 && (
-        <section className="relative py-6 bg-[#FCFCFC]">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#52D5C1]/40 to-transparent pointer-events-none" />
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#52D5C1]/40 to-transparent pointer-events-none" />
+        <section className="py-5" style={{backgroundColor: `${C.white}06`, borderTop: `1px solid ${C.teal}20`, borderBottom: `1px solid ${C.teal}20`}}>
           <div className="container flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">Filtrar por:</span>
+            <span className="text-sm" style={{color: `${C.white}60`}}>Filtrar por:</span>
             <div ref={dropdownRef} className="relative">
-              <button
-                onClick={() => setDropdownOpen((o) => !o)}
-                className="flex items-center gap-2 px-4 py-2 border border-[#52D5C1]/40 rounded-lg bg-white text-sm text-[#062126] hover:border-[#52D5C1] transition-colors"
-              >
+              <button onClick={() => setDropdownOpen(o => !o)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors"
+                style={{backgroundColor: `${C.white}08`, border: `1px solid ${C.teal}30`, color: C.white}}>
                 <span>{activeCategory ? getCategoryLabel(activeCategory) : 'Todas las categorías'}</span>
-                <ChevronDown size={15} className={`text-muted-foreground transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} style={{color: C.teal}} />
               </button>
               {dropdownOpen && (
-                <div className="absolute left-0 top-full mt-1 z-50 min-w-[220px] bg-white border border-[#52D5C1]/30 rounded-lg shadow-lg overflow-hidden">
-                  <button
-                    onClick={() => { setActiveCategory(null); setDropdownOpen(false); }}
-                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-[#80FAE3]/20 ${activeCategory === null ? 'text-[#52D5C1] font-medium' : 'text-[#062126]'}`}
-                  >
+                <div className="absolute left-0 top-full mt-1 z-50 min-w-[220px] rounded-xl overflow-hidden shadow-xl"
+                  style={{backgroundColor: '#0d3540', border: `1px solid ${C.teal}30`}}>
+                  <button onClick={() => { setActiveCategory(null); setDropdownOpen(false); }}
+                    className="w-full text-left px-4 py-3 text-sm transition-colors"
+                    style={{color: activeCategory === null ? C.teal : `${C.white}80`, backgroundColor: activeCategory === null ? `${C.teal}15` : 'transparent'}}>
                     Todas las categorías
                   </button>
-                  {availableCategories.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => { setActiveCategory(cat); setDropdownOpen(false); }}
-                      className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-[#80FAE3]/20 ${activeCategory === cat ? 'text-[#52D5C1] font-medium' : 'text-[#062126]'}`}
-                    >
+                  {availableCategories.map(cat => (
+                    <button key={cat} onClick={() => { setActiveCategory(cat); setDropdownOpen(false); }}
+                      className="w-full text-left px-4 py-3 text-sm transition-colors"
+                      style={{color: activeCategory === cat ? C.teal : `${C.white}80`, backgroundColor: activeCategory === cat ? `${C.teal}15` : 'transparent'}}>
                       {getCategoryLabel(cat)}
                     </button>
                   ))}
@@ -176,10 +119,8 @@ export default function GalleryPage() {
               )}
             </div>
             {activeCategory && (
-              <button
-                onClick={() => setActiveCategory(null)}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
-              >
+              <button onClick={() => setActiveCategory(null)} className="text-xs underline underline-offset-2 transition-colors"
+                style={{color: `${C.white}50`}}>
                 Limpiar
               </button>
             )}
@@ -188,43 +129,29 @@ export default function GalleryPage() {
       )}
 
       {/* GRID */}
-      <section className="relative py-8 md:py-12">
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-secondary/30 pointer-events-none" />
+      <section className="py-10 md:py-14" style={{backgroundColor: C.dark}}>
         <div className="container">
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="aspect-square rounded-xl bg-muted animate-pulse" />
+                <div key={i} className="aspect-square rounded-xl animate-pulse" style={{backgroundColor: `${C.white}10`}} />
               ))}
             </div>
           ) : filteredItems.length === 0 ? (
-            <p className="text-center text-muted-foreground text-lg py-20">
-              No hay trabajos en esta categoría aún.
-            </p>
+            <p className="text-center py-20 text-lg" style={{color: `${C.white}50`}}>No hay trabajos en esta categoría aún.</p>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-              {filteredItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="group cursor-pointer"
-                  onClick={() => openLightbox(item)}
-                >
-                  <div className="relative overflow-hidden rounded-xl shadow-soft hover:shadow-soft-lg transition-all duration-300">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
+              {filteredItems.map(item => (
+                <div key={item.id} className="group cursor-pointer" onClick={() => { setSelected(item); setLightboxOpen(true); }}>
+                  <div className="relative overflow-hidden rounded-xl">
+                    <img src={item.image} alt={item.title}
+                      className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500" />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-                      <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium">
-                        Ver Detalle
-                      </span>
+                      <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium">Ver Detalle</span>
                     </div>
                   </div>
-                  <h3 className="mt-3 text-base font-display text-[#062126] group-hover:text-[#52D5C1] transition-colors truncate">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-[#062126]/60 mt-0.5">{getCategoryLabel(item.category)}</p>
+                  <h3 className="mt-3 text-sm font-display truncate transition-colors" style={{color: `${C.white}90`}}>{item.title}</h3>
+                  <p className="text-xs mt-0.5" style={{color: C.teal}}>{getCategoryLabel(item.category)}</p>
                 </div>
               ))}
             </div>
@@ -232,17 +159,19 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      {/* LIGHTBOX */}
+      {/* FOOTER */}
+      <footer style={{backgroundColor: C.dark, borderTop: `1px solid ${C.teal}20`}} className="py-10">
+        <div className="container text-center space-y-3">
+          <h3 className="text-xl font-display" style={{color: C.white}}>Mery Palencia</h3>
+          <p className="text-sm" style={{color: C.teal}}>Ilustradora Digital · Diseño de Personajes · Arte Conceptual</p>
+          <p className="text-xs" style={{color: `${C.white}30`}}>© 2024 Mery Palencia. Todos los derechos reservados.</p>
+        </div>
+      </footer>
+
       {selected && (
-        <Lightbox
-          isOpen={lightboxOpen}
-          image={selected.image}
-          title={selected.title}
-          category={selected.category}
-          description={selected.description}
-          extraImages={selected.extraImages}
-          onClose={() => setLightboxOpen(false)}
-        />
+        <Lightbox isOpen={lightboxOpen} image={selected.image} title={selected.title}
+          category={selected.category} description={selected.description}
+          extraImages={selected.extraImages} onClose={() => setLightboxOpen(false)} />
       )}
     </div>
   );
