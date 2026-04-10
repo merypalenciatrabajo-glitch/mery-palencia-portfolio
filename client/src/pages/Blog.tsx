@@ -50,7 +50,9 @@ export default function Blog() {
       </section>
 
       {/* FILTROS */}
-      <section className="py-12 bg-white border-b border-border">
+      <section className="relative py-12 bg-white">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent pointer-events-none" />
         <div className="container">
           <div className="flex flex-wrap gap-3 items-center">
             <span className="text-sm font-medium text-muted-foreground">Filtrar por:</span>
