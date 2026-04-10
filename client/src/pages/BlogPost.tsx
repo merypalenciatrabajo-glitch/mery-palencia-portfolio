@@ -114,7 +114,7 @@ export default function BlogPost() {
       </section>
 
       {/* CONTENIDO PRINCIPAL */}
-      <article className="py-16 md:py-24 bg-background dark:bg-slate-950">
+      <article className="py-16 md:py-24 bg-background">
         <div className="container max-w-3xl">
           {/* Meta información */}
           <div className="space-y-6 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -227,7 +227,7 @@ export default function BlogPost() {
 
       {/* ARTÍCULOS RELACIONADOS */}
       {relatedPosts.length > 0 && (
-        <section className="py-16 md:py-24 bg-white dark:bg-slate-950 border-t border-border">
+        <section className="py-16 md:py-24 bg-white border-t border-border">
           <div className="container max-w-3xl">
             <h2 className="text-3xl md:text-4xl font-display text-foreground mb-12">
               Artículos Relacionados
@@ -271,7 +271,7 @@ export default function BlogPost() {
       )}
 
       {/* CTA FINAL */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-orange-50/30 to-white dark:from-orange-950/10 dark:to-slate-950">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-orange-50/30 to-white">
         <div className="container text-center space-y-6">
           <h2 className="text-3xl md:text-4xl font-display text-foreground">
             ¿Inspirado? Vamos a crear algo juntos
@@ -289,17 +289,11 @@ export default function BlogPost() {
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-foreground/5 dark:bg-slate-950 border-t border-border py-12">
+      <footer className="bg-accent py-12">
         <div className="container text-center space-y-4">
-          <h3 className="text-2xl font-display text-foreground">
-            Mery Palencia
-          </h3>
-          <p className="text-muted-foreground">
-            Ilustradora Digital | Diseño de Personajes | Arte Conceptual
-          </p>
-          <p className="text-sm text-muted-foreground">
-            © 2024 Mery Palencia. Todos los derechos reservados.
-          </p>
+          <h3 className="text-2xl font-display text-white">Mery Palencia</h3>
+          <p className="text-white/80">Ilustradora Digital | Diseño de Personajes | Arte Conceptual</p>
+          <p className="text-sm text-white/60">© 2024 Mery Palencia. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>
