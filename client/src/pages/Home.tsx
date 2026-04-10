@@ -97,7 +97,7 @@ function InfiniteCarousel({ items, onItemClick }: { items: GalleryItem[]; onItem
                   <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium">Ver Detalle</span>
                 </div>
               </div>
-              <h3 className="mt-4 text-lg font-display text-foreground group-hover:text-accent transition-colors truncate">{item.title}</h3>
+              <h3 className="mt-4 text-lg font-display text-white group-hover:text-white/80 transition-colors truncate">{item.title}</h3>
             </div>
           ))}
         </div>
@@ -155,9 +155,8 @@ export default function Home() {
       </header>
 
       {/* HERO */}
-      <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-secondary/50 -z-10" />
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-background pointer-events-none" />
+      <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden" style={{background: 'linear-gradient(135deg, #0D2B2E 0%, #0A3D42 60%, #003F44 100%)'}}>
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-[#0D2B2E] pointer-events-none" />
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
@@ -201,17 +200,17 @@ export default function Home() {
       </section>
 
       {/* GALERÍA */}
-      <section className="relative py-20 md:py-32 bg-gradient-to-b from-background via-background to-secondary/40">
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-secondary/50 pointer-events-none" />
+      <section className="relative py-20 md:py-32" style={{backgroundColor: '#00A9B3'}}>
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-[#0D2B2E] pointer-events-none" />
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
-            <p className="text-sm tracking-widest text-muted-foreground uppercase">Trabajos Destacados</p>
-            <h2 className="text-4xl md:text-5xl font-display text-foreground">Galería de Arte</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Explora una selección de mis trabajos más recientes. Haz clic en cualquier imagen para ampliarla.</p>
+            <p className="text-sm tracking-widest text-white/70 uppercase">Trabajos Destacados</p>
+            <h2 className="text-4xl md:text-5xl font-display text-white">Galería de Arte</h2>
+            <p className="text-lg text-white/80 max-w-2xl mx-auto">Explora una selección de mis trabajos más recientes. Haz clic en cualquier imagen para ampliarla.</p>
           </div>
           <InfiniteCarousel items={galleryItems} onItemClick={openLightbox} />
           <div className="text-center mt-12">
-            <Link to="/galeria" className="inline-flex items-center gap-2 px-6 py-3 border border-accent text-accent hover:bg-accent hover:text-white rounded-lg font-medium transition-colors duration-300">
+            <Link to="/galeria" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#003F44] hover:bg-white/90 rounded-lg font-medium transition-colors duration-300">
               Ver galería completa <ArrowRight size={18} />
             </Link>
           </div>
@@ -219,8 +218,8 @@ export default function Home() {
       </section>
 
       {/* PROCESO */}
-      <section className="relative py-20 md:py-32 bg-gradient-to-b from-secondary/50 to-background">
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-background pointer-events-none" />
+      <section className="relative py-20 md:py-32" style={{backgroundColor: '#0D2B2E'}}>
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-[#003F44] pointer-events-none" />
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">Mi Método</p>
@@ -249,8 +248,8 @@ export default function Home() {
       </section>
 
       {/* COMISIONES */}
-      <section id="commission-section" className="relative py-20 md:py-32 bg-gradient-to-b from-background via-background to-secondary/40">
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-secondary/40 pointer-events-none" />
+      <section id="commission-section" className="relative py-20 md:py-32" style={{backgroundColor: '#003F44'}}>
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-[#0D2B2E] pointer-events-none" />
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">Servicios</p>
@@ -294,7 +293,7 @@ export default function Home() {
       </section>
 
       {/* CONTACTO */}
-      <section id="contact-section" className="py-20 md:py-32 bg-gradient-to-b from-secondary/40 to-background">
+      <section id="contact-section" className="py-20 md:py-32" style={{backgroundColor: '#0D2B2E'}}>
         <div className="container">
           <div className="max-w-2xl mx-auto">
             <div className="space-y-4 mb-12 text-center">
