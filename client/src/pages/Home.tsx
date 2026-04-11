@@ -19,6 +19,7 @@ const C = {
 
 function UnicornHero() {
   useEffect(() => {
+    // Cargar script de Unicorn Studio
     const u = (window as any).UnicornStudio;
     if (u && u.init) {
       u.init();
@@ -29,6 +30,19 @@ function UnicornHero() {
       script.onload = () => { (window as any).UnicornStudio.init(); };
       (document.head || document.body).appendChild(script);
     }
+
+    // Eliminar badge con MutationObserver
+    const removeBadge = () => {
+      document.querySelectorAll('a[href*="unicorn.studio"], a[href*="unicornstudio"]').forEach(el => {
+        (el as HTMLElement).style.display = 'none';
+      });
+    };
+
+    const observer = new MutationObserver(removeBadge);
+    observer.observe(document.body, { childList: true, subtree: true });
+    removeBadge();
+
+    return () => observer.disconnect();
   }, []);
 
   return (
