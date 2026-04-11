@@ -19,16 +19,25 @@ const C = {
 
 function UnicornHero() {
   useEffect(() => {
-    // Cargar script de Unicorn Studio
     const u = (window as any).UnicornStudio;
     if (u && u.init) {
-      u.init();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => u.init());
+      } else {
+        u.init();
+      }
     } else {
       (window as any).UnicornStudio = { isInitialized: false };
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.1.6/dist/unicornStudio.umd.js';
-      script.onload = () => { (window as any).UnicornStudio.init(); };
-      (document.head || document.body).appendChild(script);
+      const i = document.createElement('script');
+      i.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.1.6/dist/unicornStudio.umd.js';
+      i.onload = function() {
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => (window as any).UnicornStudio.init());
+        } else {
+          (window as any).UnicornStudio.init();
+        }
+      };
+      (document.head || document.body).appendChild(i);
     }
 
     // Eliminar badge con MutationObserver
@@ -37,19 +46,14 @@ function UnicornHero() {
         (el as HTMLElement).style.display = 'none';
       });
     };
-
     const observer = new MutationObserver(removeBadge);
     observer.observe(document.body, { childList: true, subtree: true });
     removeBadge();
-
     return () => observer.disconnect();
   }, []);
 
   return (
-    <div
-      style={{ width: '100%', height: '100%' }}
-      data-us-project="4v8wXufmDdV5npLSJDVK"
-    />
+    <div style={{width: '1440px', height: '900px'}} data-us-project="4v8wXufmDdV5npLSJDVK" />
   );
 }
 
