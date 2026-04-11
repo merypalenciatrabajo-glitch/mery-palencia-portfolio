@@ -33,7 +33,7 @@ function UnicornHero() {
 
   return (
     <div
-      style={{ width: '100%', height: '100vh', maxHeight: '900px' }}
+      style={{ width: '100%', height: '100%' }}
       data-us-project="4v8wXufmDdV5npLSJDVK"
     />
   );
@@ -187,9 +187,55 @@ export default function Home() {
         </div>
       </header>
 
-      {/* HERO — UnicornStudio embed */}
+      {/* HERO — UnicornStudio como fondo + contenido encima */}
       <section className="relative w-full overflow-hidden" style={{backgroundColor: C.dark}}>
-        <UnicornHero />
+        {/* Fondo animado Unicorn Studio */}
+        <div className="absolute inset-0 w-full h-full" style={{zIndex: 0}}>
+          <UnicornHero />
+        </div>
+        {/* Contenido encima */}
+        <div className="relative pt-12 pb-16 md:pt-16 md:pb-20" style={{zIndex: 1}}>
+          <div className="container">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-700">
+                <div className="space-y-4">
+                  <p className="text-xs tracking-widest uppercase font-medium" style={{color: C.teal}}>Ilustración Digital</p>
+                  <h1 className="text-5xl md:text-6xl lg:text-7xl font-display leading-tight" style={{color: C.white}}>Mery Palencia</h1>
+                  <p className="subtitle text-xl md:text-2xl" style={{color: `${C.white}99`}}>
+                    Ilustradora digital especializada en arte conceptual y diseño de personajes
+                  </p>
+                </div>
+                <p className="text-lg leading-relaxed max-w-md" style={{color: `${C.white}80`}}>
+                  Transformo ideas en ilustraciones cautivadoras. Cada proyecto es una oportunidad para crear algo único y memorable.
+                </p>
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <button className="px-6 py-3 rounded-full font-semibold text-sm transition-all"
+                    style={{backgroundColor: C.teal, color: C.dark}}
+                    onClick={() => document.getElementById('commission-section')?.scrollIntoView({ behavior: 'smooth' })}>
+                    Ver Comisiones →
+                  </button>
+                  <button className="px-6 py-3 rounded-full font-medium text-sm border transition-all"
+                    style={{borderColor: `${C.white}50`, color: C.white, backgroundColor: 'transparent'}}
+                    onClick={() => document.getElementById('contact-section')?.scrollIntoView({ behavior: 'smooth' })}>
+                    Contactar
+                  </button>
+                  <Link to="/blog">
+                    <button className="px-6 py-3 rounded-full font-medium text-sm border transition-all"
+                      style={{borderColor: `${C.white}50`, color: C.white, backgroundColor: 'transparent'}}>
+                      Blog
+                    </button>
+                  </Link>
+                </div>
+              </div>
+              <div className="relative animate-in fade-in slide-in-from-right-4 duration-700 delay-200">
+                <div className="relative rounded-2xl overflow-hidden aspect-video" style={{boxShadow: `0 25px 60px ${C.dark}80`}}>
+                  <img src={FALLBACK_HERO} alt="Mery Palencia"
+                    className="absolute inset-0 w-full h-full object-cover" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* GALERÍA — fondo teal vibrante */}
