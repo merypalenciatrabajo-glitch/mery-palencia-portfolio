@@ -188,6 +188,16 @@
     animation: subtle-blink 3s ease-in-out infinite;
   }
 
+  /* Ocultar badge de Unicorn Studio (plan gratuito) */
+  [data-us-project] + div,
+  .unicorn-studio-badge,
+  a[href*="unicorn.studio"],
+  div[style*="unicorn"] > a {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
   /* Scrollbar invisible pero funcional (para modales y paneles internos) */
   .scrollbar-hide {
     scrollbar-width: none; /* Firefox */
