@@ -3,7 +3,7 @@ import { Link } from 'wouter';
 import { Mail, Instagram, Linkedin, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Lightbox from '@/components/Lightbox';
-import { useGallery, useCommissions, useProcessSteps, useHeroImage } from '@/hooks/useFirestore';
+import { useGallery, useCommissions, useProcessSteps } from '@/hooks/useFirestore';
 import emailjs from '@emailjs/browser';
 
 const EMAILJS_SERVICE = 'service_portfolio';
@@ -16,6 +16,28 @@ const C = {
   white: '#FCFCFC',
   mint: '#80FAE3',
 };
+
+function UnicornHero() {
+  useEffect(() => {
+    const u = (window as any).UnicornStudio;
+    if (u && u.init) {
+      u.init();
+    } else {
+      (window as any).UnicornStudio = { isInitialized: false };
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.1.6/dist/unicornStudio.umd.js';
+      script.onload = () => { (window as any).UnicornStudio.init(); };
+      (document.head || document.body).appendChild(script);
+    }
+  }, []);
+
+  return (
+    <div
+      style={{ width: '100%', height: '100vh', maxHeight: '900px' }}
+      data-us-project="4v8wXufmDdV5npLSJDVK"
+    />
+  );
+}
 
 type GalleryItem = { id: string; title: string; image: string; category?: string; description?: string; extraImages?: { url: string; publicId: string }[] };
 
@@ -119,7 +141,6 @@ export default function Home() {
   const { data: galleryItems } = useGallery();
   const { data: commissionTiers } = useCommissions();
   const { data: processSteps } = useProcessSteps();
-  const { imageUrl: heroImageUrl, position: heroPosition, loading: heroLoading } = useHeroImage();
   const FALLBACK_HERO = "https://d2xsxph8kpxj0f.cloudfront.net/310519663465006084/aYyNo4PkGRweszF78jfNEU/hero-illustration-h59MrgKS7TnNgq7RSR34Vn.webp";
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -166,51 +187,9 @@ export default function Home() {
         </div>
       </header>
 
-      {/* HERO — gradiente radial teal → oscuro */}
-      <section className="pt-12 pb-16 md:pt-16 md:pb-20" style={{background: `radial-gradient(ellipse at 65% 50%, ${C.teal}55 0%, ${C.dark} 65%)`}}>
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-700">
-              <div className="space-y-4">
-                <p className="text-xs tracking-widest uppercase font-medium" style={{color: C.teal}}>Ilustración Digital</p>
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-display leading-tight" style={{color: C.white}}>Mery Palencia</h1>
-                <p className="subtitle text-xl md:text-2xl" style={{color: `${C.white}99`}}>
-                  Ilustradora digital especializada en arte conceptual y diseño de personajes
-                </p>
-              </div>
-              <p className="text-lg leading-relaxed max-w-md" style={{color: `${C.white}80`}}>
-                Transformo ideas en ilustraciones cautivadoras. Cada proyecto es una oportunidad para crear algo único y memorable.
-              </p>
-              <div className="flex flex-wrap gap-3 pt-2">
-                <button className="px-6 py-3 rounded-full font-semibold text-sm transition-all"
-                  style={{backgroundColor: C.teal, color: C.dark}}
-                  onClick={() => document.getElementById('commission-section')?.scrollIntoView({ behavior: 'smooth' })}>
-                  Ver Comisiones →
-                </button>
-                <button className="px-6 py-3 rounded-full font-medium text-sm border transition-all"
-                  style={{borderColor: `${C.white}50`, color: C.white, backgroundColor: 'transparent'}}
-                  onClick={() => document.getElementById('contact-section')?.scrollIntoView({ behavior: 'smooth' })}>
-                  Contactar
-                </button>
-                <Link to="/blog">
-                  <button className="px-6 py-3 rounded-full font-medium text-sm border transition-all"
-                    style={{borderColor: `${C.white}50`, color: C.white, backgroundColor: 'transparent'}}>
-                    Blog
-                  </button>
-                </Link>
-              </div>
-            </div>
-            <div className="relative animate-in fade-in slide-in-from-right-4 duration-700 delay-200">
-              <div className="relative rounded-2xl overflow-hidden aspect-video" style={{boxShadow: `0 25px 60px ${C.dark}80`}}>
-                {!heroLoading && (
-                  <img src={heroImageUrl ?? FALLBACK_HERO} alt="Mery Palencia"
-                    className="absolute inset-0 w-full h-full object-cover"
-                    style={{ objectPosition: heroImageUrl ? `${heroPosition.x}% ${heroPosition.y}%` : 'center' }} />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* HERO — UnicornStudio embed */}
+      <section className="relative w-full overflow-hidden" style={{backgroundColor: C.dark}}>
+        <UnicornHero />
       </section>
 
       {/* GALERÍA — fondo teal vibrante */}
