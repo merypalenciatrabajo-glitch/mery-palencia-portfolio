@@ -2,14 +2,13 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { ArrowRight, Calendar } from 'lucide-react';
 import { useBlogPosts } from '@/hooks/useFirestore';
-import ThemeToggle from '@/components/ThemeToggle';
-import { useTheme } from '@/contexts/ThemeContext';
+
 
 const categories = [
-  { id: 'proceso', label: 'Proceso Creativo', color: 'bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100' },
-  { id: 'industria', label: 'Industria', color: 'bg-purple-100 text-purple-800 dark:bg-purple-700 dark:text-purple-100' },
-  { id: 'tips', label: 'Tips & Herramientas', color: 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100' },
-  { id: 'experiencia', label: 'Experiencia', color: 'bg-orange-100 text-orange-800 dark:bg-orange-700 dark:text-orange-100' },
+  { id: 'proceso', label: 'Proceso Creativo', color: 'bg-blue-900/40 text-blue-300' },
+  { id: 'industria', label: 'Industria', color: 'bg-purple-900/40 text-purple-300' },
+  { id: 'tips', label: 'Tips & Herramientas', color: 'bg-teal-900/40 text-teal-300' },
+  { id: 'experiencia', label: 'Experiencia', color: 'bg-orange-900/40 text-orange-300' },
 ];
 
 /**
@@ -20,7 +19,6 @@ const categories = [
 
 export default function Blog() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const { theme } = useTheme();
   const { data: blogPosts } = useBlogPosts();
   const [location, navigate] = useLocation();
   const isActive = (path: string) => location === path;
@@ -37,24 +35,13 @@ export default function Blog() {
     return categories.find(cat => cat.id === categoryId)?.color || '';
   };
 
-  const getCategoryDarkStyle = (categoryId: string) => {
-    if (theme !== 'dark') return {};
-    const darkColors: Record<string, string> = {
-      'proceso': '#3e8ff2',
-      'industria': '#7833d7',
-      'tips': '#0fc8cc',
-      'experiencia': '#ff0080'
-    };
-    return { backgroundColor: darkColors[categoryId] || '#ffffff' };
-  };
-
   return (
     <div className="min-h-screen bg-background">
       {/* HEADER */}
-      <header className="border-b border-border sticky top-0 bg-white/80 dark:bg-background/80 backdrop-blur-sm z-40">
-        <div className="container py-4 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-display text-foreground hover:text-accent transition-colors">
-            Mery Palencia
+      <header className="border-b border-border sticky top-0 bg-background/90 backdrop-blur-sm z-40">
+        <div className="container h-16 flex items-center justify-between">
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <img src="/logo/logo.svg" alt="Mery Palencia" className="w-auto" style={{ height: '44px' }} />
           </Link>
           <div className="flex items-center gap-4">
             <Link to="/" className="font-medium transition-colors text-foreground hover:text-accent">
@@ -66,13 +53,12 @@ export default function Blog() {
             <Link to="/galeria" className={`font-medium transition-colors ${isActive('/galeria') ? 'text-accent border-b-2 border-accent pb-0.5' : 'text-foreground hover:text-accent'}`}>
               Galería
             </Link>
-            <ThemeToggle />
           </div>
         </div>
       </header>
 
       {/* HERO DEL BLOG */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-white via-white to-orange-50/20 dark:from-slate-950 dark:via-slate-950 dark:to-orange-950/20">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container">
           <div className="max-w-3xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">
@@ -89,7 +75,7 @@ export default function Blog() {
       </section>
 
       {/* FILTROS DE CATEGORÍA */}
-      <section className="py-12 bg-white dark:bg-slate-950 border-b border-border">
+      <section className="py-12 bg-card border-b border-border">
         <div className="container">
           <div className="flex flex-wrap gap-3 items-center">
             <span className="text-sm font-medium text-muted-foreground">Filtrar por:</span>
@@ -121,7 +107,7 @@ export default function Blog() {
       </section>
 
       {/* LISTADO DE ARTÍCULOS */}
-      <section className="py-16 md:py-24 bg-background dark:bg-slate-950">
+      <section className="py-16 md:py-24 bg-background">
         <div className="container">
           {filteredPosts.length === 0 ? (
             <div className="text-center py-12">
@@ -149,7 +135,7 @@ export default function Blog() {
                       <div className="md:col-span-2 order-1 md:order-2 space-y-4">
                         {/* Categoría y Meta */}
                         <div className="flex flex-wrap items-center gap-3">
-                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(post.category)}`} style={getCategoryDarkStyle(post.category)}>
+                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(post.category)}`}>
                             {getCategoryLabel(post.category)}
                           </span>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -189,7 +175,7 @@ export default function Blog() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-orange-50/30 to-white dark:from-orange-950/10 dark:to-slate-950">
+      <section className="py-16 md:py-24 bg-card">
         <div className="container text-center space-y-6">
           <h2 className="text-3xl md:text-4xl font-display text-foreground">
             ¿Listo para trabajar juntos?
@@ -207,7 +193,7 @@ export default function Blog() {
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-foreground/5 dark:bg-slate-950 border-t border-border py-12">
+      <footer className="bg-card border-t border-border py-12">
         <div className="container text-center space-y-4">
           <h3 className="text-2xl font-display text-foreground">
             Mery Palencia

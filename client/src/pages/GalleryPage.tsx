@@ -2,7 +2,6 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import Lightbox from '@/components/Lightbox';
-import ThemeToggle from '@/components/ThemeToggle';
 import { useGalleryPage } from '@/hooks/useFirestore';
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -24,6 +23,16 @@ const CATEGORY_ALIASES: Record<string, string> = {
   'props': 'material-digital',
   'abstracto': 'ilustracion-digital',
 };
+
+/**
+ * Convierte una URL de Cloudinary a thumbnail optimizado.
+ * Inserta transformaciones: ancho 400px, calidad auto, formato auto (WebP/AVIF).
+ * Si la URL no es de Cloudinary, la devuelve sin cambios.
+ */
+function cloudinaryThumb(url: string, width = 400): string {
+  if (!url.includes('res.cloudinary.com')) return url;
+  return url.replace('/upload/', `/upload/w_${width},q_auto,f_auto/`);
+}
 
 const normalizeCategory = (cat: string) => CATEGORY_ALIASES[cat] ?? cat;
 
@@ -96,10 +105,10 @@ export default function GalleryPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* HEADER */}
-      <header className="border-b border-border sticky top-0 bg-white/80 dark:bg-background/80 backdrop-blur-sm z-40">
-        <div className="container py-4 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-display text-foreground hover:text-accent transition-colors">
-            Mery Palencia
+      <header className="border-b border-border sticky top-0 bg-background z-40">
+        <div className="container h-16 flex items-center justify-between">
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <img src="/logo/logo.svg" alt="Mery Palencia" className="w-auto" style={{ height: '44px' }} />
           </Link>
           <div className="flex items-center gap-4">
             <Link to="/" className="font-medium transition-colors text-foreground hover:text-accent">
@@ -121,13 +130,12 @@ export default function GalleryPage() {
             >
               Galería
             </Link>
-            <ThemeToggle />
           </div>
         </div>
       </header>
 
       {/* HERO */}
-      <section className="py-8 md:py-12 bg-gradient-to-br from-white via-white to-orange-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-orange-950/20">
+      <section className="py-8 md:py-12 bg-background">
         <div className="container text-center space-y-2">
           <p className="text-sm tracking-widest text-muted-foreground uppercase">
             Fotografía & Arte
@@ -143,7 +151,7 @@ export default function GalleryPage() {
 
       {/* FILTROS */}
       {!loading && availableCategories.length > 0 && (
-        <section className="py-6 border-b border-border bg-white dark:bg-slate-950">
+        <section className="py-6 border-b border-border bg-card">
           <div className="container flex items-center gap-3">
             <span className="text-sm text-muted-foreground">Filtrar por:</span>
             <div ref={dropdownRef} className="relative">
@@ -204,22 +212,34 @@ export default function GalleryPage() {
               {filteredItems.map((item) => (
                 <div
                   key={item.id}
-                  className="group cursor-pointer"
+                  className="cursor-pointer"
                   onClick={() => openLightbox(item)}
                 >
-                  <div className="relative overflow-hidden rounded-xl shadow-soft hover:shadow-soft-lg transition-all duration-300">
+                  <div className="relative overflow-hidden rounded-xl">
                     <img
-                      src={item.image}
+                      src={cloudinaryThumb(item.image, 400)}
                       alt={item.title}
-                      className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full aspect-square object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-                      <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm font-medium">
+                    {/* Overlay protector — bloquea clic derecho y arrastre */}
+                    <div
+                      className="absolute inset-0 z-10"
+                      onContextMenu={(e) => e.preventDefault()}
+                      onDragStart={(e) => e.preventDefault()}
+                    />
+                    <div className="absolute inset-0 bg-black/0 hover:bg-black/30 flex items-center justify-center z-20"
+                      style={{ transition: 'background-color 150ms ease-out' }}
+                    >
+                      <span className="text-white opacity-0 hover:opacity-100 text-sm font-medium"
+                        style={{ transition: 'opacity 150ms ease-out' }}
+                      >
                         Ver Detalle
                       </span>
                     </div>
                   </div>
-                  <h3 className="mt-3 text-base font-display text-foreground group-hover:text-accent transition-colors truncate">
+                  <h3 className="mt-3 text-base font-display text-foreground truncate">
                     {item.title}
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">{getCategoryLabel(item.category)}</p>

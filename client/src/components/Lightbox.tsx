@@ -11,6 +11,48 @@ interface LightboxProps {
   onClose: () => void;
 }
 
+/**
+ * Parsea texto y convierte @menciones y #hashtags en links clickeables.
+ * @usuario → https://instagram.com/usuario (nueva pestaña)
+ * #hashtag → https://instagram.com/explore/tags/hashtag (nueva pestaña)
+ */
+function parseTextWithLinks(text: string): React.ReactNode[] {
+  const parts = text.split(/(@[\w.]+|#[\w]+)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('@')) {
+      const username = part.slice(1);
+      return (
+        <a
+          key={i}
+          href={`https://instagram.com/${username}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="text-accent font-semibold hover:underline"
+        >
+          {part}
+        </a>
+      );
+    }
+    if (part.startsWith('#')) {
+      const tag = part.slice(1);
+      return (
+        <a
+          key={i}
+          href={`https://instagram.com/explore/tags/${tag}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="text-accent font-semibold hover:underline"
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
 export default function Lightbox({ isOpen, image, title, category, description, extraImages = [], onClose }: LightboxProps) {
   const allImages = [{ url: image, publicId: 'cover' }, ...extraImages];
   const total = allImages.length;
@@ -104,19 +146,20 @@ export default function Lightbox({ isOpen, image, title, category, description, 
         </button>
 
         <div
-          className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl overflow-y-auto scrollbar-hide flex flex-col"
+          className="bg-card rounded-xl shadow-2xl overflow-hidden flex flex-col"
           style={{ maxHeight: '90vh' }}
         >
           {/* Slider viewport */}
           <div
             className="relative overflow-hidden flex-shrink-0 bg-black"
+            style={{ height: '60vw', maxHeight: '65vh', minHeight: '200px' }}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
             {/* Track */}
             <div
-              className="flex"
+              className="flex h-full"
               style={{
                 transform: `translateX(calc(${translateBase}% + ${dragOffset}px))`,
                 transition: dragging ? 'none' : 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
@@ -124,7 +167,7 @@ export default function Lightbox({ isOpen, image, title, category, description, 
               }}
             >
               {allImages.map((img, i) => (
-                <div key={img.publicId} className="flex-none w-full relative" style={{ maxHeight: '70vh' }}>
+                <div key={img.publicId} className="flex-none w-full h-full relative">
                   {/* Fondo blur */}
                   <img
                     src={img.url}
@@ -132,20 +175,13 @@ export default function Lightbox({ isOpen, image, title, category, description, 
                     className="absolute inset-0 w-full h-full object-cover"
                     style={{ filter: 'blur(24px)', transform: 'scale(1.15)', zIndex: 0 }}
                   />
-                  {/* Overlay oscuro sutil para que el blur no distraiga */}
-                  <div className="absolute inset-0 bg-black/20" style={{ zIndex: 1 }} />
+                  <div className="absolute inset-0 bg-black/30" style={{ zIndex: 1 }} />
                   {/* Imagen real centrada */}
                   <img
                     src={img.url}
                     alt={`${title} ${i + 1}`}
-                    className="relative block mx-auto"
-                    style={{
-                      maxHeight: '70vh',
-                      maxWidth: '100%',
-                      width: 'auto',
-                      height: 'auto',
-                      zIndex: 2,
-                    }}
+                    className="absolute inset-0 w-full h-full object-contain"
+                    style={{ zIndex: 2 }}
                   />
                 </div>
               ))}
@@ -205,7 +241,9 @@ export default function Lightbox({ isOpen, image, title, category, description, 
               )}
               <h3 className="text-lg font-display text-foreground leading-snug">{title}</h3>
               {description && (
-                <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {parseTextWithLinks(description)}
+                </p>
               )}
             </div>
           </div>
