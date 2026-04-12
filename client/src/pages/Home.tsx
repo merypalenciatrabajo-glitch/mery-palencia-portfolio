@@ -1,10 +1,9 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'wouter';
 import { Mail, Instagram, Linkedin, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Lightbox from '@/components/Lightbox';
-import ThemeToggle from '@/components/ThemeToggle';
-import { useGallery, useCommissions, useProcessSteps, useHeroImage } from '@/hooks/useFirestore';
+import { useGallery, useCommissions, useProcessSteps } from '@/hooks/useFirestore';
 import emailjs from '@emailjs/browser';
 
 const EMAILJS_SERVICE = 'service_portfolio';
@@ -124,7 +123,7 @@ function InfiniteCarousel({
         onClick={() => step(-1)}
         onMouseEnter={() => (pausedRef.current = true)}
         onMouseLeave={() => (pausedRef.current = false)}
-        className="absolute left-0 top-[45%] -translate-y-1/2 -translate-x-4 z-10 w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-soft border border-border flex items-center justify-center hover:bg-accent hover:text-white hover:border-accent transition-all duration-300"
+        className="absolute left-0 top-[45%] -translate-y-1/2 -translate-x-4 z-10 w-10 h-10 rounded-full bg-card shadow-soft border border-border flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300"
         aria-label="Anterior"
       >
         <ChevronLeft size={20} />
@@ -133,7 +132,7 @@ function InfiniteCarousel({
         onClick={() => step(1)}
         onMouseEnter={() => (pausedRef.current = true)}
         onMouseLeave={() => (pausedRef.current = false)}
-        className="absolute right-0 top-[45%] -translate-y-1/2 translate-x-4 z-10 w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-soft border border-border flex items-center justify-center hover:bg-accent hover:text-white hover:border-accent transition-all duration-300"
+        className="absolute right-0 top-[45%] -translate-y-1/2 translate-x-4 z-10 w-10 h-10 rounded-full bg-card shadow-soft border border-border flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300"
         aria-label="Siguiente"
       >
         <ChevronRight size={20} />
@@ -184,8 +183,59 @@ export default function Home() {
   const { data: galleryItems } = useGallery();
   const { data: commissionTiers } = useCommissions();
   const { data: processSteps } = useProcessSteps();
-  const { imageUrl: heroImageUrl, position: heroPosition, loading: heroLoading } = useHeroImage();
-  const FALLBACK_HERO = "https://d2xsxph8kpxj0f.cloudfront.net/310519663465006084/aYyNo4PkGRweszF78jfNEU/hero-illustration-h59MrgKS7TnNgq7RSR34Vn.webp";
+
+  const heroRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let observer: IntersectionObserver | undefined;
+    let pauseTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const pauseScenes = () => {
+      const scenes = (window.UnicornStudio as any)?.scenes;
+      if (!Array.isArray(scenes)) return;
+      scenes.forEach((s: any) => { try { s.pause?.(); } catch (_) {} });
+    };
+
+    const playScenes = () => {
+      const scenes = (window.UnicornStudio as any)?.scenes;
+      if (!Array.isArray(scenes)) return;
+      scenes.forEach((s: any) => { try { s.play?.(); } catch (_) {} });
+    };
+
+    const doInit = () => {
+      if (cancelled || !window.UnicornStudio?.init) return;
+      window.UnicornStudio.init();
+
+      const el = heroRef.current;
+      if (!el) return;
+
+      // Esperar 500ms para que el SDK registre las escenas antes de observar
+      setTimeout(() => {
+        if (cancelled) return;
+        observer = new IntersectionObserver((entries) => {
+          clearTimeout(pauseTimer);
+          if (entries[0]?.isIntersecting) {
+            playScenes();
+          } else {
+            // Pequeño delay antes de pausar para evitar flicker en scroll rápido
+            pauseTimer = setTimeout(pauseScenes, 200);
+          }
+        }, { threshold: 0 });
+        observer.observe(el);
+      }, 500);
+    };
+
+    if (window.UnicornStudio?.init) {
+      const t = setTimeout(doInit, 100);
+      return () => { cancelled = true; clearTimeout(t); clearTimeout(pauseTimer); observer?.disconnect(); };
+    } else {
+      const iv = setInterval(() => {
+        if (window.UnicornStudio?.init) { clearInterval(iv); setTimeout(doInit, 100); }
+      }, 100);
+      return () => { cancelled = true; clearInterval(iv); clearTimeout(pauseTimer); observer?.disconnect(); };
+    }
+  }, []);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{ id: string; title: string; image: string; category?: string; description?: string; extraImages?: { url: string; publicId: string }[] } | null>(null);
@@ -232,11 +282,13 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* HEADER CON BOTÓN DE TEMA */}
-      <header className="border-b border-border sticky top-0 bg-white/80 dark:bg-background/80 backdrop-blur-sm z-40">
-        <div className="container py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-display text-foreground">Mery Palencia</h1>
+      <header className="border-b border-border sticky top-0 bg-background/90 backdrop-blur-sm z-40">
+        <div className="container h-16 flex items-center justify-between">
+          <Link to="/">
+            <img src="/logo/logo.svg" alt="Mery Palencia" className="w-auto" style={{ height: '44px' }} />
+          </Link>
           <div className="flex items-center gap-4">
             <Link to="/blog" className="text-foreground hover:text-accent transition-colors font-medium">
               Blog
@@ -244,49 +296,48 @@ export default function Home() {
             <Link to="/galeria" className="text-foreground hover:text-accent transition-colors font-medium">
               Galería
             </Link>
-            <ThemeToggle />
           </div>
         </div>
       </header>
 
       {/* HERO SECTION */}
-      <section className="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden">
-        {/* Gradiente de fondo sutil */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-orange-50/20 dark:from-slate-900 dark:via-slate-900 dark:to-orange-950/20 -z-10" />
-        
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            {/* Contenido del Hero */}
-            <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
-              <div className="space-y-4">
-                <p className="text-sm tracking-widest text-muted-foreground uppercase">
-                  Ilustración Digital
-                </p>
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-display leading-tight text-foreground">
-                  Mery Palencia
-                </h1>
-                <p className="subtitle text-xl md:text-2xl text-muted-foreground">
-                  Ilustradora digital especializada en arte conceptual y diseño de personajes
-                </p>
-              </div>
-              
-              <p className="text-lg text-foreground/80 leading-relaxed max-w-md">
-                Transformo ideas en ilustraciones cautivadoras. Cada proyecto es una oportunidad para crear algo único y memorable que refleje tu visión.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button
-                  size="lg"
-                  className="bg-accent hover:bg-accent/90 text-white rounded-lg"
-                  onClick={() => document.getElementById('commission-section')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  Ver Comisiones
-                  <ArrowRight className="ml-2" size={20} />
-                </Button>
+      <section ref={heroRef} className="relative overflow-hidden bg-black" style={{ height: 'calc(100vh - 57px)' }}>
+        {/* Canvas WebGL UnicornStudio — siempre en DOM, pause/play por visibilidad */}
+        <div
+          data-us-project="4v8wXufmDdV5npLSJDVK"
+          className="absolute inset-0 w-full h-full"
+          style={{ pointerEvents: 'none', zIndex: 1 }}
+        />
+        {/* Gradiente inferior para proteger los botones de la luz */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-40"
+          style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)', zIndex: 2 }}
+        />
+        {/* Contenido del hero — parte superior de la pantalla */}
+        <div className="relative h-full flex flex-col items-center justify-start pt-16 md:pt-20 container" style={{ zIndex: 3 }}>
+          <div className="max-w-3xl w-full text-center space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <p className="text-xs tracking-widest text-muted-foreground uppercase">
+              Ilustración Digital
+            </p>
+            <div className="flex justify-center">
+              <img src="/logo/logo.svg" alt="Mery Palencia" className="w-auto mx-auto" style={{ maxHeight: '280px', maxWidth: '700px' }} />
+            </div>
+            <p className="text-lg text-foreground/70 leading-relaxed max-w-lg mx-auto">
+              Transformo ideas en ilustraciones cautivadoras. Cada proyecto es una oportunidad para crear algo único y memorable que refleje tu visión.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4 pt-2">
+              <Button
+                size="lg"
+                className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-lg"
+                onClick={() => document.getElementById('commission-section')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Ver Comisiones
+                <ArrowRight className="ml-2" size={20} />
+              </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="border-accent text-foreground dark:text-accent hover:bg-accent/5 dark:hover:bg-accent/10 rounded-lg"
+                className="border-accent text-foreground hover:bg-accent/10 rounded-lg"
                 onClick={() => document.getElementById('contact-section')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 Contactar
@@ -295,7 +346,7 @@ export default function Home() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-accent text-foreground dark:text-accent hover:bg-accent/5 dark:hover:bg-accent/10 rounded-lg"
+                  className="border-accent text-foreground hover:bg-accent/10 rounded-lg"
                 >
                   Leer Blog
                 </Button>
@@ -304,35 +355,18 @@ export default function Home() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-accent text-foreground dark:text-accent hover:bg-accent/5 dark:hover:bg-accent/10 rounded-lg"
+                  className="border-accent text-foreground hover:bg-accent/10 rounded-lg"
                 >
                   Ver Galería
                 </Button>
               </Link>
-              </div>
-            </div>
-            
-            {/* Imagen Hero */}
-            <div className="relative animate-in fade-in slide-in-from-right-4 duration-700 delay-200">
-              <div className="relative rounded-2xl overflow-hidden shadow-soft-lg aspect-video bg-muted">
-                {!heroLoading && (
-                  <img
-                    src={heroImageUrl ?? FALLBACK_HERO}
-                    alt="Mery Palencia - Ilustradora Digital"
-                    className="absolute inset-0 w-full h-full object-cover"
-                    style={{ objectPosition: heroImageUrl ? `${heroPosition.x}% ${heroPosition.y}%` : 'center' }}
-                  />
-                )}
-              </div>
-              {/* Elemento decorativo */}
-              <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-gradient-to-br from-orange-100/40 to-orange-50/20 dark:from-orange-900/30 dark:to-orange-800/10 rounded-full blur-3xl -z-10" />
             </div>
           </div>
         </div>
       </section>
 
       {/* GALERÍA SECTION */}
-      <section className="py-20 md:py-32 bg-white dark:bg-slate-950">
+      <section className="py-20 md:py-32 bg-background">
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">
@@ -361,7 +395,7 @@ export default function Home() {
       </section>
 
       {/* PROCESO SECTION */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-orange-50/30 to-white dark:from-orange-950/10 dark:to-slate-950">
+      <section className="py-20 md:py-32 bg-card">
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">
@@ -407,7 +441,7 @@ export default function Home() {
       </section>
 
       {/* COMISIONES SECTION */}
-      <section id="commission-section" className="py-20 md:py-32 bg-white dark:bg-slate-950">
+      <section id="commission-section" className="py-20 md:py-32 bg-background">
         <div className="container">
           <div className="space-y-4 mb-16 text-center">
             <p className="text-sm tracking-widest text-muted-foreground uppercase">
@@ -427,8 +461,8 @@ export default function Home() {
                 key={tier.id}
                 className={`rounded-xl p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 ${
                   tier.featured
-                    ? 'bg-gradient-to-br from-accent/10 to-orange-50/20 dark:from-accent/5 dark:to-slate-900 border-2 border-accent shadow-soft-lg scale-105 md:scale-110'
-                    : 'bg-transparent border-2 border-accent hover:bg-accent/5 dark:hover:bg-accent/5'
+                    ? 'bg-gradient-to-br from-accent/10 to-accent/5 border-2 border-accent shadow-soft-lg scale-105 md:scale-110'
+                    : 'bg-transparent border-2 border-accent hover:bg-accent/5'
                 }`}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
@@ -438,13 +472,13 @@ export default function Home() {
                   </div>
                 )}
                 
-                <h3 className="text-2xl font-display text-foreground dark:text-white mb-2">
+                <h3 className="text-2xl font-display text-foreground mb-2">
                   {tier.name}
                 </h3>
                 <p className="text-3xl font-display text-accent mb-4">
                   {tier.price}
                 </p>
-                <p className="text-muted-foreground dark:text-slate-300 mb-6 leading-relaxed">
+                <p className="text-muted-foreground mb-6 leading-relaxed">
                   {tier.description}
                 </p>
                 
@@ -454,7 +488,7 @@ export default function Home() {
                       <div className="flex-shrink-0 w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center mt-0.5">
                         <div className="w-2 h-2 rounded-full bg-accent dot-animate" />
                       </div>
-                      <span className="text-foreground dark:text-slate-200">{item}</span>
+                      <span className="text-foreground">{item}</span>
                     </div>
                   ))}
                 </div>
@@ -462,8 +496,8 @@ export default function Home() {
                 <Button
                   className={`w-full rounded-lg ${
                     tier.featured
-                      ? 'bg-accent hover:bg-accent/90 text-white'
-                      : 'border border-accent bg-accent/5 dark:bg-accent/10 text-accent dark:text-cyan-400 hover:bg-accent/10 dark:hover:bg-accent/20'
+                      ? 'bg-accent hover:bg-accent/90 text-accent-foreground'
+                      : 'border border-accent bg-accent/5 text-accent hover:bg-accent/10'
                   }`}
                   onClick={() => document.getElementById('contact-section')?.scrollIntoView({ behavior: 'smooth' })}
                 >
@@ -476,7 +510,7 @@ export default function Home() {
       </section>
 
       {/* CONTACTO SECTION */}
-      <section id="contact-section" className="py-20 md:py-32 bg-gradient-to-b from-orange-50/20 to-white dark:from-orange-950/10 dark:to-slate-950">
+      <section id="contact-section" className="py-20 md:py-32 bg-card">
         <div className="container">
           <div className="max-w-2xl mx-auto">
             <div className="space-y-4 mb-12 text-center">
@@ -491,7 +525,7 @@ export default function Home() {
               </p>
             </div>
 
-            <form onSubmit={handleFormSubmit} className="space-y-6 bg-white dark:bg-slate-900 p-8 rounded-xl shadow-soft">
+            <form onSubmit={handleFormSubmit} className="space-y-6 bg-muted p-8 rounded-xl shadow-soft">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
@@ -610,7 +644,7 @@ export default function Home() {
       </section>
 
       {/* PIE DE PÁGINA */}
-      <footer className="bg-foreground/5 dark:bg-slate-900 border-t border-border py-12">
+      <footer className="bg-card border-t border-border py-12">
         <div className="container">
           <div className="text-center space-y-4">
             <h3 className="text-2xl font-display text-foreground">

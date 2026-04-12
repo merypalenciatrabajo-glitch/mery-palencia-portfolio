@@ -5,13 +5,12 @@ import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useBlogPosts } from '@/hooks/useFirestore';
 import NotFound from './NotFound';
-import ThemeToggle from '@/components/ThemeToggle';
 
 const categories = [
-  { id: 'proceso', label: 'Proceso Creativo', color: 'bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100' },
-  { id: 'industria', label: 'Industria', color: 'bg-purple-100 text-purple-800 dark:bg-purple-700 dark:text-purple-100' },
-  { id: 'tips', label: 'Tips & Herramientas', color: 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100' },
-  { id: 'experiencia', label: 'Experiencia', color: 'bg-orange-100 text-orange-800 dark:bg-orange-700 dark:text-orange-100' },
+  { id: 'proceso', label: 'Proceso Creativo', color: 'bg-blue-900/40 text-blue-300' },
+  { id: 'industria', label: 'Industria', color: 'bg-purple-900/40 text-purple-300' },
+  { id: 'tips', label: 'Tips & Herramientas', color: 'bg-teal-900/40 text-teal-300' },
+  { id: 'experiencia', label: 'Experiencia', color: 'bg-orange-900/40 text-orange-300' },
 ];
 
 interface BlogPost {
@@ -86,10 +85,10 @@ export default function BlogPost() {
   return (
     <div className="min-h-screen bg-background">
       {/* HEADER */}
-      <header className="border-b border-border sticky top-0 bg-white/80 dark:bg-background/80 backdrop-blur-sm z-40">
-        <div className="container py-4 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-display text-foreground hover:text-accent transition-colors">
-            Mery Palencia
+      <header className="border-b border-border sticky top-0 bg-background/90 backdrop-blur-sm z-40">
+        <div className="container h-16 flex items-center justify-between">
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <img src="/logo/logo.svg" alt="Mery Palencia" className="w-auto" style={{ height: '44px' }} />
           </Link>
           <div className="flex items-center gap-4">
             <Link to="/" className="font-medium transition-colors text-foreground hover:text-accent">
@@ -99,7 +98,6 @@ export default function BlogPost() {
               <ArrowLeft size={18} />
               Blog
             </Link>
-            <ThemeToggle />
           </div>
         </div>
       </header>
@@ -115,7 +113,7 @@ export default function BlogPost() {
       </section>
 
       {/* CONTENIDO PRINCIPAL */}
-      <article className="py-16 md:py-24 bg-background dark:bg-slate-950">
+      <article className="py-16 md:py-24 bg-background">
         <div className="container max-w-3xl">
           {/* Meta información */}
           <div className="space-y-6 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -228,7 +226,7 @@ export default function BlogPost() {
 
       {/* ARTÍCULOS RELACIONADOS */}
       {relatedPosts.length > 0 && (
-        <section className="py-16 md:py-24 bg-white dark:bg-slate-950 border-t border-border">
+        <section className="py-16 md:py-24 bg-card border-t border-border">
           <div className="container max-w-3xl">
             <h2 className="text-3xl md:text-4xl font-display text-foreground mb-12">
               Artículos Relacionados
@@ -272,7 +270,7 @@ export default function BlogPost() {
       )}
 
       {/* CTA FINAL */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-orange-50/30 to-white dark:from-orange-950/10 dark:to-slate-950">
+      <section className="py-16 md:py-24 bg-card">
         <div className="container text-center space-y-6">
           <h2 className="text-3xl md:text-4xl font-display text-foreground">
             ¿Inspirado? Vamos a crear algo juntos
@@ -290,7 +288,7 @@ export default function BlogPost() {
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-foreground/5 dark:bg-slate-950 border-t border-border py-12">
+      <footer className="bg-card border-t border-border py-12">
         <div className="container text-center space-y-4">
           <h3 className="text-2xl font-display text-foreground">
             Mery Palencia
