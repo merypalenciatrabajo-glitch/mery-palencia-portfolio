@@ -1,5 +1,19 @@
 apply plugin: 'com.android.application'
 
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+def keystoreProperties = new Properties()
+def isReleaseBuild = gradle.startParameter.taskNames.any {
+    it.toLowerCase().contains('release')
+}
+
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+} else if (isReleaseBuild) {
+    throw new GradleException(
+        'Missing android/keystore.properties. A release build must use the private production signing configuration.'
+    )
+}
+
 android {
     namespace = "com.merypalencia.admin"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -9,6 +23,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 190
         versionName "1.9.0"
+        manifestPlaceholders = [deepLinkScheme: "merypalenciaadmin"]
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,10 +31,36 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
-    buildTypes {
+    signingConfigs {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (keystorePropertiesFile.exists()) {
+                ['storeFile', 'storePassword', 'keyAlias', 'keyPassword'].each { key ->
+                    if (!keystoreProperties[key]) {
+                        throw new GradleException("Missing ${key} in android/keystore.properties")
+                    }
+                }
+                def configuredStoreFile = rootProject.file(keystoreProperties['storeFile'])
+                if (!configuredStoreFile.exists()) {
+                    throw new GradleException("Release keystore not found at the configured storeFile path")
+                }
+                storeFile = configuredStoreFile
+                storePassword = keystoreProperties['storePassword']
+                keyAlias = keystoreProperties['keyAlias']
+                keyPassword = keystoreProperties['keyPassword']
+            }
+        }
+    }
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+            manifestPlaceholders = [deepLinkScheme: "merypalenciaadmin-debug"]
+        }
+        release {
+            signingConfig = signingConfigs.release
+            minifyEnabled true
+            shrinkResources = true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }

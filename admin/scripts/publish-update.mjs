@@ -18,25 +18,34 @@
  *   5. git add -A && git commit -m "chore: bump version vX.Y.Z" && git push
  */
 
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync, writeFileSync } from "fs";
 import { readFile } from "fs/promises";
 import fetch from "node-fetch";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import semver from "semver";
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const [,, command = "prepare", changelog = ""] = process.argv;
 
 // ── Leer .env ─────────────────────────────────────────────────────────────────
-const envRaw = readFileSync(resolve(__dir, "../.env"), "utf-8");
-const env = Object.fromEntries(
-  envRaw.split("\n")
+const env = [".env", ".env.local"].reduce((result, fileName) => {
+  const envPath = resolve(__dir, `../${fileName}`);
+  if (!existsSync(envPath)) return result;
+  const parsed = Object.fromEntries(readFileSync(envPath, "utf-8").split("\n")
     .filter(l => l.includes("=") && !l.trimStart().startsWith("#"))
     .map(l => { const i = l.indexOf("="); return [l.slice(0, i).trim(), l.slice(i + 1).trim()]; })
-);
-const { GITHUB_TOKEN, GITHUB_REPO } = env;
-const FIREBASE_PROJECT_ID = "admin-portafolio-1bafe";
-const FIREBASE_API_KEY = "AIzaSyCOhB75_HC1TtyOj-H2RXfYtc3IS70Zfp0";
+  );
+  return { ...result, ...parsed };
+}, { ...process.env });
+const {
+  GITHUB_TOKEN,
+  GITHUB_REPO,
+  FIREBASE_ID_TOKEN,
+  VITE_FIREBASE_PROJECT_ID: FIREBASE_PROJECT_ID,
+  VITE_FIREBASE_API_KEY: FIREBASE_API_KEY,
+} = env;
 
 // ── Leer CURRENT_VERSION del código ──────────────────────────────────────────
 const hookPath = resolve(__dir, "../src/hooks/useAppUpdate.ts");
@@ -47,11 +56,9 @@ const currentVersion = match[1];
 
 // ── Calcular versión siguiente ────────────────────────────────────────────────
 function nextVersion(v) {
-  let [maj, min, patch] = v.split(".").map(Number);
-  patch += 2;
-  if (patch >= 6) { patch = 0; min += 1; }
-  if (min >= 10)  { min = 0;   maj += 1; }
-  return `${maj}.${min}.${patch}`;
+  const next = semver.inc(v, "patch");
+  if (!next) throw new Error(`Invalid current version: ${v}`);
+  return next;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -68,7 +75,9 @@ if (command === "prepare") {
   // Actualizar build.gradle
   const gradlePath = resolve(__dir, "../android/app/build.gradle");
   const gradleContent = readFileSync(gradlePath, "utf-8");
-  const versionCode = parseInt(newVersion.replace(/\./g, ""), 10);
+  const currentVersionCode = Number(gradleContent.match(/versionCode\s+(\d+)/)?.[1]);
+  if (!Number.isSafeInteger(currentVersionCode)) throw new Error("Invalid Android versionCode");
+  const versionCode = currentVersionCode + 1;
   const updatedGradle = gradleContent
     .replace(/versionCode\s+\d+/, `versionCode ${versionCode}`)
     .replace(/versionName\s+"[^"]+"/, `versionName "${newVersion}"`);
@@ -95,7 +104,7 @@ if (command === "publish") {
   console.log(`\n🚀 Publicando v${publishVersion}...`);
 
   // Verificar APK
-  const apkPath = resolve(__dir, "../android/app/release/app-release.apk");
+  const apkPath = resolve(__dir, "../android/app/build/outputs/apk/release/app-release.apk");
   if (!existsSync(apkPath)) {
     console.error("❌ APK no encontrado. Genera el APK desde Android build environment primero.");
     process.exit(1);
@@ -107,8 +116,8 @@ if (command === "publish") {
     console.warn(`⚠️  El APK tiene ${Math.round(apkAge)} minutos. ¿Seguro que es el correcto?`);
   }
 
-  if (!GITHUB_TOKEN || !GITHUB_REPO) {
-    console.error("❌ Faltan GITHUB_TOKEN y GITHUB_REPO en .env");
+  if (!GITHUB_TOKEN || !GITHUB_REPO || !FIREBASE_ID_TOKEN || !FIREBASE_PROJECT_ID || !FIREBASE_API_KEY) {
+    console.error("❌ Faltan credenciales de GitHub o Firebase en el entorno local");
     process.exit(1);
   }
 
@@ -149,6 +158,7 @@ if (command === "publish") {
 
   // Subir APK
   const apkBuffer = await readFile(apkPath);
+  const sha256 = createHash("sha256").update(apkBuffer).digest("hex");
   const uploadRes = await fetch(`${uploadUrl.replace("{?name,label}", "")}?name=admin-v${publishVersion}.apk`, {
     method: "POST",
     headers: {
@@ -172,6 +182,7 @@ if (command === "publish") {
     fields: {
       version:   { stringValue: publishVersion },
       apkUrl:    { stringValue: apkUrl },
+      sha256:    { stringValue: sha256 },
       changelog: { stringValue: changelog },
       updatedAt: { stringValue: new Date().toISOString() },
     },
@@ -181,7 +192,10 @@ if (command === "publish") {
     `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/settings/appVersion?key=${FIREBASE_API_KEY}`,
     {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${FIREBASE_ID_TOKEN}`,
+      },
       body: JSON.stringify(firestorePayload),
     }
   );

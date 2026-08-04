@@ -145,7 +145,7 @@ export default function Blog() {
       // Fecha real: si publicado ahora → hoy; si programado → fecha programada; si borrador → hoy
       const date = editing?.date || (isScheduled && scheduledIso ? scheduledIso : new Date().toISOString().split("T")[0]);
 
-      const payload: Record<string, unknown> = {
+      const payload = {
         ...rest,
         date,
         published: isPublished,

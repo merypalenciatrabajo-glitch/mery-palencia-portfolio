@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { signOut } from "firebase/auth";
 import {
   BookOpen,
   GalleryHorizontal,
@@ -13,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { auth } from "@/lib/firebase";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
 import { CURRENT_VERSION } from "@/hooks/useAppUpdate";
@@ -28,10 +27,23 @@ const NAV_ITEMS = [
 
 export default function Sidebar({ hasUpdate = false }: { hasUpdate?: boolean }) {
   const { theme, toggleTheme } = useTheme();
+  const { logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
 
   const handleLogout = async () => {
-    await signOut(auth);
+    if (loggingOut) return;
+
+    setLogoutError("");
+    setLoggingOut(true);
+    try {
+      await logout();
+    } catch {
+      setLogoutError("No se pudo cerrar la sesión. Inténtalo de nuevo.");
+    } finally {
+      setLoggingOut(false);
+    }
   };
 
   const SidebarContent = () => (
@@ -86,11 +98,17 @@ export default function Sidebar({ hasUpdate = false }: { hasUpdate?: boolean }) 
         </button>
         <button
           onClick={handleLogout}
+          disabled={loggingOut}
           className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
         >
           <LogOut size={18} />
-          Cerrar sesión
+          {loggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
         </button>
+        {logoutError && (
+          <p role="alert" className="px-3 text-xs text-destructive">
+            {logoutError}
+          </p>
+        )}
         <p className="text-xs text-muted-foreground/50 px-3 pt-2">v{CURRENT_VERSION}</p>
       </div>
     </>

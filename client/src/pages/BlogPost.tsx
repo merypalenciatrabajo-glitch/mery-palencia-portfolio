@@ -1,10 +1,13 @@
-import { useRoute, Link, useLocation } from 'wouter';
+import { useRoute, Link } from 'wouter';
 import { Calendar, ArrowLeft, Share2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { db, isFirebaseConfigured } from '@/lib/firebase';
 import { useBlogPosts } from '@/hooks/useFirestore';
 import NotFound from './NotFound';
+import Seo from '@/components/Seo';
+import ContentStatus from '@/components/ContentStatus';
+import { cloudinaryImage, cloudinarySrcSet } from '@/lib/images';
 
 const categories = [
   { id: 'proceso', label: 'Proceso Creativo', color: 'bg-blue-900/40 text-blue-300' },
@@ -49,25 +52,51 @@ function getYouTubeEmbedUrl(url: string): string | null {
 
 export default function BlogPost() {
   const [match, params] = useRoute('/blog/:id');
-  const [, navigate] = useLocation();
   const [post, setPost] = useState<BlogPost | null | undefined>(undefined);
+  const [loadError, setLoadError] = useState(false);
+  const [loadRevision, setLoadRevision] = useState(0);
   const { data: allPosts } = useBlogPosts();
 
   useEffect(() => {
     if (!params?.id) return;
-    getDoc(doc(db, 'blogPosts', params.id)).then((snap) => {
-      if (snap.exists()) {
-        setPost({ id: snap.id, ...snap.data() } as BlogPost);
-        // Incrementar contador de vistas
-        updateDoc(doc(db, 'blogPosts', params.id), { views: increment(1) });
-      } else {
-        setPost(null);
-      }
-    });
-  }, [params?.id]);
+    setPost(undefined);
+    setLoadError(false);
+    if (!isFirebaseConfigured) {
+      setLoadError(true);
+      return;
+    }
+    getDoc(doc(db, 'blogPosts', params.id))
+      .then((snap) => {
+        const data = snap.data();
+        if (snap.exists() && data?.published === true) {
+          setPost({ id: snap.id, ...data } as BlogPost);
+        } else {
+          setPost(null);
+        }
+      })
+      .catch(() => setLoadError(true));
+  }, [params?.id, loadRevision]);
 
   if (!match) return <NotFound />;
-  if (post === undefined) return null; // loading
+  if (loadError) {
+    return (
+      <main id="main-content" className="min-h-screen bg-background flex items-center justify-center p-6">
+        <ContentStatus
+          kind="error"
+          title="No pudimos cargar el artículo"
+          description="Comprueba tu conexión e inténtalo nuevamente."
+          onRetry={() => setLoadRevision((current) => current + 1)}
+        />
+      </main>
+    );
+  }
+  if (post === undefined) {
+    return (
+      <main id="main-content" className="min-h-screen bg-background flex items-center justify-center">
+        <p role="status" className="text-muted-foreground">Cargando artículo…</p>
+      </main>
+    );
+  }
   if (post === null) return <NotFound />;
 
   const relatedPosts = allPosts.filter(
@@ -84,29 +113,42 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title={post.title}
+        description={post.excerpt}
+        path={`/blog/${post.id}`}
+        image={cloudinaryImage(post.image, { width: 1200 })}
+        imageAlt={post.title}
+        type="article"
+      />
       {/* HEADER */}
       <header className="border-b border-border sticky top-0 bg-background/90 backdrop-blur-sm z-40">
         <div className="container h-16 flex items-center justify-between">
-          <Link to="/" className="hover:opacity-80 transition-opacity">
-            <img src="/logo/logo.svg" alt="Mery Palencia" className="w-auto" style={{ height: '44px' }} />
+          <Link to="/" className="inline-flex min-h-11 min-w-11 items-center hover:opacity-80 transition-opacity" aria-label="Ir al inicio">
+            <img src="/logo/logo.svg" alt="" aria-hidden="true" className="w-auto" style={{ height: '44px' }} />
           </Link>
-          <div className="flex items-center gap-4">
-            <Link to="/" className="font-medium transition-colors text-foreground hover:text-accent">
+          <nav className="flex items-center gap-1 sm:gap-2" aria-label="Navegación principal">
+            <Link to="/" className="inline-flex min-h-11 items-center px-2 font-medium transition-colors text-foreground hover:text-accent">
               Inicio
             </Link>
-            <Link to="/blog" className="flex items-center gap-2 font-medium text-foreground hover:text-accent transition-colors">
+            <Link to="/blog" className="inline-flex min-h-11 items-center gap-2 px-2 font-medium text-foreground hover:text-accent transition-colors">
               <ArrowLeft size={18} />
               Blog
             </Link>
-          </div>
+          </nav>
         </div>
       </header>
 
+      <main id="main-content">
       {/* HERO CON IMAGEN */}
       <section className="relative h-96 md:h-[500px] overflow-hidden">
         <img
-          src={post.image}
+          src={cloudinaryImage(post.image, { width: 1600 })}
+          srcSet={cloudinarySrcSet(post.image, [720, 1080, 1440, 1920])}
+          sizes="100vw"
           alt={post.title}
+          fetchPriority="high"
+          decoding="async"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -215,7 +257,7 @@ export default function BlogPost() {
                   alert('Enlace copiado al portapapeles');
                 }
               }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary hover:bg-muted transition-colors text-foreground"
+              className="inline-flex min-h-11 items-center gap-2 px-4 py-2 rounded-lg bg-secondary hover:bg-muted transition-colors text-foreground"
             >
               <Share2 size={18} />
               Compartir
@@ -234,13 +276,17 @@ export default function BlogPost() {
 
             <div className="space-y-8">
               {relatedPosts.map((relatedPost, index) => (
-                <div key={relatedPost.id} className="group block animate-in fade-in slide-in-from-bottom-4 duration-500 cursor-pointer" style={{ animationDelay: `${index * 100}ms` }} onClick={() => navigate(`/blog/${relatedPost.id}`)}>
+                <Link key={relatedPost.id} to={`/blog/${relatedPost.id}`} className="group block animate-in fade-in slide-in-from-bottom-4 duration-500 rounded-lg" style={{ animationDelay: `${index * 100}ms` }}>
                     <article className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start pb-8 border-b border-border last:border-b-0 hover:opacity-80 transition-opacity">
                       <div className="md:col-span-1">
                         <div className="relative overflow-hidden rounded-lg shadow-soft group-hover:shadow-soft-lg transition-all">
                           <img
-                            src={relatedPost.image}
+                            src={cloudinaryImage(relatedPost.image, { width: 600 })}
+                            srcSet={cloudinarySrcSet(relatedPost.image, [320, 480, 600])}
+                            sizes="(min-width: 768px) 33vw, 100vw"
                             alt={relatedPost.title}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         </div>
@@ -262,7 +308,7 @@ export default function BlogPost() {
                         </div>
                       </div>
                     </article>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -280,12 +326,14 @@ export default function BlogPost() {
           </p>
           <Link
             to="/#contact-section"
-            className="inline-block px-8 py-3 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-all duration-300"
+            className="inline-flex min-h-11 items-center px-8 py-3 bg-accent hover:bg-accent/90 text-accent-foreground rounded-lg font-medium transition-all duration-300"
           >
             Solicitar Comisión
           </Link>
         </div>
       </section>
+
+      </main>
 
       {/* FOOTER */}
       <footer className="bg-card border-t border-border py-12">
@@ -297,7 +345,7 @@ export default function BlogPost() {
             Ilustradora Digital | Diseño de Personajes | Arte Conceptual
           </p>
           <p className="text-sm text-muted-foreground">
-            © 2024 Mery Palencia. Todos los derechos reservados.
+            © {new Date().getFullYear()} Mery Palencia. Todos los derechos reservados.
           </p>
         </div>
       </footer>

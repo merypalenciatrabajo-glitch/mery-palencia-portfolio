@@ -8,7 +8,7 @@ import { resolve } from "node:path";
  * Unit tests for GalleryPage
  *
  * These tests verify the structural content of the GalleryPage component:
- * - Header contains logo, Blog link, Galería link, and ThemeToggle
+ * - Header contains logo, Inicio, Blog and Galería links
  * - Empty state shows a placeholder message
  *
  * Since the test environment is 'node' (no jsdom), we verify the component
@@ -76,14 +76,13 @@ describe("GalleryPage – header (Requirement 2.6)", () => {
     expect(source).toContain("border-b-2 border-accent");
   });
 
-  it("el header contiene el componente ThemeToggle", () => {
-    // The component imports and renders <ThemeToggle />
-    expect(source).toContain("ThemeToggle");
-    expect(source).toContain("<ThemeToggle");
+  it("el header contiene un link explícito a Inicio", () => {
+    expect(source).toMatch(/to="\/"[\s\S]{0,300}Inicio/);
   });
 
-  it("el header importa ThemeToggle desde @/components/ThemeToggle", () => {
-    expect(source).toContain("import ThemeToggle from '@/components/ThemeToggle'");
+  it("el header utiliza Link de wouter para navegación SPA", () => {
+    expect(source).toContain("import { Link, useLocation } from 'wouter'");
+    expect(source).not.toContain("window.location.href");
   });
 });
 
@@ -119,12 +118,11 @@ describe("GalleryPage – estado vacío (Requirement 2.5)", () => {
   });
 
   it("el componente contiene el texto del placeholder para colección vacía", () => {
-    // The component renders: "No hay ilustraciones disponibles aún."
-    expect(source).toContain("No hay ilustraciones disponibles aún");
+    expect(source).toContain("Aún no hay trabajos disponibles");
+    expect(source).toContain("No hay trabajos publicados en esta categoría.");
   });
 
-  it("el placeholder se muestra solo cuando items.length === 0 (lógica condicional)", () => {
-    // Verify the source has the conditional: items.length === 0
-    expect(source).toContain("items.length === 0");
+  it("el placeholder se muestra cuando el filtro no devuelve elementos", () => {
+    expect(source).toContain("filteredItems.length === 0");
   });
 });

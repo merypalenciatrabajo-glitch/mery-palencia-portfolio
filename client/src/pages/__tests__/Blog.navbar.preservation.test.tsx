@@ -12,7 +12,7 @@
  *
  * Observed behaviors in unfixed code:
  * - GalleryPage at `/galeria` renders "Blog" and "Galería" links in the header
- * - ThemeToggle is present in GalleryPage header
+ * - An explicit Inicio link is present in GalleryPage header
  * - Logo "Mery Palencia" navigates to "/" (href="/")
  * - "Galería" link has active style class (border-b-2 border-accent) when at /galeria
  *
@@ -80,27 +80,24 @@ describe("GalleryPage – preservation de navbar (Property 2: Preservation)", ()
   );
 
   /**
-   * P2.2: ThemeToggle está presente en el header de GalleryPage.
+   * P2.2: Inicio está presente en el header de GalleryPage.
    *
    * Validates: Requirement 3.2
    * EXPECTED TO PASS on unfixed code.
    */
-  it("P2.2: ThemeToggle está presente en el header de GalleryPage", () => {
-    expect(headerSource).toContain("ThemeToggle");
-    expect(headerSource).toMatch(/<ThemeToggle/);
+  it("P2.2: Inicio está presente en el header de GalleryPage", () => {
+    expect(headerSource).toMatch(/to="\/"[\s\S]{0,300}Inicio/);
   });
 
   /**
-   * P2.3: El logo "Mery Palencia" en GalleryPage tiene href="/" (navega al home).
+   * P2.3: El logo accesible de GalleryPage navega al home.
    *
    * Validates: Requirement 3.3
    * EXPECTED TO PASS on unfixed code.
    */
-  it('P2.3: el logo link en GalleryPage tiene href="/" (navega al home)', () => {
-    // The logo is rendered as <Link to="/">Mery Palencia</Link>
-    // which wouter renders as <a href="/">Mery Palencia</a>
-    expect(headerSource).toContain('to="/"');
-    expect(headerSource).toMatch(/to="\/"[\s\S]{0,200}Mery Palencia/);
+  it('P2.3: el logo accesible en GalleryPage navega al home', () => {
+    expect(headerSource).toMatch(/<Link to="\/"[^>]*aria-label="Ir al inicio"/);
+    expect(headerSource).toMatch(/<img src="\/logo\/logo\.svg" alt="" aria-hidden="true"/);
   });
 
   /**

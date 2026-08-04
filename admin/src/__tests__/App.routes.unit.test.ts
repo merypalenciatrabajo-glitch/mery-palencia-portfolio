@@ -25,8 +25,10 @@ const appSource = readFileSync(
 // ── Requirement 7.1 – ruta /galeria registrada ────────────────────────────────
 
 describe("Admin router – ruta /galeria registrada (Requirement 7.1)", () => {
-  it("App.tsx importa GaleriaPage", () => {
-    expect(appSource).toMatch(/import\s+GaleriaPage\s+from/);
+  it("App.tsx carga GaleriaPage de forma diferida", () => {
+    expect(appSource).toContain(
+      'lazy(() => import("./pages/GaleriaPage"))'
+    );
   });
 
   it("AppRoutes contiene una <Route> con path='/galeria'", () => {

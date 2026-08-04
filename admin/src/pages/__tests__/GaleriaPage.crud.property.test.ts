@@ -106,11 +106,6 @@ const cloudinaryResultArb: fc.Arbitrary<CloudinaryResult> = fc.record({
   publicId: nonEmptyStringArb,
 });
 
-const extraImageArb: fc.Arbitrary<ExtraImage> = fc.record({
-  url: urlArb,
-  publicId: nonEmptyStringArb,
-});
-
 const CATEGORIES = ["fotografia-paisaje", "fotografia-infantil", "fotografia-moda", "fotografia-documental", "ilustracion-digital", "material-digital", "trabajos-analogos", "otros"] as const;
 
 const formArb: fc.Arbitrary<FormState> = fc.record({

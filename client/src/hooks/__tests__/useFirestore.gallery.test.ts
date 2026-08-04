@@ -3,6 +3,10 @@
 
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+const hookSource = readFileSync(resolve(__dirname, "../useFirestore.ts"), "utf-8");
 
 /**
  * The normalization logic extracted from useGalleryPage:
@@ -84,6 +88,11 @@ const rawItemWithExtrasArb = fc
 // ---------------------------------------------------------------------------
 
 describe("useGalleryPage – normalización de extraImages (Property 1)", () => {
+  it("consulta la colección independiente galleryPage", () => {
+    const implementation = hookSource.slice(hookSource.indexOf("export function useGalleryPage"));
+    expect(implementation).toMatch(/\}\>\("galleryPage", \[orderBy\("order", "asc"\)\]\)/);
+  });
+
   it(
     "P1a: cuando el documento NO tiene extraImages, el resultado siempre es []",
     () => {

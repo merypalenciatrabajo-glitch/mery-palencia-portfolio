@@ -7,8 +7,8 @@ import {
   where,
   type QueryConstraint,
 } from "firebase/firestore";
-import { useEffect, useState } from "react";
-import { db } from "@/lib/firebase";
+import { useCallback, useEffect, useState } from "react";
+import { db, isFirebaseConfigured } from "@/lib/firebase";
 
 export function useCollection<T>(
   collectionName: string,
@@ -16,17 +16,46 @@ export function useCollection<T>(
 ) {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [revision, setRevision] = useState(0);
+
+  const retry = useCallback(() => setRevision((current) => current + 1), []);
 
   useEffect(() => {
-    const q = query(collection(db, collectionName), ...constraints);
-    const unsub = onSnapshot(q, (snap) => {
-      setData(snap.docs.map((d) => ({ id: d.id, ...d.data() } as T)));
+    setLoading(true);
+    setError(null);
+    if (!isFirebaseConfigured) {
+      setError(new Error("Firebase no está configurado"));
       setLoading(false);
-    });
-    return unsub;
-  }, [collectionName]);
+      return;
+    }
 
-  return { data, loading };
+    const q = query(collection(db, collectionName), ...constraints);
+    const timeout = window.setTimeout(() => {
+      setError(new Error(`La carga de ${collectionName} agotó el tiempo de espera`));
+      setLoading(false);
+    }, 12000);
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        window.clearTimeout(timeout);
+        setData(snap.docs.map((d) => ({ id: d.id, ...d.data() } as T)));
+        setError(null);
+        setLoading(false);
+      },
+      () => {
+        window.clearTimeout(timeout);
+        setError(new Error(`No se pudo cargar ${collectionName}`));
+        setLoading(false);
+      }
+    );
+    return () => {
+      window.clearTimeout(timeout);
+      unsub();
+    };
+  }, [collectionName, revision]);
+
+  return { data, loading, error, retry };
 }
 
 // Hooks específicos para cada colección
@@ -61,7 +90,7 @@ export function useGalleryPage() {
     description: string;
     order: number;
     extraImages?: { url: string; publicId: string }[];
-  }>("gallery", [orderBy("order", "asc")]);
+  }>("galleryPage", [orderBy("order", "asc")]);
 
   // Normalize legacy items that have no extraImages field
   return {
@@ -85,7 +114,7 @@ export function useBlogPosts() {
     image: string;
     author: string;
     published: boolean;
-  }>("blogPosts", [orderBy("date", "desc")]);
+  }>("blogPosts", [where("published", "==", true), orderBy("date", "desc")]);
 }
 
 export function useCommissions() {

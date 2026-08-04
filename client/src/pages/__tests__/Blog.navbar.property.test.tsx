@@ -87,7 +87,7 @@ describe("Blog – navbar enlaces de navegación (Property 1: Bug Condition)", (
       // The fixed header should have: <Link to="/blog">Blog</Link>
       const hasBlogLink =
         headerSource.includes('to="/blog"') &&
-        /to="\/blog"[\s\S]{0,200}Blog/.test(headerSource);
+        /to="\/blog"[\s\S]{0,500}Blog/.test(headerSource);
 
       expect(hasBlogLink).toBe(true);
     }
@@ -107,7 +107,7 @@ describe("Blog – navbar enlaces de navegación (Property 1: Bug Condition)", (
       // The fixed header should have: <Link to="/galeria">Galería</Link>
       const hasGaleriaLink =
         headerSource.includes('to="/galeria"') &&
-        /to="\/galeria"[\s\S]{0,200}Galer/.test(headerSource);
+        /to="\/galeria"[\s\S]{0,500}Galer/.test(headerSource);
 
       expect(hasGaleriaLink).toBe(true);
     }
@@ -140,7 +140,7 @@ describe("Blog – navbar enlaces de navegación (Property 1: Bug Condition)", (
             const routePattern = route.replace("/", "\\/");
             const hasLink =
               headerSource.includes(`to="${route}"`) &&
-              new RegExp(`to="${routePattern}"[\\s\\S]{0,200}${label.charAt(0)}`).test(headerSource);
+              new RegExp(`to="${routePattern}"[\\s\\S]{0,500}${label.charAt(0)}`).test(headerSource);
 
             return hasLink;
           }

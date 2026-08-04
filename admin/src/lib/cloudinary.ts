@@ -1,5 +1,11 @@
-const CLOUD_NAME = "dh5zf58jv";
-const UPLOAD_PRESET = "admin-portafolio";
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+function assertCloudinaryConfiguration() {
+  if (!CLOUD_NAME || !UPLOAD_PRESET) {
+    throw new Error("Cloudinary public upload configuration is missing");
+  }
+}
 
 export interface CloudinaryUploadResult {
   url: string;
@@ -10,6 +16,7 @@ export async function uploadToCloudinary(
   file: File,
   onProgress?: (percent: number) => void
 ): Promise<CloudinaryUploadResult> {
+  assertCloudinaryConfiguration();
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", UPLOAD_PRESET);
@@ -43,6 +50,7 @@ export async function uploadRawToCloudinary(
   file: File,
   onProgress?: (percent: number) => void
 ): Promise<CloudinaryUploadResult> {
+  assertCloudinaryConfiguration();
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", UPLOAD_PRESET);

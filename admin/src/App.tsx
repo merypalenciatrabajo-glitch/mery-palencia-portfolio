@@ -1,16 +1,20 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import AccessDenied from "./components/AccessDenied";
 import DashboardLayout from "./components/DashboardLayout";
+import NativeNavigation from "./components/NativeNavigation";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Blog from "./pages/Blog";
-import Commissions from "./pages/Commissions";
-import Dashboard from "./pages/Dashboard";
-import Gallery from "./pages/Gallery";
-import GaleriaPage from "./pages/GaleriaPage";
 import Login from "./pages/Login";
 
+const Blog = lazy(() => import("./pages/Blog"));
+const Commissions = lazy(() => import("./pages/Commissions"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Gallery = lazy(() => import("./pages/Gallery"));
+const GaleriaPage = lazy(() => import("./pages/GaleriaPage"));
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
 
   if (loading) {
     return (
@@ -21,12 +25,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) return <Navigate to="/login" replace />;
+  if (!isAdmin) return <AccessDenied />;
 
   return <DashboardLayout>{children}</DashboardLayout>;
 }
 
 function AppRoutes() {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
 
   if (loading) {
     return (
@@ -37,10 +42,23 @@ function AppRoutes() {
   }
 
   return (
-    <Routes>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div
+            className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"
+            role="status"
+            aria-label="Cargando página"
+          />
+        </div>
+      }
+    >
+      <Routes>
       <Route
         path="/login"
-        element={user ? <Navigate to="/" replace /> : <Login />}
+        element={
+          user ? (isAdmin ? <Navigate to="/" replace /> : <AccessDenied />) : <Login />
+        }
       />
       <Route
         path="/"
@@ -83,7 +101,8 @@ function AppRoutes() {
         }
       />
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }
 
@@ -92,6 +111,7 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
+          <NativeNavigation />
           <AppRoutes />
         </BrowserRouter>
       </AuthProvider>

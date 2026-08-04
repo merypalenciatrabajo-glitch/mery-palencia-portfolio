@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { ArrowRight, Calendar } from 'lucide-react';
 import { useBlogPosts } from '@/hooks/useFirestore';
+import Seo from '@/components/Seo';
+import ContentStatus from '@/components/ContentStatus';
+import { cloudinaryImage, cloudinarySrcSet } from '@/lib/images';
 
 
 const categories = [
@@ -19,8 +22,8 @@ const categories = [
 
 export default function Blog() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const { data: blogPosts } = useBlogPosts();
-  const [location, navigate] = useLocation();
+  const { data: blogPosts, loading, error, retry } = useBlogPosts();
+  const [location] = useLocation();
   const isActive = (path: string) => location === path;
 
   const filteredPosts = selectedCategory
@@ -37,26 +40,32 @@ export default function Blog() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title="Blog de ilustración"
+        description="Procesos creativos, técnicas y reflexiones sobre ilustración digital, diseño de personajes y la industria creativa."
+        path="/blog"
+      />
       {/* HEADER */}
       <header className="border-b border-border sticky top-0 bg-background/90 backdrop-blur-sm z-40">
         <div className="container h-16 flex items-center justify-between">
-          <Link to="/" className="hover:opacity-80 transition-opacity">
-            <img src="/logo/logo.svg" alt="Mery Palencia" className="w-auto" style={{ height: '44px' }} />
+          <Link to="/" className="inline-flex min-h-11 min-w-11 items-center hover:opacity-80 transition-opacity" aria-label="Ir al inicio">
+            <img src="/logo/logo.svg" alt="" aria-hidden="true" className="w-auto" style={{ height: '44px' }} />
           </Link>
-          <div className="flex items-center gap-4">
-            <Link to="/" className="font-medium transition-colors text-foreground hover:text-accent">
+          <nav className="flex items-center gap-1 sm:gap-2" aria-label="Navegación principal">
+            <Link to="/" className="inline-flex min-h-11 items-center px-2 font-medium transition-colors text-foreground hover:text-accent">
               Inicio
             </Link>
-            <Link to="/blog" className={`font-medium transition-colors ${isActive('/blog') ? 'text-accent border-b-2 border-accent pb-0.5' : 'text-foreground hover:text-accent'}`}>
+            <Link to="/blog" aria-current="page" className={`inline-flex min-h-11 items-center px-2 font-medium transition-colors ${isActive('/blog') ? 'text-accent border-b-2 border-accent' : 'text-foreground hover:text-accent'}`}>
               Blog
             </Link>
-            <Link to="/galeria" className={`font-medium transition-colors ${isActive('/galeria') ? 'text-accent border-b-2 border-accent pb-0.5' : 'text-foreground hover:text-accent'}`}>
+            <Link to="/galeria" className={`inline-flex min-h-11 items-center px-2 font-medium transition-colors ${isActive('/galeria') ? 'text-accent border-b-2 border-accent' : 'text-foreground hover:text-accent'}`}>
               Galería
             </Link>
-          </div>
+          </nav>
         </div>
       </header>
 
+      <main id="main-content">
       {/* HERO DEL BLOG */}
       <section className="py-16 md:py-24 bg-background">
         <div className="container">
@@ -81,11 +90,12 @@ export default function Blog() {
             <span className="text-sm font-medium text-muted-foreground">Filtrar por:</span>
             <button
               onClick={() => setSelectedCategory(null)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+              className={`min-h-11 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                 selectedCategory === null
-                  ? 'bg-accent text-white'
+                  ? 'bg-accent text-accent-foreground'
                   : 'bg-secondary text-foreground hover:bg-muted'
               }`}
+              aria-pressed={selectedCategory === null}
             >
               Todos
             </button>
@@ -93,11 +103,12 @@ export default function Blog() {
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                className={`min-h-11 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   selectedCategory === category.id
-                    ? 'bg-accent text-white'
+                    ? 'bg-accent text-accent-foreground'
                     : 'bg-secondary text-foreground hover:bg-muted'
                 }`}
+                aria-pressed={selectedCategory === category.id}
               >
                 {category.label}
               </button>
@@ -109,23 +120,47 @@ export default function Blog() {
       {/* LISTADO DE ARTÍCULOS */}
       <section className="py-16 md:py-24 bg-background">
         <div className="container">
-          {filteredPosts.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">
-                No hay artículos en esta categoría aún.
-              </p>
+          {loading ? (
+            <div className="space-y-8" role="status" aria-label="Cargando artículos">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                  <div className="aspect-square animate-pulse rounded-lg bg-muted" />
+                  <div className="space-y-4 py-3 md:col-span-2">
+                    <div className="h-5 w-28 animate-pulse rounded bg-muted" />
+                    <div className="h-9 w-3/4 animate-pulse rounded bg-muted" />
+                    <div className="h-20 animate-pulse rounded bg-muted" />
+                  </div>
+                </div>
+              ))}
             </div>
+          ) : error ? (
+            <ContentStatus
+              kind="error"
+              title="No pudimos cargar los artículos"
+              description="Comprueba tu conexión e inténtalo nuevamente."
+              onRetry={retry}
+            />
+          ) : filteredPosts.length === 0 ? (
+            <ContentStatus
+              kind="empty"
+              title="Aún no hay artículos publicados"
+              description={selectedCategory ? 'No hay artículos disponibles en esta categoría.' : 'Vuelve pronto para leer nuevas publicaciones.'}
+            />
           ) : (
             <div className="space-y-12">
               {filteredPosts.map((post, index) => (
-                <div key={post.id} className="group block animate-in fade-in slide-in-from-bottom-4 duration-500 cursor-pointer" style={{ animationDelay: `${index * 100}ms` }} onClick={() => navigate(`/blog/${post.id}`)}>
+                <Link key={post.id} to={`/blog/${post.id}`} className="group block animate-in fade-in slide-in-from-bottom-4 duration-500 rounded-lg" style={{ animationDelay: `${index * 100}ms` }}>
                     <article className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start pb-12 border-b border-border last:border-b-0 hover:opacity-80 transition-opacity">
                       {/* Imagen */}
                       <div className="md:col-span-1 order-2 md:order-1">
                         <div className="relative overflow-hidden rounded-lg shadow-soft group-hover:shadow-soft-lg transition-all duration-300">
                           <img
-                            src={post.image}
+                            src={cloudinaryImage(post.image, { width: 720 })}
+                            srcSet={cloudinarySrcSet(post.image, [360, 540, 720, 960])}
+                            sizes="(min-width: 768px) 33vw, 100vw"
                             alt={post.title}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         </div>
@@ -167,7 +202,7 @@ export default function Blog() {
                         </div>
                       </div>
                     </article>
-                </div>
+                </Link>
               ))}
             </div>
           )}
@@ -185,12 +220,14 @@ export default function Blog() {
           </p>
           <Link
             to="/#contact-section"
-            className="inline-block px-8 py-3 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-all duration-300 cursor-pointer"
+            className="inline-flex min-h-11 items-center px-8 py-3 bg-accent hover:bg-accent/90 text-accent-foreground rounded-lg font-medium transition-all duration-300 cursor-pointer"
           >
             Solicitar Comisión
           </Link>
         </div>
       </section>
+
+      </main>
 
       {/* FOOTER */}
       <footer className="bg-card border-t border-border py-12">
@@ -202,7 +239,7 @@ export default function Blog() {
             Ilustradora Digital | Diseño de Personajes | Arte Conceptual
           </p>
           <p className="text-sm text-muted-foreground">
-            © 2024 Mery Palencia. Todos los derechos reservados.
+            © {new Date().getFullYear()} Mery Palencia. Todos los derechos reservados.
           </p>
         </div>
       </footer>

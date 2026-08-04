@@ -65,7 +65,7 @@ export default function GaleriaPage() {
   const [customCategory, setCustomCategory] = useState("");
 
   useEffect(() => {
-    const q = query(collection(db, "gallery"), orderBy("order", "asc"));
+    const q = query(collection(db, "galleryPage"), orderBy("order", "asc"));
     const unsub = onSnapshot(q, (snap) => {
       setItems(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GalleryItem, "id">) })));
     });
@@ -163,7 +163,7 @@ export default function GaleriaPage() {
           const { url, publicId } = await uploadToCloudinary(file, setProgress);
           imageData = { image: url, publicId };
         }
-        await updateDoc(doc(db, "gallery", editing.id), {
+        await updateDoc(doc(db, "galleryPage", editing.id), {
           ...form,
           category: finalCategory,
           ...imageData,
@@ -172,7 +172,7 @@ export default function GaleriaPage() {
       } else {
         if (!file) return;
         const { url, publicId } = await uploadToCloudinary(file, setProgress);
-        await addDoc(collection(db, "gallery"), {
+        await addDoc(collection(db, "galleryPage"), {
           ...form,
           category: finalCategory,
           image: url,
@@ -194,7 +194,7 @@ export default function GaleriaPage() {
   const handleToggleFeatured = async (item: GalleryItem) => {
     setTogglingId(item.id);
     try {
-      await updateDoc(doc(db, "gallery", item.id), { featured: !item.featured });
+      await updateDoc(doc(db, "galleryPage", item.id), { featured: !item.featured });
     } catch (err) {
       console.error(err);
     } finally {
@@ -206,7 +206,7 @@ export default function GaleriaPage() {
     if (!confirm(`¿Eliminar "${item.title}"?`)) return;
     setDeletingId(item.id);
     try {
-      await deleteDoc(doc(db, "gallery", item.id));
+      await deleteDoc(doc(db, "galleryPage", item.id));
     } finally {
       setDeletingId(null);
     }

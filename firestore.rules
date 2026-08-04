@@ -1,0 +1,141 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function hasContentRole() {
+      return request.auth != null && (
+        request.auth.token.get('admin', false) == true ||
+        request.auth.token.get('role', '') == 'admin' ||
+        request.auth.token.get('role', '') == 'editor'
+      );
+    }
+
+    function validGallery(data) {
+      return data.keys().hasOnly([
+        'title', 'image', 'publicId', 'category', 'description', 'order',
+        'featured', 'extraImages'
+      ]) &&
+      data.keys().hasAll(['title', 'image', 'category', 'description', 'order']) &&
+      data.title is string && data.title.size() > 0 && data.title.size() <= 160 &&
+      data.image is string && data.image.size() <= 2048 &&
+      data.category is string && data.category.size() <= 80 &&
+      data.description is string && data.description.size() <= 4000 &&
+      data.order is number &&
+      (!('publicId' in data) || data.publicId is string) &&
+      (!('featured' in data) || data.featured is bool) &&
+      (!('extraImages' in data) || (data.extraImages is list && data.extraImages.size() <= 4));
+    }
+
+    function validBlogPost(data) {
+      return data.keys().hasOnly([
+        'title', 'excerpt', 'content', 'date', 'scheduledAt', 'category',
+        'image', 'publicId', 'author', 'published', 'views', 'videoUrl'
+      ]) &&
+      data.keys().hasAll([
+        'title', 'excerpt', 'content', 'date', 'category', 'image', 'author', 'published'
+      ]) &&
+      data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+      data.excerpt is string && data.excerpt.size() <= 600 &&
+      data.content is string && data.content.size() <= 50000 &&
+      data.date is string && data.category is string &&
+      data.image is string && data.image.size() <= 2048 &&
+      data.author is string && data.author.size() <= 120 &&
+      data.published is bool &&
+      (!('scheduledAt' in data) || data.scheduledAt == null || data.scheduledAt is string) &&
+      (!('videoUrl' in data) || data.videoUrl == null || data.videoUrl is string) &&
+      (!('publicId' in data) || data.publicId is string) &&
+      (!('views' in data) || (data.views is int && data.views >= 0));
+    }
+
+    function validCommission(data) {
+      return data.keys().hasOnly([
+        'name', 'price', 'priceAmount', 'priceCurrency', 'description',
+        'includes', 'featured', 'order'
+      ]) &&
+      data.keys().hasAll(['name', 'price', 'description', 'includes', 'featured', 'order']) &&
+      data.name is string && data.name.size() > 0 && data.name.size() <= 120 &&
+      data.price is string && data.price.size() <= 120 &&
+      data.description is string && data.description.size() <= 2000 &&
+      data.includes is list && data.includes.size() <= 20 &&
+      data.featured is bool && data.order is number &&
+      (!('priceAmount' in data) || data.priceAmount is number) &&
+      (!('priceCurrency' in data) || data.priceCurrency in ['COP', 'USD']);
+    }
+
+    function validProcessStep(data) {
+      return data.keys().hasOnly(['number', 'title', 'description', 'order']) &&
+      data.keys().hasAll(['number', 'title', 'description', 'order']) &&
+      data.number is string && data.number.size() <= 20 &&
+      data.title is string && data.title.size() > 0 && data.title.size() <= 160 &&
+      data.description is string && data.description.size() <= 2000 &&
+      data.order is number;
+    }
+
+    function validHero(data) {
+      return data.keys().hasOnly(['imageUrl', 'position']) &&
+      data.keys().hasAll(['imageUrl', 'position']) &&
+      (data.imageUrl == null || (data.imageUrl is string && data.imageUrl.size() <= 2048)) &&
+      data.position is map &&
+      data.position.keys().hasOnly(['x', 'y']) &&
+      data.position.keys().hasAll(['x', 'y']) &&
+      data.position.x is number && data.position.x >= 0 && data.position.x <= 100 &&
+      data.position.y is number && data.position.y >= 0 && data.position.y <= 100;
+    }
+
+    function validAppVersion(data) {
+      return data.keys().hasOnly(['version', 'apkUrl', 'sha256', 'changelog', 'updatedAt']) &&
+      data.keys().hasAll(['version', 'apkUrl', 'sha256', 'updatedAt']) &&
+      data.version is string && data.version.size() <= 32 &&
+      data.apkUrl is string && data.apkUrl.matches('https://.*\\.apk') && data.apkUrl.size() <= 2048 &&
+      data.sha256 is string && data.sha256.size() == 64 &&
+      data.updatedAt is string && data.updatedAt.size() <= 64 &&
+      (!('changelog' in data) || (data.changelog is string && data.changelog.size() <= 4000));
+    }
+
+    match /gallery/{documentId} {
+      allow read: if true;
+      allow create, update: if hasContentRole() && validGallery(request.resource.data);
+      allow delete: if hasContentRole();
+    }
+
+    match /galleryPage/{documentId} {
+      allow read: if true;
+      allow create, update: if hasContentRole() && validGallery(request.resource.data);
+      allow delete: if hasContentRole();
+    }
+
+    match /blogPosts/{documentId} {
+      allow read: if hasContentRole() || resource.data.published == true;
+      allow create, update: if hasContentRole() && validBlogPost(request.resource.data);
+      allow delete: if hasContentRole();
+    }
+
+    match /commissions/{documentId} {
+      allow read: if true;
+      allow create, update: if hasContentRole() && validCommission(request.resource.data);
+      allow delete: if hasContentRole();
+    }
+
+    match /processSteps/{documentId} {
+      allow read: if true;
+      allow create, update: if hasContentRole() && validProcessStep(request.resource.data);
+      allow delete: if hasContentRole();
+    }
+
+    match /settings/hero {
+      allow read: if true;
+      allow create, update: if hasContentRole() && validHero(request.resource.data);
+      allow delete: if hasContentRole();
+    }
+
+    match /settings/appVersion {
+      allow read: if hasContentRole();
+      allow create, update: if hasContentRole() && validAppVersion(request.resource.data);
+      allow delete: if hasContentRole();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

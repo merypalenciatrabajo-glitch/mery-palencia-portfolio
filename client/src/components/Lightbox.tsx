@@ -63,19 +63,50 @@ export default function Lightbox({ isOpen, image, title, category, description, 
   const touchStartXRef = useRef(0);
   const touchStartYRef = useRef(0);
   const isHorizontalRef = useRef<boolean | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement | null;
+      const previousOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       setIndex(0);
       setDragOffset(0);
-    } else {
-      document.body.style.overflow = 'unset';
+      requestAnimationFrame(() => closeButtonRef.current?.focus());
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') onClose();
+        if (e.key === 'ArrowLeft') setIndex((current) => Math.max(0, current - 1));
+        if (e.key === 'ArrowRight') setIndex((current) => Math.min(total - 1, current + 1));
+        if (e.key !== 'Tab' || !dialogRef.current) return;
+
+        const focusable = Array.from(
+          dialogRef.current.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          )
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      };
+
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+        document.body.style.overflow = previousOverflow;
+        previousFocusRef.current?.focus();
+      };
     }
-    const handleEscape = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    if (isOpen) document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, total]);
 
   const goTo = (i: number) => {
     setDragOffset(0);
@@ -132,14 +163,19 @@ export default function Lightbox({ isOpen, image, title, category, description, 
       onTouchMove={(e) => e.stopPropagation()}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="lightbox-title"
         className="relative animate-in fade-in zoom-in-95 duration-300 w-full"
         style={{ maxWidth: '480px' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close */}
         <button
+          ref={closeButtonRef}
           onClick={onClose}
-          className="absolute -top-10 right-0 text-white hover:text-gray-300 z-10"
+          className="absolute -top-12 right-0 flex h-11 w-11 items-center justify-center text-white hover:text-gray-300 z-10"
           aria-label="Cerrar"
         >
           <X size={28} />
@@ -193,7 +229,7 @@ export default function Lightbox({ isOpen, image, title, category, description, 
                 {index > 0 && (
                   <button
                     onClick={(e) => { e.stopPropagation(); prev(); }}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
                     aria-label="Anterior"
                   >
                     <ChevronLeft size={18} />
@@ -202,7 +238,7 @@ export default function Lightbox({ isOpen, image, title, category, description, 
                 {index < total - 1 && (
                   <button
                     onClick={(e) => { e.stopPropagation(); next(); }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
                     aria-label="Siguiente"
                   >
                     <ChevronRight size={18} />
@@ -210,7 +246,7 @@ export default function Lightbox({ isOpen, image, title, category, description, 
                 )}
 
                 {/* Contador */}
-                <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm">
+                <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm" aria-live="polite">
                   {index + 1}/{total}
                 </div>
 
@@ -220,11 +256,14 @@ export default function Lightbox({ isOpen, image, title, category, description, 
                     <button
                       key={i}
                       onClick={(e) => { e.stopPropagation(); goTo(i); }}
-                      className={`rounded-full transition-all duration-200 ${
-                        i === index ? 'w-2 h-2 bg-white' : 'w-1.5 h-1.5 bg-white/50'
-                      }`}
+                      className="flex h-11 w-11 items-center justify-center rounded-full"
                       aria-label={`Foto ${i + 1}`}
-                    />
+                      aria-current={i === index ? 'true' : undefined}
+                    >
+                      <span className={`rounded-full transition-all duration-200 ${
+                        i === index ? 'w-2 h-2 bg-white' : 'w-1.5 h-1.5 bg-white/50'
+                      }`} />
+                    </button>
                   ))}
                 </div>
               </>
@@ -239,7 +278,7 @@ export default function Lightbox({ isOpen, image, title, category, description, 
                   {category}
                 </span>
               )}
-              <h3 className="text-lg font-display text-foreground leading-snug">{title}</h3>
+              <h3 id="lightbox-title" className="text-lg font-display text-foreground leading-snug">{title}</h3>
               {description && (
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {parseTextWithLinks(description)}

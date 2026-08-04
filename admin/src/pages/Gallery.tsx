@@ -6,7 +6,6 @@ import {
   orderBy,
   query,
   updateDoc,
-  where,
 } from "firebase/firestore";
 import { Edit2, Plus, StarOff, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -45,7 +44,7 @@ const EMPTY_FORM = {
 };
 
 export default function Gallery() {
-  // Only show items from galleryPage that are featured
+  // Featured items are stored in the dedicated `gallery` collection used by Home.
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [allItems, setAllItems] = useState<GalleryItem[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -66,7 +65,7 @@ export default function Gallery() {
   const [customCategory, setCustomCategory] = useState("");
 
   useEffect(() => {
-    // Listen to all galleryPage items ordered by order
+    // Listen to all Home carousel items ordered by order.
     const q = query(collection(db, "gallery"), orderBy("order", "asc"));
     const unsub = onSnapshot(q, (snap) => {
       const all = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GalleryItem, "id">) }));
@@ -194,7 +193,7 @@ export default function Gallery() {
     }
   };
 
-  // Remove from featured (set featured: false) — does NOT delete from galleryPage
+  // Remove from the Home carousel without deleting the `gallery` document.
   const handleUnfeature = async (item: GalleryItem) => {
     if (!confirm(`¿Quitar "${item.title}" de destacadas? La ilustración seguirá en Galería.`)) return;
     setTogglingId(item.id);

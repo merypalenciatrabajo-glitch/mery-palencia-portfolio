@@ -15,9 +15,13 @@ import { resolve } from "node:path";
 const appSource = readFileSync(resolve(__dirname, "../App.tsx"), "utf-8");
 
 describe("Client router – ruta /galeria (Requirement 6.1)", () => {
-  it("App.tsx importa el componente GalleryPage", () => {
+  it("registra la ruta principal '/' con el componente Home", () => {
+    expect(appSource).toMatch(/path=\{["']\/["']\}[^>]*component=\{Home\}/);
+  });
+
+  it("App.tsx carga GalleryPage de forma diferida", () => {
     expect(appSource).toContain("GalleryPage");
-    expect(appSource).toMatch(/import\s+GalleryPage/);
+    expect(appSource).toContain('lazy(() => import("@/pages/GalleryPage"))');
   });
 
   it("App.tsx registra la ruta '/galeria' en el Switch de wouter", () => {

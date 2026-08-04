@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Download, RefreshCw, X } from "lucide-react";
 import { type AppUpdateInfo } from "@/hooks/useAppUpdate";
 import { Filesystem, Directory } from "@capacitor/filesystem";
+import { FileTransfer } from "@capacitor/file-transfer";
 import { FileOpener } from "@capawesome-team/capacitor-file-opener";
 import { Capacitor } from "@capacitor/core";
 
@@ -11,16 +12,24 @@ interface Props {
 
 type State = "idle" | "downloading" | "done" | "error";
 
+async function sha256ForBase64(data: string) {
+  const bytes = new Uint8Array(Math.ceil(data.length * 0.75));
+  const decoded = atob(data);
+  const view = bytes.subarray(0, decoded.length);
+  for (let index = 0; index < decoded.length; index += 1) {
+    view[index] = decoded.charCodeAt(index);
+  }
+  const digest = await crypto.subtle.digest('SHA-256', view);
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
 export default function UpdateModal({ update }: Props) {
   const [dismissed, setDismissed] = useState(false);
   const [state, setState] = useState<State>("idle");
-
-  // Solo mostrar en app nativa Android, no en navegador web
-  if (!Capacitor.isNativePlatform()) return null;
   const [progress, setProgress] = useState(0);
   const [errorMsg, setErrorMsg] = useState("");
 
-  if (dismissed) return null;
+  if (!Capacitor.isNativePlatform() || dismissed) return null;
 
   const handleUpdate = async () => {
     setState("downloading");
@@ -28,32 +37,50 @@ export default function UpdateModal({ update }: Props) {
     setErrorMsg("");
 
     try {
-      const fileName = `admin-update-${update.version}.apk`;
+      const fileName = `updates/admin-update-${update.version}.apk`;
 
-      const progressListener = await Filesystem.addListener("progress", (e) => {
+      await Filesystem.mkdir({
+        path: "updates",
+        directory: Directory.Cache,
+        recursive: true,
+      }).catch(() => undefined);
+
+      const { uri: destinationUri } = await Filesystem.getUri({
+        path: fileName,
+        directory: Directory.Cache,
+      });
+
+      const progressListener = await FileTransfer.addListener("progress", (e) => {
         if (e.contentLength > 0) {
           setProgress(Math.round((e.bytes / e.contentLength) * 100));
         }
       });
 
-      let result;
       try {
-        result = await Filesystem.downloadFile({
+        await FileTransfer.downloadFile({
           url: update.apkUrl,
-          path: fileName,
-          directory: Directory.Documents,
+          path: destinationUri,
           progress: true,
         });
       } finally {
-        progressListener.remove();
+        await progressListener.remove();
       }
 
-      if (!result.path) throw new Error("No se obtuvo ruta del archivo");
+      const downloaded = await Filesystem.readFile({
+        path: fileName,
+        directory: Directory.Cache,
+      });
+      if (typeof downloaded.data !== 'string') throw new Error('No se pudo verificar el archivo descargado');
+      const actualSha256 = await sha256ForBase64(downloaded.data);
+      if (actualSha256.toLowerCase() !== update.sha256.toLowerCase()) {
+        await Filesystem.deleteFile({ path: fileName, directory: Directory.Cache });
+        throw new Error('La firma SHA-256 de la actualización no coincide');
+      }
 
       // Obtener URI pública accesible por el instalador de Android
       const { uri } = await Filesystem.getUri({
         path: fileName,
-        directory: Directory.Documents,
+        directory: Directory.Cache,
       });
 
       setState("done");
@@ -68,7 +95,7 @@ export default function UpdateModal({ update }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6" role="dialog" aria-modal="true" aria-labelledby="update-title">
       <div className="bg-card border border-border rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4">
 
         {/* Header */}
@@ -78,7 +105,7 @@ export default function UpdateModal({ update }: Props) {
               <RefreshCw size={20} className="text-primary" />
             </div>
             <div>
-              <p className="font-semibold text-foreground text-sm">Nueva actualización</p>
+              <p id="update-title" className="font-semibold text-foreground text-sm">Nueva actualización</p>
               <p className="text-xs text-muted-foreground">Versión {update.version} disponible</p>
             </div>
           </div>
@@ -86,6 +113,7 @@ export default function UpdateModal({ update }: Props) {
             <button
               onClick={() => setDismissed(true)}
               className="p-1 rounded-lg text-muted-foreground hover:bg-secondary transition-colors"
+              aria-label="Cerrar actualización"
             >
               <X size={16} />
             </button>

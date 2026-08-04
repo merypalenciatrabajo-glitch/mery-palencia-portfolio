@@ -3,12 +3,33 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
+  "engines": {
+    "node": ">=24.18.0 <25",
+    "pnpm": ">=11.9.0 <12"
+  },
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
-    "start": "NODE_ENV=production node dist/index.js",
+    "dev:client": "pnpm --filter mery-palencia-portfolio-client dev",
+    "dev:admin": "pnpm --filter mery-palencia-admin dev",
+    "build": "pnpm run build:integrated",
+    "build:integrated": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build:client": "pnpm --filter mery-palencia-portfolio-client build",
+    "build:admin": "pnpm --filter mery-palencia-admin build",
+    "build:all": "pnpm run build:integrated && pnpm run build:client && pnpm run build:admin",
+    "start": "node dist/index.js",
     "preview": "vite preview --host",
-    "check": "tsc --noEmit",
+    "typecheck:root": "tsc --noEmit",
+    "typecheck": "pnpm run typecheck:root && pnpm --filter mery-palencia-portfolio-client typecheck && pnpm --filter mery-palencia-admin typecheck",
+    "check": "pnpm run typecheck",
+    "test": "pnpm --filter mery-palencia-portfolio-client test && pnpm --filter mery-palencia-admin test",
+    "test:server": "vitest --run --config vitest.server.config.ts",
+    "test:firebase-rules": "firebase emulators:exec --project demo-mery-portfolio --only firestore,storage \"vitest --run tests/firebase.rules.test.ts --config vitest.firebase.config.ts\"",
+    "preview:firebase:seed": "node scripts/seed-firebase-preview.mjs",
+    "test:firebase-live": "node scripts/require-firebase-live-env.mjs && vitest --run --config vitest.firebase-live.config.ts",
+    "check:frontend-secrets": "node scripts/check-frontend-secrets.mjs",
+    "check:firebase-public": "node scripts/check-public-firebase.mjs",
+    "check:vercel": "node scripts/validate-vercel-config.mjs",
+    "verify": "pnpm run typecheck && pnpm run test && pnpm run test:server && pnpm run build:all && pnpm run check:frontend-secrets && pnpm run check:vercel",
     "format": "prettier --write ."
   },
   "dependencies": {
@@ -44,9 +65,12 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "cors": "2.8.6",
     "embla-carousel-react": "^8.6.0",
     "express": "^4.21.2",
+    "express-rate-limit": "8.6.1",
     "firebase": "^12.11.0",
+    "firebase-admin": "14.2.0",
     "framer-motion": "^12.23.22",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.453.0",
@@ -68,20 +92,24 @@
   },
   "devDependencies": {
     "@builder.io/vite-plugin-jsx-loc": "^0.1.1",
+    "@firebase/rules-unit-testing": "5.0.1",
     "@tailwindcss/typography": "^0.5.15",
     "@tailwindcss/vite": "^4.1.3",
+    "@types/cors": "2.8.19",
     "@types/express": "4.17.21",
     "@types/google.maps": "^3.58.1",
     "@types/node": "^24.7.0",
     "@types/react": "^19.2.1",
     "@types/react-dom": "^19.2.1",
+    "@types/supertest": "7.2.1",
     "@vitejs/plugin-react": "^5.0.4",
     "add": "^2.0.6",
     "autoprefixer": "^10.4.20",
     "esbuild": "^0.25.0",
-    "pnpm": "^10.15.1",
+    "firebase-tools": "15.25.1",
     "postcss": "^8.4.47",
     "prettier": "^3.6.2",
+    "supertest": "7.2.2",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.19.1",
     "tw-animate-css": "^1.4.0",
@@ -90,13 +118,8 @@
     "vite-plugin-manus-runtime": "^0.0.57",
     "vitest": "^2.1.4"
   },
-  "packageManager": "pnpm@10.4.1+sha512.c753b6c3ad7afa13af388fa6d808035a008e30ea9993f58c6663e2bc5ff21679aa834db094987129aa4d488b86df57f7b634981b2f827cdcacc698cc0cfb88af",
-  "pnpm": {
-    "patchedDependencies": {
-      "wouter@3.7.1": "patches/wouter@3.7.1.patch"
-    },
-    "overrides": {
-      "tailwindcss>nanoid": "3.3.7"
-    }
+  "packageManager": "pnpm@11.9.0",
+  "volta": {
+    "node": "24.18.0"
   }
 }

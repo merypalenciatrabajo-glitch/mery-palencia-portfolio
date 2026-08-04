@@ -213,7 +213,6 @@ describe("GaleriaPage – edición de documento en galleryPage (Property 6)", ()
           fc.option(cloudinaryResultArb, { nil: null }),
           existingExtrasArb(4),
           (form, newCoverUpload, existingExtras) => {
-            const maxNew = 4 - existingExtras.length;
             const uploadedExtras: CloudinaryResult[] = [];
             const payload = buildUpdatePayload(form, newCoverUpload, existingExtras, uploadedExtras);
 

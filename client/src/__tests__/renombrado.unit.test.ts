@@ -48,7 +48,7 @@ describe("Gallery.tsx admin – heading y subtítulo (Requirement 4.2)", () => {
     expect(galleryAdminSource).toContain("carrusel del Home");
   });
 
-  it("el subtítulo menciona 'Imágenes del carrusel del Home'", () => {
-    expect(galleryAdminSource).toContain("Imágenes del carrusel del Home");
+  it("el subtítulo muestra el número de ilustraciones destacadas", () => {
+    expect(galleryAdminSource).toContain("ilustraciones destacadas");
   });
 });

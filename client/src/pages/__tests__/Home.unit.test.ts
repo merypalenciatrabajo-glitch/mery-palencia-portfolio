@@ -24,8 +24,7 @@ const source = readFileSync(componentPath, "utf-8");
 
 describe("Home – header link 'Ver Galería' (Requirement 3.1)", () => {
   it("el header contiene un elemento que navega a /galeria", () => {
-    // The header button uses window.location.href = '/galeria'
-    expect(source).toContain("'/galeria'");
+    expect(source).toContain('to="/galeria"');
   });
 
   it("el header contiene el texto 'Galería' en el área de navegación", () => {
@@ -40,12 +39,12 @@ describe("Home – header link 'Ver Galería' (Requirement 3.1)", () => {
     const headerSource = headerMatch![0];
     expect(headerSource).toContain("Blog");
     expect(headerSource).toContain("Galer");
-    expect(headerSource).toContain("'/galeria'");
+    expect(headerSource).toContain('to="/galeria"');
   });
 
-  it("el link 'Galería' del header navega a /galeria mediante window.location.href", () => {
-    // The header uses window.location.href = '/galeria'
-    expect(source).toContain("window.location.href = '/galeria'");
+  it("el link 'Galería' del header usa navegación SPA con Link", () => {
+    expect(source).toMatch(/<Link\s+to="\/galeria">/);
+    expect(source).not.toContain("window.location.href = '/galeria'");
   });
 });
 
@@ -59,15 +58,14 @@ describe("Home – hero button 'Ver Galería' (Requirement 3.2)", () => {
   });
 
   it("el hero contiene un Button que navega a /galeria", () => {
-    // The hero section has a Button with onClick navigating to /galeria
-    // We look for the pattern: onClick={() => window.location.href = '/galeria'} near "Ver Galería"
-    expect(source).toMatch(/Ver Galer[íi]a[\s\S]{0,200}\/galeria|\/galeria[\s\S]{0,200}Ver Galer[íi]a/);
+    const heroSource = source.match(/HERO SECTION[\s\S]*?GALERÍA SECTION/)?.[0] ?? "";
+    expect(heroSource).toContain('to="/galeria"');
+    expect(heroSource).toContain("Ver Galería");
   });
 
   it("el hero 'Ver Galería' usa el mismo patrón que 'Leer Blog'", () => {
-    // Both buttons use window.location.href navigation
-    expect(source).toContain("window.location.href = '/blog'");
-    expect(source).toContain("window.location.href = '/galeria'");
+    expect(source).toContain('to="/blog"');
+    expect(source).toContain('to="/galeria"');
   });
 
   it("el hero contiene el botón 'Ver Galería' con variant outline (mismo estilo que 'Leer Blog')", () => {
@@ -78,6 +76,6 @@ describe("Home – hero button 'Ver Galería' (Requirement 3.2)", () => {
     const heroSource = heroMatch![0];
     expect(heroSource).toContain("Ver Galería");
     expect(heroSource).toContain('variant="outline"');
-    expect(heroSource).toContain("'/galeria'");
+    expect(heroSource).toContain('to="/galeria"');
   });
 });

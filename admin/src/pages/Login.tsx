@@ -1,5 +1,4 @@
 import {
-  multiFactor,
   signInWithEmailAndPassword,
   TotpMultiFactorGenerator,
   type MultiFactorError,
@@ -10,11 +9,14 @@ import {
 import { Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { auth } from "@/lib/firebase";
+import { getSignInErrorMessage } from "@/lib/authErrors";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Step = "credentials" | "totp";
 
 export default function Login() {
+  const { offlinePreview, offlinePreviewError } = useAuth();
   const [step, setStep] = useState<Step>("credentials");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +31,8 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      setPassword("");
       // Si no tiene 2FA configurado, entra directo
     } catch (err: unknown) {
       const mfaError = err as MultiFactorError;
@@ -38,7 +41,7 @@ export default function Login() {
         setResolver(mfaResolver);
         setStep("totp");
       } else {
-        setError("Credenciales incorrectas. Verifica tu email y contraseña.");
+        setError(getSignInErrorMessage(err));
       }
     } finally {
       setLoading(false);
@@ -85,6 +88,22 @@ export default function Login() {
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
+          {offlinePreview && (
+            <div
+              role="status"
+              className="mb-5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-200"
+            >
+              Vista previa offline · datos locales de prueba
+            </div>
+          )}
+          {offlinePreviewError && (
+            <p
+              role="alert"
+              className="mb-5 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            >
+              No se pudo iniciar la vista local ({offlinePreviewError}).
+            </p>
+          )}
           {step === "credentials" ? (
             <>
               <h2 className="text-lg font-semibold text-foreground mb-6">
@@ -92,7 +111,7 @@ export default function Login() {
               </h2>
               <form onSubmit={handleCredentials} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                  <label htmlFor="admin-email" className="block text-sm font-medium text-foreground mb-1.5">
                     Email
                   </label>
                   <div className="relative">
@@ -101,9 +120,12 @@ export default function Login() {
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                     />
                     <input
+                      id="admin-email"
+                      aria-label="Email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="email"
                       required
                       className="w-full pl-9 pr-4 py-2.5 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
                       placeholder="admin@ejemplo.com"
@@ -112,7 +134,7 @@ export default function Login() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                  <label htmlFor="admin-password" className="block text-sm font-medium text-foreground mb-1.5">
                     Contraseña
                   </label>
                   <div className="relative">
@@ -121,15 +143,19 @@ export default function Login() {
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                     />
                     <input
+                      id="admin-password"
+                      aria-label="Contraseña"
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      autoComplete="current-password"
                       required
                       className="w-full pl-9 pr-10 py-2.5 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
                       placeholder="••••••••"
                     />
                     <button
                       type="button"
+                      aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                       onClick={() => setShowPassword((p) => !p)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     >
@@ -139,7 +165,7 @@ export default function Login() {
                 </div>
 
                 {error && (
-                  <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg">
+                  <p role="alert" className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg">
                     {error}
                   </p>
                 )}
@@ -175,10 +201,12 @@ export default function Login() {
 
               <form onSubmit={handleTotp} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                  <label htmlFor="admin-totp" className="block text-sm font-medium text-foreground mb-1.5">
                     Código de 6 dígitos
                   </label>
                   <input
+                    id="admin-totp"
+                    aria-label="Código de 6 dígitos"
                     type="text"
                     inputMode="numeric"
                     maxLength={6}
@@ -186,6 +214,7 @@ export default function Login() {
                     onChange={(e) =>
                       setTotpCode(e.target.value.replace(/\D/g, ""))
                     }
+                    autoComplete="one-time-code"
                     required
                     className="w-full px-4 py-2.5 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm tracking-widest text-center text-lg"
                     placeholder="000000"
@@ -194,7 +223,7 @@ export default function Login() {
                 </div>
 
                 {error && (
-                  <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg">
+                  <p role="alert" className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg">
                     {error}
                   </p>
                 )}

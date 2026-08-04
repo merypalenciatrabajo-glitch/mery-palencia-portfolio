@@ -150,10 +150,14 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
-
-export default defineConfig({
-  plugins,
+export default defineConfig(({ mode }) => ({
+  plugins: [
+    react(),
+    tailwindcss(),
+    ...(mode === "development"
+      ? [jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()]
+      : []),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -166,6 +170,20 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return undefined;
+          if (id.includes("firebase")) return "vendor-firebase";
+          if (id.includes("framer-motion")) return "vendor-motion";
+          if (id.includes("@radix-ui")) return "vendor-radix";
+          if (id.includes("react") || id.includes("wouter")) {
+            return "vendor-react";
+          }
+          return "vendor";
+        },
+      },
+    },
   },
   server: {
     port: 3000,
@@ -185,4 +203,4 @@ export default defineConfig({
       deny: ["**/.*"],
     },
   },
-});
+}));
