@@ -2,6 +2,11 @@
   "name": "mery-palencia-admin",
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=24.18.0 <25",
+    "pnpm": ">=11.9.0 <12"
+  },
+  "packageManager": "pnpm@11.9.0",
   "scripts": {
     "dev": "vite --host --port 3001",
     "build": "vite build",
