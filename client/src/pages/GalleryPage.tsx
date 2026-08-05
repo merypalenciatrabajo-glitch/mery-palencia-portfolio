@@ -94,7 +94,7 @@ export default function GalleryPage() {
   const getCategoryLabel = (cat: string) => CATEGORY_LABELS[normalizeCategory(cat)] ?? cat;
 
   return (
-    <div className="portfolio-page portfolio-page-enter min-h-screen bg-background">
+    <div className="portfolio-page portfolio-collection-page portfolio-page-enter min-h-screen bg-background">
       <Seo
         title="Galería"
         description="Galería de fotografía, ilustración digital, trabajos análogos y material creativo de Mery Palencia."
@@ -105,13 +105,13 @@ export default function GalleryPage() {
       <main id="main-content">
       {/* HERO */}
       <section className="portfolio-collection-hero">
-        <div className="container grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-end">
+        <div className="container grid gap-7 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-end">
           <div className="max-w-3xl">
-            <p className="portfolio-eyebrow mb-5">Fotografía & Arte</p>
+            <p className="portfolio-eyebrow mb-3">Fotografía & Arte</p>
             <h1 className="text-5xl font-semibold leading-[0.95] tracking-[-0.055em] text-foreground sm:text-6xl md:text-7xl">
               Archivo visual
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground md:text-lg">
+            <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground md:text-lg">
               Una selección de fotografía, ilustración y piezas creativas reunidas en un solo espacio.
             </p>
           </div>
@@ -239,10 +239,10 @@ export default function GalleryPage() {
                     />
                     <div className="portfolio-gallery-card__veil absolute inset-0 z-20" aria-hidden="true" />
                     <div className="absolute inset-x-0 bottom-0 z-30 p-5 text-left sm:p-6">
-                      <span className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-primary">
+                      <span className="portfolio-gallery-card__category">
                         {getCategoryLabel(item.category)}
                       </span>
-                      <h2 className="mt-2 line-clamp-2 text-lg font-semibold leading-tight text-white sm:text-xl">
+                      <h2 className="portfolio-gallery-card__title mt-2 line-clamp-2 text-lg leading-tight sm:text-xl">
                         {item.title}
                       </h2>
                     </div>

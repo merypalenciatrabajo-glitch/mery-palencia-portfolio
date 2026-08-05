@@ -35,7 +35,7 @@ export default function Blog() {
   };
 
   return (
-    <div className="portfolio-page portfolio-page-enter min-h-screen bg-background">
+    <div className="portfolio-page portfolio-collection-page portfolio-page-enter min-h-screen bg-background">
       <Seo
         title="Blog de ilustración"
         description="Procesos creativos, técnicas y reflexiones sobre ilustración digital, diseño de personajes y la industria creativa."
@@ -46,13 +46,13 @@ export default function Blog() {
       <main id="main-content">
       {/* HERO DEL BLOG */}
       <section className="portfolio-collection-hero">
-        <div className="container grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-end">
+        <div className="container grid gap-7 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-end">
           <div className="max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <p className="portfolio-eyebrow mb-5">Blog & Artículos</p>
+            <p className="portfolio-eyebrow mb-3">Blog & Artículos</p>
             <h1 className="max-w-3xl text-5xl font-semibold leading-[0.98] tracking-[-0.055em] text-foreground sm:text-6xl md:text-7xl">
               Procesos, oficio y reflexiones
             </h1>
-            <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
+            <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
               Experiencias, técnicas y pensamientos sobre ilustración digital y vida creativa.
             </p>
           </div>
@@ -169,7 +169,7 @@ export default function Blog() {
                         </div>
 
                         {/* Título */}
-                        <h2 className="mt-5 text-2xl font-semibold leading-tight tracking-[-0.035em] text-foreground transition-colors group-hover:text-primary md:text-3xl">
+                        <h2 className="portfolio-blog-card__title mt-5 text-2xl leading-tight text-foreground transition-colors group-hover:text-primary md:text-3xl">
                           {post.title}
                         </h2>
 
@@ -193,7 +193,7 @@ export default function Blog() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="portfolio-section">
+      <section className="portfolio-section portfolio-section--cta">
         <div className="portfolio-blog-cta container text-center">
           <p className="portfolio-eyebrow mb-4">Trabajemos juntos</p>
           <h2 className="text-3xl md:text-4xl font-display text-foreground">
