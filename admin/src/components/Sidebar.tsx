@@ -1,21 +1,19 @@
-import { useState } from "react";
 import {
   BookOpen,
   GalleryHorizontal,
   Image,
+  Layers,
   LayoutDashboard,
   LogOut,
   Moon,
   Sun,
-  Layers,
-  Menu,
-  X,
 } from "lucide-react";
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { cn } from "@/lib/utils";
 import { CURRENT_VERSION } from "@/hooks/useAppUpdate";
+import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
@@ -25,10 +23,12 @@ const NAV_ITEMS = [
   { to: "/commissions", icon: Layers, label: "Comisiones" },
 ];
 
-export default function Sidebar({ hasUpdate = false }: { hasUpdate?: boolean }) {
+const dockButtonClass =
+  "group relative flex h-11 shrink-0 items-center justify-center gap-2 rounded-2xl px-3 text-sm font-medium outline-none transition-[color,background-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-secondary/80 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-0 disabled:pointer-events-none disabled:opacity-50";
+
+export default function Sidebar() {
   const { theme, toggleTheme } = useTheme();
   const { logout } = useAuth();
-  const [open, setOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
 
@@ -46,123 +46,97 @@ export default function Sidebar({ hasUpdate = false }: { hasUpdate?: boolean }) 
     }
   };
 
-  const SidebarContent = () => (
-    <>
-      {/* Header */}
-      <div className="px-5 py-6 border-b border-border flex items-center justify-between">
-        <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1">
-            Admin Panel
-          </p>
-          <h1 className="text-base font-bold text-foreground">Mery Palencia</h1>
-        </div>
-        <button
-          onClick={() => setOpen(false)}
-          className="md:hidden p-1 rounded-lg text-muted-foreground hover:bg-secondary"
-        >
-          <X size={20} />
-        </button>
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={to === "/"}
-            onClick={() => setOpen(false)}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-              )
-            }
-          >
-            <Icon size={18} />
-            {label}
-          </NavLink>
-        ))}
-      </nav>
-
-      {/* Footer */}
-      <div className="px-3 py-4 border-t border-border space-y-1">
-        <button
-          onClick={toggleTheme}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-        >
-          {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-          {theme === "light" ? "Tema oscuro" : "Tema claro"}
-        </button>
-        <button
-          onClick={handleLogout}
-          disabled={loggingOut}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-        >
-          <LogOut size={18} />
-          {loggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
-        </button>
-        {logoutError && (
-          <p role="alert" className="px-3 text-xs text-destructive">
-            {logoutError}
-          </p>
-        )}
-        <p className="text-xs text-muted-foreground/50 px-3 pt-2">v{CURRENT_VERSION}</p>
-      </div>
-    </>
-  );
-
   return (
     <>
-      {/* Mobile top bar — siempre debajo de la status bar */}
-      <div
-        className="md:hidden fixed left-0 right-0 z-40 bg-card border-b border-border"
-        style={{ top: hasUpdate ? '48px' : '0' }}
-      >
-        {/* Relleno de status bar */}
-        <div style={{ height: 'env(safe-area-inset-top, 0px)' }} />
-        {/* Contenido del top bar */}
-        <div className="flex items-center gap-3 px-4 py-3">
-          <button
-            onClick={() => setOpen(true)}
-            className="p-1.5 rounded-lg text-muted-foreground hover:bg-secondary"
-          >
-            <Menu size={22} />
-          </button>
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest leading-none">
-              Admin Panel
-            </p>
-            <p className="text-sm font-bold text-foreground">Mery Palencia</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile overlay */}
-      {open && (
-        <div
-          className="md:hidden fixed inset-0 z-40 bg-black/50"
-          onClick={() => setOpen(false)}
-        />
+      {logoutError && (
+        <p
+          role="alert"
+          className="fixed bottom-24 left-1/2 z-[60] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 rounded-xl border border-destructive/25 bg-card/95 px-4 py-3 text-center text-xs font-medium text-destructive shadow-xl backdrop-blur-xl"
+        >
+          {logoutError}
+        </p>
       )}
 
-      {/* Mobile drawer — respeta status bar */}
       <aside
-        className={cn(
-          "md:hidden fixed top-0 left-0 z-50 h-full w-64 flex flex-col bg-card border-r border-border transition-transform duration-300",
-          open ? "translate-x-0" : "-translate-x-full"
-        )}
+        className="admin-dock fixed left-1/2 z-50 w-max max-w-[calc(100vw-1.5rem)] -translate-x-1/2 rounded-[1.65rem] border border-border/80 p-1.5"
+        style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
+        aria-label="Navegación principal del panel"
       >
-        {/* Relleno de status bar en el drawer */}
-        <div style={{ height: 'env(safe-area-inset-top, 0px)', flexShrink: 0 }} />
-        <SidebarContent />
-      </aside>
+        <div className="admin-dock__content flex items-center gap-1 overflow-x-auto rounded-[1.25rem] px-1 py-0.5">
+          <div
+            className="hidden shrink-0 items-center gap-2.5 pl-2 pr-3 xl:flex"
+            title={`Panel administrativo · v${CURRENT_VERSION}`}
+          >
+            <span className="flex size-8 items-center justify-center rounded-xl bg-primary/15 text-[11px] font-bold tracking-tight text-primary ring-1 ring-primary/20">
+              MP
+            </span>
+            <span className="leading-tight">
+              <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Admin Panel
+              </span>
+              <span className="block text-xs font-semibold text-foreground">Mery Palencia</span>
+            </span>
+          </div>
 
-      {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-60 shrink-0 h-screen sticky top-0 flex-col bg-card border-r border-border">
-        <SidebarContent />
+          <span className="mx-1 hidden h-7 w-px shrink-0 bg-border xl:block" aria-hidden="true" />
+
+          <nav className="flex items-center gap-1" aria-label="Secciones del panel">
+            {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={to === "/"}
+                aria-label={label}
+                title={label}
+                className={({ isActive }) =>
+                  cn(
+                    dockButtonClass,
+                    isActive
+                      ? "bg-primary/15 text-primary shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_24%,transparent)] after:absolute after:-bottom-0.5 after:left-1/2 after:size-1 after:-translate-x-1/2 after:rounded-full after:bg-primary"
+                      : "text-muted-foreground",
+                  )
+                }
+              >
+                <Icon size={19} strokeWidth={1.8} aria-hidden="true" />
+                <span className="hidden lg:inline">{label}</span>
+              </NavLink>
+            ))}
+          </nav>
+
+          <span className="mx-1 h-7 w-px shrink-0 bg-border" aria-hidden="true" />
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className={cn(dockButtonClass, "text-muted-foreground")}
+            aria-label={theme === "light" ? "Activar tema oscuro" : "Activar tema claro"}
+            title={theme === "light" ? "Tema oscuro" : "Tema claro"}
+          >
+            {theme === "light" ? (
+              <Moon size={19} strokeWidth={1.8} aria-hidden="true" />
+            ) : (
+              <Sun size={19} strokeWidth={1.8} aria-hidden="true" />
+            )}
+            <span className="hidden xl:inline">{theme === "light" ? "Oscuro" : "Claro"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className={cn(
+              dockButtonClass,
+              "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
+            )}
+            aria-label={loggingOut ? "Cerrando sesión" : "Cerrar sesión"}
+            title={loggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
+          >
+            <LogOut size={19} strokeWidth={1.8} aria-hidden="true" />
+            <span className="hidden xl:inline">
+              {loggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
+            </span>
+          </button>
+        </div>
       </aside>
     </>
   );

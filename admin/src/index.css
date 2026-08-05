@@ -73,3 +73,49 @@
     font-family: 'Inter', sans-serif;
   }
 }
+
+@layer components {
+  .admin-dock {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--card) 86%, transparent),
+        color-mix(in oklab, var(--background) 72%, transparent)
+      );
+    box-shadow:
+      0 24px 64px color-mix(in oklab, var(--background) 76%, transparent),
+      0 8px 24px color-mix(in oklab, black 28%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 10%, transparent);
+    -webkit-backdrop-filter: blur(28px) saturate(165%);
+    backdrop-filter: blur(28px) saturate(165%);
+    isolation: isolate;
+  }
+
+  .admin-dock::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(
+      circle at 50% 0%,
+      color-mix(in oklab, var(--primary) 10%, transparent),
+      transparent 58%
+    );
+    content: "";
+    pointer-events: none;
+  }
+
+  .admin-dock__content {
+    scrollbar-width: none;
+  }
+
+  .admin-dock__content::-webkit-scrollbar {
+    display: none;
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .admin-dock {
+      background: var(--card);
+    }
+  }
+}
