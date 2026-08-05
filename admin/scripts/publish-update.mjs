@@ -4,7 +4,7 @@
  * FASE 1 — release:prepare "descripción"
  *   Calcula la versión siguiente, actualiza CURRENT_VERSION en el código
  *   y build.gradle. NO sube nada todavía.
- *   Después debes: pnpm release:build → generar APK en Android build environment → pnpm release:publish
+ *   Después debes: pnpm release:build → generar el APK release → pnpm release:publish
  *
  * FASE 2 — release:publish "descripción"
  *   Lee CURRENT_VERSION del código (ya actualizado), sube el APK a GitHub
@@ -13,7 +13,7 @@
  * Flujo completo:
  *   1. pnpm release:prepare "descripción"   ← bump versión en código
  *   2. pnpm release:build                   ← build + cap sync
- *   3. Android build environment → Build → Build APK(s)
+ *   3. Generar el APK release mediante la compilación Android
  *   4. pnpm release:publish "descripción"   ← sube APK + actualiza Firestore
  *   5. git add -A && git commit -m "chore: bump version vX.Y.Z" && git push
  */
@@ -89,7 +89,7 @@ if (command === "prepare") {
 
 Próximos pasos:
   1. pnpm release:build          ← build + cap sync
-  2. Android build environment → Build → Build APK(s)
+  2. Generar el APK release mediante la compilación Android
   3. pnpm release:publish "${changelog || 'descripción del cambio'}"
 `);
   process.exit(0);
@@ -106,7 +106,7 @@ if (command === "publish") {
   // Verificar APK
   const apkPath = resolve(__dir, "../android/app/build/outputs/apk/release/app-release.apk");
   if (!existsSync(apkPath)) {
-    console.error("❌ APK no encontrado. Genera el APK desde Android build environment primero.");
+    console.error("❌ APK no encontrado. Genera primero el APK release.");
     process.exit(1);
   }
 
