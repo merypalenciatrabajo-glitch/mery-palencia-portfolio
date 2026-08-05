@@ -95,15 +95,13 @@ export default function UpdateModal({ update }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6" role="dialog" aria-modal="true" aria-labelledby="update-title">
-      <div className="bg-card border border-border rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="update-title">
+      <div className="admin-dashboard-surface w-full max-w-sm space-y-5 rounded-[1.65rem] border border-border/80 p-5 shadow-2xl sm:p-6">
 
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <RefreshCw size={20} className="text-primary" />
-            </div>
+            <RefreshCw size={24} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
             <div>
               <p id="update-title" className="font-semibold text-foreground text-sm">Nueva actualización</p>
               <p className="text-xs text-muted-foreground">Versión {update.version} disponible</p>
@@ -111,18 +109,19 @@ export default function UpdateModal({ update }: Props) {
           </div>
           {state !== "downloading" && (
             <button
+              type="button"
               onClick={() => setDismissed(true)}
-              className="p-1 rounded-lg text-muted-foreground hover:bg-secondary transition-colors"
+              className="flex size-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               aria-label="Cerrar actualización"
             >
-              <X size={16} />
+              <X size={17} aria-hidden="true" />
             </button>
           )}
         </div>
 
         {/* Changelog */}
         {update.changelog && (
-          <p className="text-sm text-muted-foreground bg-muted rounded-lg px-3 py-2.5">
+          <p className="rounded-xl border border-border/70 bg-background/35 px-3 py-2.5 text-sm leading-relaxed text-muted-foreground">
             {update.changelog}
           </p>
         )}
@@ -142,25 +141,26 @@ export default function UpdateModal({ update }: Props) {
 
         {/* Success */}
         {state === "done" && (
-          <p className="bg-emerald-950/40 px-3 py-2 text-xs text-emerald-400 rounded-lg">
+          <p role="status" className="rounded-xl border border-emerald-400/20 bg-emerald-400/5 px-3 py-2.5 text-xs text-emerald-300">
             Descarga completa. Sigue las instrucciones para instalar.
           </p>
         )}
 
         {/* Error */}
         {state === "error" && (
-          <p className="text-xs text-destructive bg-destructive/10 px-3 py-2 rounded-lg break-all">
+          <p role="alert" className="break-words rounded-xl border border-destructive/25 bg-destructive/10 px-3 py-2.5 text-xs text-destructive">
             {errorMsg}
           </p>
         )}
 
         {/* Botón */}
         <button
+          type="button"
           onClick={handleUpdate}
           disabled={state === "downloading" || state === "done"}
-          className="w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/85 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Download size={15} />
+          <Download size={16} aria-hidden="true" />
           {state === "downloading" ? `Descargando ${progress}%` : state === "done" ? "Instalando..." : "Actualizar ahora"}
         </button>
 

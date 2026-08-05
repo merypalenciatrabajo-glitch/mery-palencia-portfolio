@@ -13,6 +13,7 @@ import { BriefcaseBusiness, Check, Edit2, ListChecks, Plus, Save, Trash2, X } fr
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AdminSelect from "@/components/AdminSelect";
+import AdminEmptyState from "@/components/AdminEmptyState";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { db } from "@/lib/firebase";
 import { cn } from "@/lib/utils";
@@ -216,7 +217,7 @@ export default function Commissions() {
 
         <div className="grid gap-4 p-4 sm:p-5 md:grid-cols-2 lg:p-6 xl:grid-cols-3">
           {tiersLoading && Array.from({ length: 3 }).map((_, index) => <div key={index} className="h-64 animate-pulse rounded-[1.35rem] border border-border/70 bg-muted/50" />)}
-          {!tiersLoading && tiers.length === 0 && <div className="col-span-full flex min-h-64 flex-col items-center justify-center rounded-[1.35rem] border border-dashed border-border text-center"><BriefcaseBusiness size={24} className="mb-3 text-primary" /><h3 className="font-semibold text-foreground">No hay niveles configurados</h3><p className="mt-1 text-sm text-muted-foreground">Crea la primera opción de comisión.</p></div>}
+          {!tiersLoading && tiers.length === 0 && <AdminEmptyState className="col-span-full" icon={BriefcaseBusiness} title="No hay niveles configurados" description="Crea la primera opción de comisión." />}
           {tiers.map((tier) => (
             <article
               key={tier.id}
@@ -292,7 +293,7 @@ export default function Commissions() {
 
         <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5 lg:p-6 xl:grid-cols-3">
           {stepsLoading && Array.from({ length: 3 }).map((_, index) => <div key={index} className="h-48 animate-pulse rounded-[1.35rem] border border-border/70 bg-muted/50" />)}
-          {!stepsLoading && steps.length === 0 && <div className="col-span-full flex min-h-56 flex-col items-center justify-center rounded-[1.35rem] border border-dashed border-border text-center"><ListChecks size={24} className="mb-3 text-primary" /><h3 className="font-semibold text-foreground">No hay pasos configurados</h3></div>}
+          {!stepsLoading && steps.length === 0 && <AdminEmptyState className="col-span-full min-h-56" icon={ListChecks} title="No hay pasos configurados" />}
           {steps.map((step) => (
             <article key={step.id} className="rounded-[1.35rem] border border-border/80 bg-card/50 p-5">
               <span className="text-3xl font-semibold tabular-nums text-primary/35">{step.number}</span>

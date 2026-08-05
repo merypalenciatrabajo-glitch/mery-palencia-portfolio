@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import AdminBrand from "@/components/AdminBrand";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
@@ -59,9 +60,7 @@ export default function Sidebar() {
       >
         <div className="admin-dock__content flex items-center gap-1 overflow-x-auto rounded-[1.25rem] px-1 py-0.5">
           <div className="hidden shrink-0 items-center gap-2.5 pl-2 pr-3 xl:flex">
-            <span className="flex size-8 items-center justify-center rounded-xl bg-primary/15 text-[11px] font-bold tracking-tight text-primary ring-1 ring-primary/20">
-              MP
-            </span>
+            <AdminBrand decorative className="size-9 shrink-0" />
             <span className="leading-tight">
               <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 Admin Panel

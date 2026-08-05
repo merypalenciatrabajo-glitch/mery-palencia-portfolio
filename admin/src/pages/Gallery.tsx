@@ -19,6 +19,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import CategorySelect from "@/components/CategorySelect";
+import AdminEmptyState from "@/components/AdminEmptyState";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import HashtagInput, {
   HashtagLinks,
@@ -372,23 +373,13 @@ export default function Gallery() {
               ))}
             </div>
           ) : items.length === 0 ? (
-            <div className="flex min-h-80 flex-col items-center justify-center rounded-[1.35rem] border border-dashed border-border px-6 text-center">
-              <span className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                <ImagePlus size={24} strokeWidth={1.6} aria-hidden="true" />
-              </span>
-              <h3 className="text-base font-semibold text-foreground">El carrusel está vacío</h3>
-              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                Publica una pieza nueva aquí o activa una existente desde la Galería.
-              </p>
-              <button
-                type="button"
-                onClick={openCreate}
-                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-              >
-                <Plus size={16} aria-hidden="true" />
-                Añadir la primera
-              </button>
-            </div>
+            <AdminEmptyState
+              icon={ImagePlus}
+              title="El carrusel está vacío"
+              description="Publica una pieza nueva aquí o activa una existente desde la Galería."
+              className="min-h-80"
+              action={<button type="button" onClick={openCreate} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/85"><Plus size={16} aria-hidden="true" /> Añadir la primera</button>}
+            />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {items.map((item) => (
@@ -514,9 +505,7 @@ export default function Gallery() {
                     onClick={() => fileRef.current?.click()}
                     className="flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-background/35 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <span className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                      <Upload size={20} aria-hidden="true" />
-                    </span>
+                    <Upload size={24} className="text-primary" aria-hidden="true" />
                     <span className="text-sm font-medium">Seleccionar imagen</span>
                     <span className="text-xs text-muted-foreground">Haz clic para explorar tus archivos</span>
                   </button>

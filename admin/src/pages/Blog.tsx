@@ -12,6 +12,7 @@ import { BookOpen, Calendar, Clock, Edit2, Eye, FileText, Plus, RefreshCw, Trash
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AdminSelect from "@/components/AdminSelect";
+import AdminEmptyState from "@/components/AdminEmptyState";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
@@ -271,12 +272,13 @@ export default function Blog() {
         {loadState === "loading" ? (
           <div className="space-y-3">{Array.from({ length: 4 }).map((_, index) => <div key={index} className="flex gap-4 rounded-2xl border border-border/70 p-3"><div className="h-24 w-32 animate-pulse rounded-xl bg-muted" /><div className="flex-1 space-y-3 py-2"><div className="h-4 w-2/3 animate-pulse rounded bg-muted" /><div className="h-3 w-1/3 animate-pulse rounded bg-muted" /></div></div>)}</div>
         ) : posts.length === 0 ? (
-          <div className="flex min-h-80 flex-col items-center justify-center rounded-[1.35rem] border border-dashed border-border px-6 text-center">
-            <span className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15"><FileText size={24} aria-hidden="true" /></span>
-            <h3 className="text-base font-semibold text-foreground">Todavía no hay artículos</h3>
-            <p className="mt-1 text-sm text-muted-foreground">Crea la primera historia del portafolio.</p>
-            <button type="button" onClick={openCreate} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"><Plus size={16} aria-hidden="true" /> Crear artículo</button>
-          </div>
+          <AdminEmptyState
+            icon={FileText}
+            title="Todavía no hay artículos"
+            description="Crea la primera historia del portafolio."
+            className="min-h-80"
+            action={<button type="button" onClick={openCreate} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/85"><Plus size={16} aria-hidden="true" /> Crear artículo</button>}
+          />
         ) : (
           <div className="space-y-3">
           {posts.map((post) => {
@@ -402,7 +404,7 @@ export default function Blog() {
                     onClick={() => fileRef.current?.click()}
                     className="flex h-40 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-background/35 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
                   >
-                    <span className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary"><Upload size={20} aria-hidden="true" /></span>
+                    <Upload size={24} className="text-primary" aria-hidden="true" />
                     <span className="text-sm font-medium">Seleccionar imagen</span>
                     <span className="text-xs text-muted-foreground">JPG, PNG o WebP</span>
                   </button>

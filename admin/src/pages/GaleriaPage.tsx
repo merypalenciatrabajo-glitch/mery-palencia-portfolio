@@ -15,6 +15,7 @@ import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { cn } from "@/lib/utils";
 import CategorySelect from "@/components/CategorySelect";
+import AdminEmptyState from "@/components/AdminEmptyState";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import HashtagInput, {
   HashtagLinks,
@@ -307,12 +308,13 @@ export default function GaleriaPage() {
               ))}
             </div>
           ) : items.length === 0 ? (
-            <div className="flex min-h-80 flex-col items-center justify-center rounded-[1.35rem] border border-dashed border-border px-6 text-center">
-              <span className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15"><Images size={24} aria-hidden="true" /></span>
-              <h3 className="text-base font-semibold text-foreground">La galería está vacía</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Añade la primera pieza para comenzar el archivo visual.</p>
-              <button type="button" onClick={openCreate} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"><Plus size={16} aria-hidden="true" /> Añadir la primera</button>
-            </div>
+            <AdminEmptyState
+              icon={Images}
+              title="La galería está vacía"
+              description="Añade la primera pieza para comenzar el archivo visual."
+              className="min-h-80"
+              action={<button type="button" onClick={openCreate} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/85"><Plus size={16} aria-hidden="true" /> Añadir la primera</button>}
+            />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {items.map((item) => (

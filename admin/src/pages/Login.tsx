@@ -8,6 +8,7 @@ import {
 } from "firebase/auth";
 import { Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react";
 import { useState } from "react";
+import AdminBrand from "@/components/AdminBrand";
 import { auth } from "@/lib/firebase";
 import { getSignInErrorMessage } from "@/lib/authErrors";
 import { cn } from "@/lib/utils";
@@ -82,12 +83,8 @@ export default function Login() {
 
       <div className="w-full max-w-[30rem]">
         <header className="mb-7 text-center sm:mb-9">
-          <img
-            src="/brand/mery-palencia-logo.svg"
-            alt="Mery Palencia"
-            className="mx-auto h-32 w-32 object-contain sm:h-40 sm:w-40"
-          />
-          <p className="mt-3 text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-primary">
+          <AdminBrand className="mx-auto size-32 sm:size-40" />
+          <p className="mx-auto mt-3 max-w-full text-[0.62rem] font-semibold uppercase leading-relaxed tracking-[0.18em] text-primary sm:text-[0.68rem] sm:tracking-[0.3em]">
             Administración del portafolio
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem]">

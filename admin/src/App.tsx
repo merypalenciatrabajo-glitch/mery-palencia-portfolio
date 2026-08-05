@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import AccessDenied from "./components/AccessDenied";
+import AdminLoading from "./components/AdminLoading";
 import DashboardLayout from "./components/DashboardLayout";
 import NativeNavigation from "./components/NativeNavigation";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -13,27 +14,13 @@ const Gallery = lazy(() => import("./pages/Gallery"));
 const GaleriaPage = lazy(() => import("./pages/GaleriaPage"));
 
 function RouteLoading() {
-  return (
-    <div
-      className="flex min-h-48 items-center justify-center"
-      role="status"
-      aria-label="Cargando página"
-    >
-      <div className="size-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-    </div>
-  );
+  return <AdminLoading label="Cargando página" />;
 }
 
 function ProtectedRoute() {
   const { user, loading, isAdmin } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <AdminLoading fullscreen />;
 
   if (!user) return <Navigate to="/login" replace />;
   if (!isAdmin) return <AccessDenied />;
@@ -50,13 +37,7 @@ function ProtectedRoute() {
 function AppRoutes() {
   const { user, loading, isAdmin } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <AdminLoading fullscreen />;
 
   return (
     <Routes>
@@ -81,7 +62,9 @@ function AppRoutes() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
         <NativeNavigation />
         <AppRoutes />
       </BrowserRouter>
