@@ -5,13 +5,10 @@ import {
   Layers,
   LayoutDashboard,
   LogOut,
-  Moon,
-  Sun,
 } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTheme } from "@/contexts/ThemeContext";
 import { CURRENT_VERSION } from "@/hooks/useAppUpdate";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +24,6 @@ const dockButtonClass =
   "group relative flex h-11 shrink-0 items-center justify-center gap-2 rounded-2xl px-3 text-sm font-medium outline-none transition-[color,background-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-secondary/80 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-0 disabled:pointer-events-none disabled:opacity-50";
 
 export default function Sidebar() {
-  const { theme, toggleTheme } = useTheme();
   const { logout } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
@@ -92,7 +88,7 @@ export default function Sidebar() {
                   cn(
                     dockButtonClass,
                     isActive
-                      ? "bg-primary/15 text-primary shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_24%,transparent)] after:absolute after:-bottom-0.5 after:left-1/2 after:size-1 after:-translate-x-1/2 after:rounded-full after:bg-primary"
+                      ? "bg-primary/15 text-primary shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_24%,transparent)]"
                       : "text-muted-foreground",
                   )
                 }
@@ -104,21 +100,6 @@ export default function Sidebar() {
           </nav>
 
           <span className="mx-1 h-7 w-px shrink-0 bg-border" aria-hidden="true" />
-
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className={cn(dockButtonClass, "text-muted-foreground")}
-            aria-label={theme === "light" ? "Activar tema oscuro" : "Activar tema claro"}
-            title={theme === "light" ? "Tema oscuro" : "Tema claro"}
-          >
-            {theme === "light" ? (
-              <Moon size={19} strokeWidth={1.8} aria-hidden="true" />
-            ) : (
-              <Sun size={19} strokeWidth={1.8} aria-hidden="true" />
-            )}
-            <span className="hidden xl:inline">{theme === "light" ? "Oscuro" : "Claro"}</span>
-          </button>
 
           <button
             type="button"

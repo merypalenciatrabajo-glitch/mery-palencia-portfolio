@@ -142,7 +142,7 @@ export default function UpdateModal({ update }: Props) {
 
         {/* Success */}
         {state === "done" && (
-          <p className="text-xs text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 rounded-lg">
+          <p className="bg-emerald-950/40 px-3 py-2 text-xs text-emerald-400 rounded-lg">
             Descarga completa. Sigue las instrucciones para instalar.
           </p>
         )}

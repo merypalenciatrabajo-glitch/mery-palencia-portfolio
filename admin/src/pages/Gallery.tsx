@@ -246,7 +246,7 @@ export default function Gallery() {
                   <button
                     onClick={() => handleUnfeature(item)}
                     disabled={togglingId === item.id}
-                    className="flex-1 flex items-center justify-center gap-1 py-1.5 border border-yellow-300 rounded-lg text-xs text-yellow-600 hover:bg-yellow-50 transition-colors disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-1 rounded-lg border border-yellow-700/50 py-1.5 text-xs text-yellow-400 transition-colors hover:bg-yellow-950/30 disabled:opacity-50"
                   >
                     <StarOff size={12} /> Quitar
                   </button>

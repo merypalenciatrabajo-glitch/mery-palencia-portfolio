@@ -197,8 +197,8 @@ export default function Blog() {
     CATEGORIES.find((c) => c.id === id)?.label || id;
 
   const getStatusBadge = (post: BlogPost) => {
-    if (post.published) return { label: "Publicado", cls: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400" };
-    if (post.scheduledAt) return { label: "Programado", cls: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400" };
+    if (post.published) return { label: "Publicado", cls: "bg-emerald-900/40 text-emerald-400" };
+    if (post.scheduledAt) return { label: "Programado", cls: "bg-blue-900/40 text-blue-400" };
     return { label: "Borrador", cls: "bg-secondary text-muted-foreground" };
   };
 
@@ -265,7 +265,7 @@ export default function Blog() {
                       "flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors",
                       post.published
                         ? "bg-secondary text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                        : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400"
+                        : "bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50"
                     )}
                   >
                     {post.published ? "Despublicar" : "Publicar"}

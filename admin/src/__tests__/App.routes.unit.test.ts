@@ -9,7 +9,7 @@ import { resolve } from "node:path";
  *
  * We inspect the source of admin/src/App.tsx to verify:
  *   1. The route /galeria is registered in AppRoutes
- *   2. The route /galeria is wrapped by ProtectedRoute
+ *   2. The route /galeria belongs to the protected route group
  *   3. The route /galeria renders GaleriaPage
  *   4. Unauthenticated users are redirected to /login (via ProtectedRoute logic)
  *
@@ -45,17 +45,16 @@ describe("Admin router – ruta /galeria registrada (Requirement 7.1)", () => {
 // ── Requirement 7.1 – ruta /galeria usa ProtectedRoute ───────────────────────
 
 describe("Admin router – ruta /galeria protegida por ProtectedRoute (Requirement 7.1)", () => {
-  it("la ruta /galeria está envuelta en ProtectedRoute", () => {
-    // Extract the JSX block for the /galeria route and verify ProtectedRoute wraps it
-    const galeriaRouteBlock = extractRouteBlock(appSource, "/galeria");
-    expect(galeriaRouteBlock).not.toBeNull();
-    expect(galeriaRouteBlock).toContain("ProtectedRoute");
+  it("la ruta /galeria pertenece al grupo protegido", () => {
+    const protectedRoutesBlock = extractProtectedRoutesBlock(appSource);
+    expect(protectedRoutesBlock).not.toBeNull();
+    expect(protectedRoutesBlock).toMatch(/path=["']\/galeria["']/);
   });
 
-  it("GaleriaPage aparece dentro del bloque ProtectedRoute de la ruta /galeria", () => {
-    const galeriaRouteBlock = extractRouteBlock(appSource, "/galeria");
-    expect(galeriaRouteBlock).not.toBeNull();
-    expect(galeriaRouteBlock).toContain("GaleriaPage");
+  it("GaleriaPage aparece dentro del grupo ProtectedRoute", () => {
+    const protectedRoutesBlock = extractProtectedRoutesBlock(appSource);
+    expect(protectedRoutesBlock).not.toBeNull();
+    expect(protectedRoutesBlock).toContain("GaleriaPage");
   });
 });
 
@@ -80,39 +79,14 @@ describe("Admin router – usuario no autenticado redirigido a /login (Requireme
 // ── Helper ────────────────────────────────────────────────────────────────────
 
 /**
- * Extracts the JSX <Route> block for a given path from the App source.
- * Returns the substring from `path="<routePath>"` to the closing `/>` or `</Route>`.
+ * Extracts the nested route group whose element is ProtectedRoute.
  */
-function extractRouteBlock(source: string, routePath: string): string | null {
-  // Find the <Route ... path="/galeria" ...> opening
-  const pathPattern = new RegExp(`path=["']${routePath.replace("/", "\\/")}["']`);
-  const match = pathPattern.exec(source);
+function extractProtectedRoutesBlock(source: string): string | null {
+  const protectedRoutePattern = /<Route\s+element=\{<ProtectedRoute\s*\/>\}>/;
+  const match = protectedRoutePattern.exec(source);
   if (!match) return null;
 
-  // Walk backwards to find the opening <Route
-  const beforeMatch = source.slice(0, match.index);
-  const routeStart = beforeMatch.lastIndexOf("<Route");
-  if (routeStart === -1) return null;
-
-  // Walk forward to find the closing </Route> or self-closing />
-  // We count nesting depth to handle nested elements
-  let depth = 0;
-  let i = routeStart;
-  while (i < source.length) {
-    if (source.startsWith("<Route", i) && !source.startsWith("</Route", i)) {
-      depth++;
-      i += 6;
-    } else if (source.startsWith("</Route>", i)) {
-      depth--;
-      if (depth === 0) {
-        return source.slice(routeStart, i + 8);
-      }
-      i += 8;
-    } else {
-      i++;
-    }
-  }
-
-  // Fallback: return a generous slice around the match
-  return source.slice(routeStart, routeStart + 300);
+  const routeStart = match.index;
+  const routeEnd = source.indexOf("</Route>", routeStart);
+  return routeEnd === -1 ? null : source.slice(routeStart, routeEnd + 8);
 }
