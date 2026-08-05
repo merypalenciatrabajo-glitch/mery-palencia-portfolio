@@ -21,33 +21,43 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
+  private reloadSite = () => {
+    const refreshedUrl = new URL(window.location.href);
+    refreshedUrl.searchParams.set('_actualizado', String(Date.now()));
+    window.location.replace(refreshedUrl.toString());
+  };
+
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex items-center justify-center min-h-screen p-8 bg-background">
-          <div className="flex flex-col items-center w-full max-w-2xl p-8">
+        <main id="main-content" className="flex min-h-screen items-center justify-center bg-background p-6">
+          <section className="portfolio-surface flex w-full max-w-xl flex-col items-center rounded-[1.75rem] p-8 text-center sm:p-10">
             <AlertTriangle
-              size={48}
-              className="text-destructive mb-6 flex-shrink-0"
+              size={38}
+              className="mb-6 flex-shrink-0 text-destructive"
             />
 
-            <h2 className="text-xl mb-4">An unexpected error occurred.</h2>
+            <p className="portfolio-eyebrow mb-3">No pudimos abrir esta sección</p>
+            <h1 className="mb-3 text-2xl font-semibold tracking-[-0.03em]">Actualiza el sitio para continuar</h1>
+            <p className="mb-7 max-w-md leading-7 text-muted-foreground">
+              Es posible que haya una versión nueva disponible. Tus datos y tu navegación no se han perdido.
+            </p>
 
-            <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
+            {import.meta.env.DEV && this.state.error && <div className="mb-6 w-full overflow-auto rounded-xl bg-muted p-4 text-left">
               <pre className="text-sm text-muted-foreground whitespace-break-spaces">
-                {this.state.error?.stack}
+                {this.state.error.stack}
               </pre>
-            </div>
+            </div>}
 
             <button
-              onClick={() => window.location.reload()}
+              onClick={this.reloadSite}
               className={cn("portfolio-button portfolio-button--primary")}
             >
               <RotateCcw size={16} />
-              Reload Page
+              Actualizar sitio
             </button>
-          </div>
-        </div>
+          </section>
+        </main>
       );
     }
 

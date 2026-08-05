@@ -103,7 +103,7 @@ export function useGalleryPage() {
 }
 
 export function useBlogPosts() {
-  return useCollection<{
+  const result = useCollection<{
     id: string;
     title: string;
     excerpt: string;
@@ -114,7 +114,12 @@ export function useBlogPosts() {
     image: string;
     author: string;
     published: boolean;
-  }>("blogPosts", [where("published", "==", true), orderBy("date", "desc")]);
+  }>("blogPosts", [where("published", "==", true)]);
+
+  return {
+    ...result,
+    data: [...result.data].sort((left, right) => right.date.localeCompare(left.date)),
+  };
 }
 
 export function useCommissions() {

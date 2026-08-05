@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Images, SlidersHorizontal } from 'lucide-react';
 import Lightbox from '@/components/Lightbox';
 import { useGalleryPage } from '@/hooks/useFirestore';
 import Seo from '@/components/Seo';
@@ -104,25 +104,35 @@ export default function GalleryPage() {
 
       <main id="main-content">
       {/* HERO */}
-      <section className="portfolio-section">
-        <div className="container text-center space-y-2">
-          <p className="portfolio-eyebrow">
-            Fotografía & Arte
-          </p>
-          <h1 className="text-4xl md:text-5xl font-display text-foreground">
-            Galería
-          </h1>
-          <p className="subtitle text-base md:text-lg text-muted-foreground max-w-xl mx-auto">
-            Explora todos mis trabajos y obras
-          </p>
+      <section className="portfolio-collection-hero">
+        <div className="container grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-end">
+          <div className="max-w-3xl">
+            <p className="portfolio-eyebrow mb-5">Fotografía & Arte</p>
+            <h1 className="text-5xl font-semibold leading-[0.95] tracking-[-0.055em] text-foreground sm:text-6xl md:text-7xl">
+              Archivo visual
+            </h1>
+            <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground md:text-lg">
+              Una selección de fotografía, ilustración y piezas creativas reunidas en un solo espacio.
+            </p>
+          </div>
+
+          <div className="portfolio-collection-summary" aria-live="polite">
+            <Images size={21} strokeWidth={1.7} aria-hidden="true" />
+            <div>
+              <strong>{loading ? '—' : items.length}</strong>
+              <span>{items.length === 1 ? 'obra publicada' : 'obras publicadas'}</span>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* FILTROS */}
       {!loading && availableCategories.length > 0 && (
-        <section className="border-y border-border/70 bg-card/20 py-6 backdrop-blur-sm">
-          <div className="container flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">Filtrar por:</span>
+        <section className="portfolio-filter-section">
+          <div className="container flex flex-wrap items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <SlidersHorizontal size={17} className="shrink-0 text-primary" aria-hidden="true" />
+              <span className="hidden text-sm text-muted-foreground sm:inline">Organizar colección</span>
             <div ref={dropdownRef} className="relative">
               <button
                 onClick={() => setDropdownOpen((o) => !o)}
@@ -171,6 +181,10 @@ export default function GalleryPage() {
                 Limpiar
               </button>
             )}
+            </div>
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              {filteredItems.length} {filteredItems.length === 1 ? 'resultado' : 'resultados'}
+            </p>
           </div>
         </section>
       )}
@@ -198,16 +212,16 @@ export default function GalleryPage() {
               description={activeCategory ? 'No hay trabajos publicados en esta categoría.' : 'La galería se actualizará cuando haya obras publicadas.'}
             />
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-              {filteredItems.map((item) => (
+            <div className="portfolio-gallery-grid">
+              {filteredItems.map((item, index) => (
                 <button
                   type="button"
                   key={item.id}
-                  className="group text-left rounded-[1.35rem] outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className={`portfolio-gallery-card group ${index % 7 === 0 ? 'portfolio-gallery-card--feature' : ''}`}
                   onClick={() => openLightbox(item)}
                   aria-label={`Abrir ${item.title}`}
                 >
-                  <div className="portfolio-surface relative overflow-hidden rounded-[1.35rem] p-1.5">
+                  <div className="relative h-full overflow-hidden rounded-[1.35rem]">
                     <img
                       src={cloudinaryImage(item.image, { width: 600 })}
                       srcSet={cloudinarySrcSet(item.image, [320, 480, 600, 900])}
@@ -215,7 +229,7 @@ export default function GalleryPage() {
                       alt={item.title}
                       loading="lazy"
                       decoding="async"
-                      className="aspect-square w-full rounded-[1rem] object-cover transition-transform duration-500 group-hover:scale-[1.025]"
+                      className="h-full min-h-[16rem] w-full object-cover transition-transform duration-700 group-hover:scale-[1.035]"
                     />
                     {/* Overlay protector — bloquea clic derecho y arrastre */}
                     <div
@@ -223,20 +237,16 @@ export default function GalleryPage() {
                       onContextMenu={(e) => e.preventDefault()}
                       onDragStart={(e) => e.preventDefault()}
                     />
-                    <div className="absolute inset-0 bg-black/0 hover:bg-black/30 flex items-center justify-center z-20"
-                      style={{ transition: 'background-color 150ms ease-out' }}
-                    >
-                      <span className="text-white opacity-0 hover:opacity-100 text-sm font-medium"
-                        style={{ transition: 'opacity 150ms ease-out' }}
-                      >
-                        Ver Detalle
+                    <div className="portfolio-gallery-card__veil absolute inset-0 z-20" aria-hidden="true" />
+                    <div className="absolute inset-x-0 bottom-0 z-30 p-5 text-left sm:p-6">
+                      <span className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-primary">
+                        {getCategoryLabel(item.category)}
                       </span>
+                      <h2 className="mt-2 line-clamp-2 text-lg font-semibold leading-tight text-white sm:text-xl">
+                        {item.title}
+                      </h2>
                     </div>
                   </div>
-                  <h3 className="mt-3 text-base font-display text-foreground truncate">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">{getCategoryLabel(item.category)}</p>
                 </button>
               ))}
             </div>

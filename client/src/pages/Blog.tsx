@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
-import { ArrowRight, Calendar } from 'lucide-react';
+import { ArrowRight, Calendar, FileText, SlidersHorizontal } from 'lucide-react';
 import { useBlogPosts } from '@/hooks/useFirestore';
 import Seo from '@/components/Seo';
 import ContentStatus from '@/components/ContentStatus';
@@ -45,27 +45,34 @@ export default function Blog() {
 
       <main id="main-content">
       {/* HERO DEL BLOG */}
-      <section className="portfolio-section bg-background">
-        <div className="container">
-          <div className="max-w-3xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <p className="portfolio-eyebrow">
-              Blog & Artículos
-            </p>
-            <h1 className="text-5xl md:text-6xl font-display text-foreground leading-tight">
-              Procesos Creativos & Reflexiones
+      <section className="portfolio-collection-hero">
+        <div className="container grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-end">
+          <div className="max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <p className="portfolio-eyebrow mb-5">Blog & Artículos</p>
+            <h1 className="max-w-3xl text-5xl font-semibold leading-[0.98] tracking-[-0.055em] text-foreground sm:text-6xl md:text-7xl">
+              Procesos, oficio y reflexiones
             </h1>
-            <p className="text-xl text-muted-foreground">
-              Comparto mis experiencias, técnicas y pensamientos sobre la ilustración digital y la industria creativa.
+            <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
+              Experiencias, técnicas y pensamientos sobre ilustración digital y vida creativa.
             </p>
+          </div>
+
+          <div className="portfolio-collection-summary" aria-live="polite">
+            <FileText size={21} strokeWidth={1.7} aria-hidden="true" />
+            <div>
+              <strong>{loading ? '—' : blogPosts.filter((post) => post.published).length}</strong>
+              <span>artículos publicados</span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* FILTROS DE CATEGORÍA */}
-      <section className="py-12 bg-card border-b border-border">
+      <section className="portfolio-filter-section">
         <div className="container">
-          <div className="flex flex-wrap gap-3 items-center">
-            <span className="text-sm font-medium text-muted-foreground">Filtrar por:</span>
+          <div className="portfolio-filter-scroll">
+            <SlidersHorizontal size={17} className="mr-1 shrink-0 text-primary" aria-hidden="true" />
+            <span className="mr-1 shrink-0 text-sm text-muted-foreground">Filtrar por</span>
             <button
               onClick={() => setSelectedCategory(null)}
               className={`portfolio-button min-h-11 rounded-full px-4 py-2 text-sm ${
@@ -125,13 +132,12 @@ export default function Blog() {
               description={selectedCategory ? 'No hay artículos disponibles en esta categoría.' : 'Vuelve pronto para leer nuevas publicaciones.'}
             />
           ) : (
-            <div className="space-y-12">
+            <div className="portfolio-blog-grid">
               {filteredPosts.map((post, index) => (
-                <Link key={post.id} to={`/blog/${post.id}`} className="group block animate-in fade-in slide-in-from-bottom-4 duration-500 rounded-lg" style={{ animationDelay: `${index * 100}ms` }}>
-                    <article className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start pb-12 border-b border-border last:border-b-0 hover:opacity-80 transition-opacity">
+                <Link key={post.id} to={`/blog/${post.id}`} className={`group block animate-in fade-in slide-in-from-bottom-4 duration-500 ${index === 0 ? 'portfolio-blog-link--feature' : ''}`} style={{ animationDelay: `${index * 100}ms` }}>
+                    <article className={`portfolio-blog-card ${index === 0 ? 'portfolio-blog-card--feature' : ''}`}>
                       {/* Imagen */}
-                      <div className="md:col-span-1 order-2 md:order-1">
-                        <div className="relative overflow-hidden rounded-lg shadow-soft group-hover:shadow-soft-lg transition-all duration-300">
+                      <div className="portfolio-blog-card__media">
                           <img
                             src={cloudinaryImage(post.image, { width: 720 })}
                             srcSet={cloudinarySrcSet(post.image, [360, 540, 720, 960])}
@@ -139,13 +145,12 @@ export default function Blog() {
                             alt={post.title}
                             loading="lazy"
                             decoding="async"
-                            className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.035]"
                           />
-                        </div>
                       </div>
 
                       {/* Contenido */}
-                      <div className="md:col-span-2 order-1 md:order-2 space-y-4">
+                      <div className="flex flex-1 flex-col p-6 sm:p-7">
                         {/* Categoría y Meta */}
                         <div className="flex flex-wrap items-center gap-3">
                           <span className="portfolio-tag">
@@ -164,17 +169,17 @@ export default function Blog() {
                         </div>
 
                         {/* Título */}
-                        <h2 className="text-2xl md:text-3xl font-display text-foreground group-hover:text-accent transition-colors">
+                        <h2 className="mt-5 text-2xl font-semibold leading-tight tracking-[-0.035em] text-foreground transition-colors group-hover:text-primary md:text-3xl">
                           {post.title}
                         </h2>
 
                         {/* Excerpt */}
-                        <p className="text-lg text-muted-foreground leading-relaxed">
+                        <p className="mt-4 line-clamp-3 leading-7 text-muted-foreground">
                           {post.excerpt}
                         </p>
 
                         {/* CTA */}
-                        <div className="flex items-center gap-2 text-accent font-medium pt-2 group-hover:gap-3 transition-all">
+                        <div className="mt-7 flex items-center gap-2 border-t border-border/60 pt-5 text-sm font-semibold text-primary transition-all group-hover:gap-3">
                           Leer artículo
                           <ArrowRight size={20} />
                         </div>
@@ -188,17 +193,18 @@ export default function Blog() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="portfolio-section bg-card">
-        <div className="container text-center space-y-6">
+      <section className="portfolio-section">
+        <div className="portfolio-blog-cta container text-center">
+          <p className="portfolio-eyebrow mb-4">Trabajemos juntos</p>
           <h2 className="text-3xl md:text-4xl font-display text-foreground">
             ¿Listo para trabajar juntos?
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
             Si te interesa mi trabajo o quieres discutir un proyecto, no dudes en contactarme.
           </p>
           <Link
             to="/#contact-section"
-            className="portfolio-button portfolio-button--primary"
+            className="portfolio-button portfolio-button--primary mt-7"
           >
             Solicitar Comisión
           </Link>
