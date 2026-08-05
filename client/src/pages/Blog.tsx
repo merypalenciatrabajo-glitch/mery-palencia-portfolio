@@ -1,17 +1,19 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'wouter';
+import { Link } from 'wouter';
 import { ArrowRight, Calendar } from 'lucide-react';
 import { useBlogPosts } from '@/hooks/useFirestore';
 import Seo from '@/components/Seo';
 import ContentStatus from '@/components/ContentStatus';
 import { cloudinaryImage, cloudinarySrcSet } from '@/lib/images';
+import PortfolioDock from '@/components/PortfolioDock';
+import PortfolioFooter from '@/components/PortfolioFooter';
 
 
 const categories = [
-  { id: 'proceso', label: 'Proceso Creativo', color: 'bg-blue-900/40 text-blue-300' },
-  { id: 'industria', label: 'Industria', color: 'bg-purple-900/40 text-purple-300' },
-  { id: 'tips', label: 'Tips & Herramientas', color: 'bg-teal-900/40 text-teal-300' },
-  { id: 'experiencia', label: 'Experiencia', color: 'bg-orange-900/40 text-orange-300' },
+  { id: 'proceso', label: 'Proceso Creativo' },
+  { id: 'industria', label: 'Industria' },
+  { id: 'tips', label: 'Tips & Herramientas' },
+  { id: 'experiencia', label: 'Experiencia' },
 ];
 
 /**
@@ -23,8 +25,6 @@ const categories = [
 export default function Blog() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { data: blogPosts, loading, error, retry } = useBlogPosts();
-  const [location] = useLocation();
-  const isActive = (path: string) => location === path;
 
   const filteredPosts = selectedCategory
     ? blogPosts.filter(post => post.published && post.category === selectedCategory)
@@ -34,43 +34,21 @@ export default function Blog() {
     return categories.find(cat => cat.id === categoryId)?.label || categoryId;
   };
 
-  const getCategoryColor = (categoryId: string) => {
-    return categories.find(cat => cat.id === categoryId)?.color || '';
-  };
-
   return (
-    <div className="min-h-screen bg-background">
+    <div className="portfolio-page portfolio-page-enter min-h-screen bg-background">
       <Seo
         title="Blog de ilustración"
         description="Procesos creativos, técnicas y reflexiones sobre ilustración digital, diseño de personajes y la industria creativa."
         path="/blog"
       />
-      {/* HEADER */}
-      <header className="border-b border-border sticky top-0 bg-background/90 backdrop-blur-sm z-40">
-        <div className="container h-16 flex items-center justify-between">
-          <Link to="/" className="inline-flex min-h-11 min-w-11 items-center hover:opacity-80 transition-opacity" aria-label="Ir al inicio">
-            <img src="/logo/logo.svg" alt="" aria-hidden="true" className="w-auto" style={{ height: '44px' }} />
-          </Link>
-          <nav className="flex items-center gap-1 sm:gap-2" aria-label="Navegación principal">
-            <Link to="/" className="inline-flex min-h-11 items-center px-2 font-medium transition-colors text-foreground hover:text-accent">
-              Inicio
-            </Link>
-            <Link to="/blog" aria-current="page" className={`inline-flex min-h-11 items-center px-2 font-medium transition-colors ${isActive('/blog') ? 'text-accent border-b-2 border-accent' : 'text-foreground hover:text-accent'}`}>
-              Blog
-            </Link>
-            <Link to="/galeria" className={`inline-flex min-h-11 items-center px-2 font-medium transition-colors ${isActive('/galeria') ? 'text-accent border-b-2 border-accent' : 'text-foreground hover:text-accent'}`}>
-              Galería
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <PortfolioDock />
 
       <main id="main-content">
       {/* HERO DEL BLOG */}
-      <section className="py-16 md:py-24 bg-background">
+      <section className="portfolio-section bg-background">
         <div className="container">
           <div className="max-w-3xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <p className="text-sm tracking-widest text-muted-foreground uppercase">
+            <p className="portfolio-eyebrow">
               Blog & Artículos
             </p>
             <h1 className="text-5xl md:text-6xl font-display text-foreground leading-tight">
@@ -90,10 +68,10 @@ export default function Blog() {
             <span className="text-sm font-medium text-muted-foreground">Filtrar por:</span>
             <button
               onClick={() => setSelectedCategory(null)}
-              className={`min-h-11 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+              className={`portfolio-button min-h-11 rounded-full px-4 py-2 text-sm ${
                 selectedCategory === null
-                  ? 'bg-accent text-accent-foreground'
-                  : 'bg-secondary text-foreground hover:bg-muted'
+                  ? 'portfolio-button--primary'
+                  : 'portfolio-button--secondary'
               }`}
               aria-pressed={selectedCategory === null}
             >
@@ -103,10 +81,10 @@ export default function Blog() {
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={`min-h-11 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                className={`portfolio-button min-h-11 rounded-full px-4 py-2 text-sm ${
                   selectedCategory === category.id
-                    ? 'bg-accent text-accent-foreground'
-                    : 'bg-secondary text-foreground hover:bg-muted'
+                    ? 'portfolio-button--primary'
+                    : 'portfolio-button--secondary'
                 }`}
                 aria-pressed={selectedCategory === category.id}
               >
@@ -118,7 +96,7 @@ export default function Blog() {
       </section>
 
       {/* LISTADO DE ARTÍCULOS */}
-      <section className="py-16 md:py-24 bg-background">
+      <section className="portfolio-section bg-background">
         <div className="container">
           {loading ? (
             <div className="space-y-8" role="status" aria-label="Cargando artículos">
@@ -170,7 +148,7 @@ export default function Blog() {
                       <div className="md:col-span-2 order-1 md:order-2 space-y-4">
                         {/* Categoría y Meta */}
                         <div className="flex flex-wrap items-center gap-3">
-                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(post.category)}`}>
+                          <span className="portfolio-tag">
                             {getCategoryLabel(post.category)}
                           </span>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -210,7 +188,7 @@ export default function Blog() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="py-16 md:py-24 bg-card">
+      <section className="portfolio-section bg-card">
         <div className="container text-center space-y-6">
           <h2 className="text-3xl md:text-4xl font-display text-foreground">
             ¿Listo para trabajar juntos?
@@ -220,7 +198,7 @@ export default function Blog() {
           </p>
           <Link
             to="/#contact-section"
-            className="inline-flex min-h-11 items-center px-8 py-3 bg-accent hover:bg-accent/90 text-accent-foreground rounded-lg font-medium transition-all duration-300 cursor-pointer"
+            className="portfolio-button portfolio-button--primary"
           >
             Solicitar Comisión
           </Link>
@@ -229,20 +207,7 @@ export default function Blog() {
 
       </main>
 
-      {/* FOOTER */}
-      <footer className="bg-card border-t border-border py-12">
-        <div className="container text-center space-y-4">
-          <h3 className="text-2xl font-display text-foreground">
-            Mery Palencia
-          </h3>
-          <p className="text-muted-foreground">
-            Ilustradora Digital | Diseño de Personajes | Arte Conceptual
-          </p>
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Mery Palencia. Todos los derechos reservados.
-          </p>
-        </div>
-      </footer>
+      <PortfolioFooter />
     </div>
   );
 }

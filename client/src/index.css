@@ -4,6 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Manrope', ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -88,7 +90,11 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    color-scheme: dark;
+    font-family: var(--font-sans);
+    font-optical-sizing: auto;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
   }
 
   :focus-visible {
@@ -104,12 +110,28 @@
     user-select: none;
     pointer-events: none;
   }
+
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(:disabled),
+  textarea:not(:disabled),
+  [contenteditable="true"] {
+    cursor: text;
+  }
+
+  button:disabled,
+  input:disabled,
+  textarea:disabled,
+  select:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-weight: 700;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
   }
   .subtitle {
-    font-family: 'Lora', serif;
+    font-family: var(--font-sans);
     font-weight: 600;
   }
   button:not(:disabled),
@@ -174,6 +196,654 @@
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
 
+  .portfolio-page {
+    position: relative;
+    isolation: isolate;
+    background:
+      radial-gradient(circle at 12% 4%, color-mix(in oklab, var(--primary) 8%, transparent), transparent 27rem),
+      radial-gradient(circle at 88% 32%, color-mix(in oklab, var(--primary) 4%, transparent), transparent 34rem),
+      var(--background);
+  }
+
+  .portfolio-dock {
+    background:
+      linear-gradient(135deg, color-mix(in oklab, var(--card) 86%, transparent), color-mix(in oklab, var(--background) 72%, transparent));
+    box-shadow:
+      0 24px 64px color-mix(in oklab, var(--background) 76%, transparent),
+      0 8px 24px color-mix(in oklab, black 28%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 10%, transparent);
+    -webkit-backdrop-filter: blur(28px) saturate(165%);
+    backdrop-filter: blur(28px) saturate(165%);
+    isolation: isolate;
+  }
+
+  .portfolio-dock::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--primary) 10%, transparent), transparent 58%);
+    content: "";
+    pointer-events: none;
+  }
+
+  .portfolio-dock__content {
+    scrollbar-width: none;
+  }
+
+  .portfolio-dock__content::-webkit-scrollbar {
+    display: none;
+  }
+
+  .portfolio-surface {
+    border: 1px solid color-mix(in oklab, var(--border) 82%, transparent);
+    background:
+      linear-gradient(145deg, color-mix(in oklab, var(--card) 82%, transparent), color-mix(in oklab, var(--background) 78%, transparent));
+    box-shadow:
+      0 22px 60px color-mix(in oklab, black 22%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 6%, transparent);
+    -webkit-backdrop-filter: blur(22px) saturate(145%);
+    backdrop-filter: blur(22px) saturate(145%);
+  }
+
+  .portfolio-section {
+    padding-block: clamp(4rem, 7vw, 6rem);
+  }
+
+  .portfolio-section-heading {
+    margin-bottom: clamp(2.5rem, 4vw, 3.5rem);
+  }
+
+  .portfolio-hero-frame {
+    min-height: clamp(39rem, 84svh, 48rem);
+  }
+
+  .portfolio-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    border: 1px solid color-mix(in oklab, var(--border) 82%, transparent);
+    border-radius: 1rem;
+    padding: 0.65rem 1.25rem;
+    color: var(--foreground);
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow:
+      0 12px 30px color-mix(in oklab, black 18%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 7%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+    backdrop-filter: blur(18px) saturate(145%);
+    transition:
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      color 180ms ease,
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .portfolio-button:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
+
+  .portfolio-button:not(:disabled):active {
+    transform: translateY(0) scale(0.985);
+  }
+
+  .portfolio-button:focus-visible {
+    border-color: color-mix(in oklab, var(--primary) 58%, transparent);
+    outline: 3px solid color-mix(in oklab, var(--ring) 38%, transparent);
+    outline-offset: 3px;
+  }
+
+  .portfolio-button--primary {
+    border-color: color-mix(in oklab, var(--primary) 82%, transparent);
+    background: linear-gradient(135deg, color-mix(in oklab, var(--primary) 92%, white 8%), var(--primary));
+    color: var(--primary-foreground);
+    box-shadow:
+      0 12px 34px color-mix(in oklab, var(--primary) 18%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 28%, transparent);
+  }
+
+  .portfolio-button--primary:not(:disabled):hover {
+    border-color: color-mix(in oklab, var(--primary) 70%, white 30%);
+    background: linear-gradient(135deg, color-mix(in oklab, var(--primary) 84%, white 16%), var(--primary));
+    box-shadow:
+      0 16px 38px color-mix(in oklab, var(--primary) 24%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 34%, transparent);
+  }
+
+  .portfolio-button--secondary {
+    background:
+      linear-gradient(145deg, color-mix(in oklab, var(--card) 76%, transparent), color-mix(in oklab, var(--background) 72%, transparent));
+  }
+
+  .portfolio-button--secondary:not(:disabled):hover {
+    border-color: color-mix(in oklab, var(--primary) 42%, transparent);
+    background: color-mix(in oklab, var(--primary) 9%, var(--card));
+    color: var(--primary);
+  }
+
+  .portfolio-button--quiet {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .portfolio-button--icon {
+    width: 2.875rem;
+    min-width: 2.875rem;
+    height: 2.875rem;
+    min-height: 2.875rem;
+    border-radius: 999px;
+    padding: 0;
+  }
+
+  .portfolio-button--menu {
+    border-radius: 0.75rem;
+    transition: color 180ms ease, background-color 180ms ease;
+  }
+
+  .portfolio-button--menu:hover,
+  .portfolio-button--menu:focus-visible {
+    background: color-mix(in oklab, var(--primary) 9%, var(--secondary));
+    color: var(--primary);
+    outline: none;
+  }
+
+  .portfolio-lightbox-dot:hover span,
+  .portfolio-lightbox-dot:focus-visible span {
+    background: var(--primary);
+    transform: scale(1.25);
+  }
+
+  .portfolio-lightbox-backdrop {
+    background:
+      radial-gradient(circle at 50% 18%, color-mix(in oklab, var(--primary) 9%, transparent), transparent 32rem),
+      color-mix(in oklab, #010407 90%, transparent);
+    -webkit-backdrop-filter: blur(26px) saturate(125%);
+    backdrop-filter: blur(26px) saturate(125%);
+  }
+
+  .portfolio-lightbox-panel {
+    border: 1px solid color-mix(in oklab, var(--primary) 17%, var(--border));
+    background:
+      linear-gradient(145deg, color-mix(in oklab, var(--card) 90%, transparent), color-mix(in oklab, var(--background) 94%, transparent));
+    box-shadow:
+      0 40px 110px color-mix(in oklab, black 58%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 7%, transparent);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    backdrop-filter: blur(24px) saturate(150%);
+    scrollbar-width: none;
+  }
+
+  .portfolio-lightbox-panel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .portfolio-lightbox-counter,
+  .portfolio-lightbox-pagination {
+    border: 1px solid color-mix(in oklab, white 12%, transparent);
+    border-radius: 999px;
+    background: color-mix(in oklab, black 58%, transparent);
+    color: color-mix(in oklab, white 90%, transparent);
+    box-shadow: inset 0 1px 0 color-mix(in oklab, white 9%, transparent);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+
+  .portfolio-lightbox-counter {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .portfolio-lightbox-pagination {
+    padding-inline: 0.25rem;
+  }
+
+  .portfolio-process-card {
+    position: relative;
+    min-height: 15rem;
+    overflow: hidden;
+    border: 1px solid color-mix(in oklab, var(--border) 82%, transparent);
+    border-radius: 1.5rem;
+    background: linear-gradient(155deg, color-mix(in oklab, var(--card) 76%, transparent), color-mix(in oklab, var(--background) 86%, transparent));
+    padding: 1.5rem;
+    box-shadow: inset 0 1px 0 color-mix(in oklab, white 5%, transparent);
+    transition: border-color 220ms ease, transform 220ms ease, background-color 220ms ease;
+  }
+
+  .portfolio-process-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in oklab, var(--primary) 30%, transparent);
+    background: color-mix(in oklab, var(--primary) 4%, var(--card));
+  }
+
+  .portfolio-process-number {
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 750;
+    letter-spacing: 0.16em;
+  }
+
+  .portfolio-commission-card {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    border: 1px solid color-mix(in oklab, var(--border) 86%, transparent);
+    border-radius: 1.65rem;
+    background: linear-gradient(155deg, color-mix(in oklab, var(--card) 78%, transparent), color-mix(in oklab, var(--background) 90%, transparent));
+    padding: clamp(1.5rem, 2.4vw, 2rem);
+    box-shadow: inset 0 1px 0 color-mix(in oklab, white 5%, transparent);
+    transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+  }
+
+  .portfolio-commission-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in oklab, var(--primary) 26%, transparent);
+  }
+
+  .portfolio-commission-card--featured {
+    border-color: color-mix(in oklab, var(--primary) 42%, transparent);
+    box-shadow:
+      0 20px 50px color-mix(in oklab, var(--primary) 8%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 7%, transparent);
+  }
+
+  .portfolio-contact-form {
+    border: 1px solid color-mix(in oklab, var(--primary) 14%, var(--border));
+    background:
+      linear-gradient(150deg, color-mix(in oklab, var(--card) 78%, transparent), color-mix(in oklab, var(--background) 88%, transparent));
+    box-shadow:
+      0 28px 70px color-mix(in oklab, black 22%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 6%, transparent);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    backdrop-filter: blur(22px) saturate(140%);
+  }
+
+  .portfolio-field {
+    width: 100%;
+    min-height: 3.25rem;
+    border: 1px solid color-mix(in oklab, var(--border) 90%, transparent);
+    border-radius: 1rem;
+    background: color-mix(in oklab, var(--background) 84%, transparent);
+    padding: 0.85rem 1rem;
+    color: var(--foreground);
+    box-shadow: inset 0 1px 0 color-mix(in oklab, white 3%, transparent);
+    transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .portfolio-field:hover {
+    border-color: color-mix(in oklab, var(--primary) 24%, transparent);
+  }
+
+  .portfolio-field:focus {
+    border-color: color-mix(in oklab, var(--primary) 58%, transparent);
+    background: color-mix(in oklab, var(--primary) 3%, var(--background));
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 10%, transparent);
+    outline: none;
+  }
+
+  .portfolio-field::placeholder {
+    color: color-mix(in oklab, var(--muted-foreground) 78%, transparent);
+  }
+
+  .portfolio-form-notice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    border: 1px solid color-mix(in oklab, #fbbf24 18%, transparent);
+    border-radius: 0.9rem;
+    background: color-mix(in oklab, #fbbf24 6%, transparent);
+    padding: 0.75rem 1rem;
+    color: #f8d477;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    text-align: left;
+  }
+
+  .portfolio-button:disabled {
+    border-color: color-mix(in oklab, var(--border) 74%, transparent);
+    background: color-mix(in oklab, var(--muted) 50%, transparent);
+    color: color-mix(in oklab, var(--muted-foreground) 72%, transparent);
+    box-shadow: none;
+    opacity: 1;
+  }
+
+  .portfolio-eyebrow {
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .portfolio-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.75rem;
+    border: 1px solid color-mix(in oklab, var(--primary) 24%, transparent);
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--primary) 8%, transparent);
+    padding: 0.25rem 0.7rem;
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 650;
+  }
+
+  .portfolio-page-enter {
+    animation: portfolio-page-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .carousel-viewport {
+    -webkit-mask-image: linear-gradient(to right, transparent, black 2.5rem, black calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to right, transparent, black 2.5rem, black calc(100% - 2.5rem), transparent);
+  }
+
+  .portfolio-hero {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .hero-sunset {
+    background: #02080c;
+    isolation: isolate;
+  }
+
+  .hero-sunset__fallback {
+    z-index: 0;
+    background:
+      radial-gradient(circle at 58% 53%, rgba(152, 238, 232, 0.22), transparent 9%),
+      radial-gradient(circle at 50% 48%, rgba(0, 174, 181, 0.16), transparent 36%),
+      linear-gradient(180deg, #01070d 0%, #061824 35%, #0a3540 55%, #10606a 69%, #031015 70%, #010508 100%);
+    opacity: 1;
+    transition: opacity 700ms ease;
+  }
+
+  .hero-sunset.is-ready .hero-sunset__fallback {
+    opacity: 0;
+  }
+
+  .hero-sunset__canvas {
+    z-index: 1;
+    display: block;
+    opacity: 0;
+    transition: opacity 700ms ease;
+    pointer-events: none;
+  }
+
+  .hero-sunset.is-ready .hero-sunset__canvas {
+    opacity: 1;
+  }
+
+  .hero-sunset__veil {
+    z-index: 2;
+    background:
+      radial-gradient(circle at 50% 48%, transparent 3%, rgba(0, 5, 8, 0.06) 48%, rgba(0, 5, 8, 0.52) 100%),
+      linear-gradient(180deg, rgba(0, 4, 7, 0.08), transparent 45%, rgba(0, 4, 7, 0.34));
+    pointer-events: none;
+  }
+
+  .hero-sunset__grain {
+    z-index: 3;
+    opacity: 0.055;
+    background-image: repeating-radial-gradient(circle at 0 0, transparent 0, rgba(255,255,255,0.18) 1px, transparent 1.5px, transparent 4px);
+    background-size: 6px 6px;
+    mix-blend-mode: soft-light;
+    pointer-events: none;
+  }
+
+  .hero-logo {
+    position: relative;
+    width: clamp(13rem, 19vw, 15rem);
+    height: clamp(9rem, 14vw, 11rem);
+    overflow: hidden;
+  }
+
+  .hero-logo__sheet {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: clamp(43rem, 65vw, 52rem);
+    max-width: none;
+    height: clamp(12rem, 20vw, 16rem);
+    transform: translate(-50%, -50%);
+  }
+
+  .portfolio-social-rail {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    z-index: 45;
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+    transform: translateY(-50%);
+    border: 1px solid color-mix(in oklab, var(--primary) 18%, var(--border));
+    border-left: 0;
+    border-radius: 0 1.05rem 1.05rem 0;
+    background: color-mix(in oklab, var(--card) 74%, transparent);
+    padding: 0.3rem;
+    box-shadow:
+      12px 16px 38px color-mix(in oklab, black 24%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 7%, transparent);
+    -webkit-backdrop-filter: blur(22px) saturate(145%);
+    backdrop-filter: blur(22px) saturate(145%);
+    transition: opacity 260ms ease, transform 260ms ease;
+  }
+
+  .portfolio-social-rail--hidden {
+    pointer-events: none;
+    transform: translate(-1rem, -50%);
+    opacity: 0;
+  }
+
+  .portfolio-social-rail__link {
+    display: inline-flex;
+    width: 2.35rem;
+    height: 2.35rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    color: var(--muted-foreground);
+    outline: none;
+    transition: color 180ms ease, background-color 180ms ease, transform 180ms ease;
+  }
+
+  .portfolio-social-rail__link[href]:hover {
+    transform: translateX(0.15rem);
+    background: color-mix(in oklab, var(--primary) 11%, transparent);
+    color: var(--primary);
+  }
+
+  .portfolio-social-rail__link[href]:focus-visible {
+    background: color-mix(in oklab, var(--primary) 13%, transparent);
+    color: var(--primary);
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+
+  .portfolio-social-rail__link--disabled {
+    cursor: not-allowed;
+    color: color-mix(in oklab, var(--muted-foreground) 38%, transparent);
+  }
+
+  .portfolio-footer {
+    border-top: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
+    background:
+      linear-gradient(180deg, color-mix(in oklab, var(--card) 34%, transparent), color-mix(in oklab, var(--background) 94%, transparent));
+    padding: clamp(3.5rem, 7vw, 5.5rem) 0 4.5rem;
+  }
+
+  .portfolio-footer__main {
+    display: grid;
+    gap: 3rem;
+  }
+
+  .portfolio-footer__brand img {
+    width: auto;
+    max-width: 10rem;
+    height: 4.25rem;
+    object-fit: contain;
+  }
+
+  .portfolio-footer__brand p {
+    max-width: 25rem;
+    margin-top: 1.35rem;
+    color: var(--muted-foreground);
+    font-size: 0.92rem;
+    line-height: 1.75;
+  }
+
+  .portfolio-footer__nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
+  }
+
+  .portfolio-footer__nav div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .portfolio-footer__nav p {
+    margin-bottom: 0.25rem;
+    color: var(--foreground);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+  }
+
+  .portfolio-footer__nav a {
+    color: var(--muted-foreground);
+    font-size: 0.9rem;
+    outline: none;
+    transition: color 180ms ease, transform 180ms ease;
+  }
+
+  .portfolio-footer__nav a:hover,
+  .portfolio-footer__nav a:focus-visible {
+    color: var(--primary);
+    transform: translateX(0.2rem);
+  }
+
+  .portfolio-footer__nav a:focus-visible {
+    border-radius: 0.25rem;
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+
+  .portfolio-footer__bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 3.25rem;
+    border-top: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+    padding-top: 1.5rem;
+    color: color-mix(in oklab, var(--muted-foreground) 82%, transparent);
+    font-size: 0.78rem;
+  }
+
+  .portfolio-legal-back {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 2.5rem;
+    color: var(--muted-foreground);
+    font-size: 0.86rem;
+    outline: none;
+    transition: color 180ms ease, transform 180ms ease;
+  }
+
+  .portfolio-legal-back:hover,
+  .portfolio-legal-back:focus-visible {
+    color: var(--primary);
+    transform: translateX(-0.2rem);
+  }
+
+  .portfolio-legal-content {
+    display: grid;
+    gap: 0;
+  }
+
+  .portfolio-legal-section {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr;
+    gap: 1rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--border) 66%, transparent);
+    padding: 2rem 0;
+  }
+
+  .portfolio-legal-section > span {
+    padding-top: 0.15rem;
+    color: var(--primary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  .portfolio-legal-section h2 {
+    color: var(--foreground);
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .portfolio-legal-section p {
+    max-width: 44rem;
+    margin-top: 0.8rem;
+    color: var(--muted-foreground);
+    font-size: 0.93rem;
+    line-height: 1.8;
+  }
+
+  @media (min-width: 640px) {
+    .portfolio-footer__bottom {
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .portfolio-footer__main {
+      grid-template-columns: minmax(0, 1.4fr) minmax(21rem, 0.8fr);
+      align-items: start;
+    }
+
+    .portfolio-legal-section {
+      grid-template-columns: 3.5rem 1fr;
+      gap: 1.5rem;
+      padding: 2.25rem 0;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .portfolio-social-rail {
+      padding: 0.25rem;
+      border-radius: 0 0.9rem 0.9rem 0;
+    }
+
+    .portfolio-social-rail__link {
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 0.7rem;
+    }
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .portfolio-dock,
+    .portfolio-surface,
+    .portfolio-social-rail {
+      background: var(--card);
+    }
+  }
+
   /* Animaciones sutiles para puntos */
   @keyframes subtle-blink {
     0%, 100% {
@@ -228,11 +898,18 @@
       scroll-behavior: auto;
     }
 
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       scroll-behavior: auto !important;
       transition-duration: 0.01ms !important;
     }
   }
+}
+
+@keyframes portfolio-page-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

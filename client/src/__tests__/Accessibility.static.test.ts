@@ -8,7 +8,7 @@ const read = (path: string) => readFileSync(resolve(src, path), 'utf-8');
 describe('accesibilidad del cliente público', () => {
   it('permite saltar la navegación repetida y usa regiones principales', () => {
     expect(read('App.tsx')).toContain('href="#main-content"');
-    for (const page of ['pages/Home.tsx', 'pages/Blog.tsx', 'pages/GalleryPage.tsx', 'pages/BlogPost.tsx', 'pages/NotFound.tsx']) {
+    for (const page of ['pages/Home.tsx', 'pages/Blog.tsx', 'pages/GalleryPage.tsx', 'pages/BlogPost.tsx', 'pages/NotFound.tsx', 'pages/LegalPage.tsx']) {
       expect(read(page)).toContain('<main id="main-content"');
     }
   });

@@ -8,12 +8,14 @@ import NotFound from './NotFound';
 import Seo from '@/components/Seo';
 import ContentStatus from '@/components/ContentStatus';
 import { cloudinaryImage, cloudinarySrcSet } from '@/lib/images';
+import PortfolioDock from '@/components/PortfolioDock';
+import PortfolioFooter from '@/components/PortfolioFooter';
 
 const categories = [
-  { id: 'proceso', label: 'Proceso Creativo', color: 'bg-blue-900/40 text-blue-300' },
-  { id: 'industria', label: 'Industria', color: 'bg-purple-900/40 text-purple-300' },
-  { id: 'tips', label: 'Tips & Herramientas', color: 'bg-teal-900/40 text-teal-300' },
-  { id: 'experiencia', label: 'Experiencia', color: 'bg-orange-900/40 text-orange-300' },
+  { id: 'proceso', label: 'Proceso Creativo' },
+  { id: 'industria', label: 'Industria' },
+  { id: 'tips', label: 'Tips & Herramientas' },
+  { id: 'experiencia', label: 'Experiencia' },
 ];
 
 interface BlogPost {
@@ -107,12 +109,8 @@ export default function BlogPost() {
     return categories.find(cat => cat.id === categoryId)?.label || categoryId;
   };
 
-  const getCategoryColor = (categoryId: string) => {
-    return categories.find(cat => cat.id === categoryId)?.color || '';
-  };
-
   return (
-    <div className="min-h-screen bg-background">
+    <div className="portfolio-page portfolio-page-enter min-h-screen bg-background">
       <Seo
         title={post.title}
         description={post.excerpt}
@@ -121,23 +119,7 @@ export default function BlogPost() {
         imageAlt={post.title}
         type="article"
       />
-      {/* HEADER */}
-      <header className="border-b border-border sticky top-0 bg-background/90 backdrop-blur-sm z-40">
-        <div className="container h-16 flex items-center justify-between">
-          <Link to="/" className="inline-flex min-h-11 min-w-11 items-center hover:opacity-80 transition-opacity" aria-label="Ir al inicio">
-            <img src="/logo/logo.svg" alt="" aria-hidden="true" className="w-auto" style={{ height: '44px' }} />
-          </Link>
-          <nav className="flex items-center gap-1 sm:gap-2" aria-label="Navegación principal">
-            <Link to="/" className="inline-flex min-h-11 items-center px-2 font-medium transition-colors text-foreground hover:text-accent">
-              Inicio
-            </Link>
-            <Link to="/blog" className="inline-flex min-h-11 items-center gap-2 px-2 font-medium text-foreground hover:text-accent transition-colors">
-              <ArrowLeft size={18} />
-              Blog
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <PortfolioDock />
 
       <main id="main-content">
       {/* HERO CON IMAGEN */}
@@ -155,12 +137,12 @@ export default function BlogPost() {
       </section>
 
       {/* CONTENIDO PRINCIPAL */}
-      <article className="py-16 md:py-24 bg-background">
+      <article className="portfolio-section bg-background">
         <div className="container max-w-3xl">
           {/* Meta información */}
           <div className="space-y-6 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="flex flex-wrap items-center gap-4">
-              <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(post.category)}`}>
+              <span className="portfolio-tag">
                 {getCategoryLabel(post.category)}
               </span>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -182,8 +164,8 @@ export default function BlogPost() {
 
             {/* Autor */}
             <div className="flex items-center gap-4 pt-4 border-t border-border">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent/30 to-orange-100 flex items-center justify-center">
-                <span className="text-lg font-display text-accent">MP</span>
+              <div className="portfolio-surface flex h-12 w-12 items-center justify-center rounded-xl p-2">
+                <img src="/logo/logo.svg" alt="" aria-hidden="true" className="h-full w-full object-contain" />
               </div>
               <div>
                 <p className="font-medium text-foreground">{post.author}</p>
@@ -257,7 +239,7 @@ export default function BlogPost() {
                   alert('Enlace copiado al portapapeles');
                 }
               }}
-              className="inline-flex min-h-11 items-center gap-2 px-4 py-2 rounded-lg bg-secondary hover:bg-muted transition-colors text-foreground"
+              className="portfolio-button portfolio-button--secondary"
             >
               <Share2 size={18} />
               Compartir
@@ -268,7 +250,7 @@ export default function BlogPost() {
 
       {/* ARTÍCULOS RELACIONADOS */}
       {relatedPosts.length > 0 && (
-        <section className="py-16 md:py-24 bg-card border-t border-border">
+        <section className="portfolio-section bg-card border-t border-border">
           <div className="container max-w-3xl">
             <h2 className="text-3xl md:text-4xl font-display text-foreground mb-12">
               Artículos Relacionados
@@ -293,7 +275,7 @@ export default function BlogPost() {
                       </div>
 
                       <div className="md:col-span-2 space-y-3">
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(relatedPost.category)}`}>
+                        <span className="portfolio-tag">
                           {getCategoryLabel(relatedPost.category)}
                         </span>
                         <h3 className="text-xl font-display text-foreground group-hover:text-accent transition-colors">
@@ -316,7 +298,7 @@ export default function BlogPost() {
       )}
 
       {/* CTA FINAL */}
-      <section className="py-16 md:py-24 bg-card">
+      <section className="portfolio-section bg-card">
         <div className="container text-center space-y-6">
           <h2 className="text-3xl md:text-4xl font-display text-foreground">
             ¿Inspirado? Vamos a crear algo juntos
@@ -326,7 +308,7 @@ export default function BlogPost() {
           </p>
           <Link
             to="/#contact-section"
-            className="inline-flex min-h-11 items-center px-8 py-3 bg-accent hover:bg-accent/90 text-accent-foreground rounded-lg font-medium transition-all duration-300"
+            className="portfolio-button portfolio-button--primary"
           >
             Solicitar Comisión
           </Link>
@@ -335,20 +317,7 @@ export default function BlogPost() {
 
       </main>
 
-      {/* FOOTER */}
-      <footer className="bg-card border-t border-border py-12">
-        <div className="container text-center space-y-4">
-          <h3 className="text-2xl font-display text-foreground">
-            Mery Palencia
-          </h3>
-          <p className="text-muted-foreground">
-            Ilustradora Digital | Diseño de Personajes | Arte Conceptual
-          </p>
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Mery Palencia. Todos los derechos reservados.
-          </p>
-        </div>
-      </footer>
+      <PortfolioFooter />
     </div>
   );
 }

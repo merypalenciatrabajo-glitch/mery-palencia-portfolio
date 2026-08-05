@@ -21,9 +21,9 @@ export default function ContentStatus({
   return (
     <div
       role={kind === 'error' ? 'alert' : 'status'}
-      className={`mx-auto flex max-w-xl flex-col items-center rounded-xl border border-border bg-card text-center ${compact ? 'p-6' : 'p-10'}`}
+      className={`portfolio-surface mx-auto flex max-w-xl flex-col items-center rounded-[1.5rem] text-center ${compact ? 'p-6' : 'p-10'}`}
     >
-      <Icon className={kind === 'error' ? 'mb-4 text-red-400' : 'mb-4 text-muted-foreground'} size={32} aria-hidden="true" />
+      <Icon className={kind === 'error' ? 'mb-4 text-destructive' : 'mb-4 text-primary'} size={32} strokeWidth={1.7} aria-hidden="true" />
       <h3 className="text-xl font-display text-foreground">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
       {kind === 'error' && onRetry && (

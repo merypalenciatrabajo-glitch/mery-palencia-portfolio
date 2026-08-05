@@ -22,6 +22,7 @@ const componentPath = resolve(
   "../GalleryPage.tsx"
 );
 const source = readFileSync(componentPath, "utf-8");
+const dockSource = readFileSync(resolve(__dirname, "../../components/PortfolioDock.tsx"), "utf-8");
 
 // ---------------------------------------------------------------------------
 // Helpers — mirror the rendering logic from GalleryPage
@@ -54,35 +55,34 @@ function getRenderedState(items: GalleryItem[], loading: boolean): "loading" | "
 
 describe("GalleryPage – header (Requirement 2.6)", () => {
   it("el header contiene el logo 'Mery Palencia'", () => {
-    expect(source).toContain("Mery Palencia");
+    expect(source).toContain("<PortfolioDock />");
+    expect(dockSource).toContain("Mery Palencia");
   });
 
   it("el header contiene un link a /blog (Blog)", () => {
     // The component renders <Link to="/blog">...Blog...</Link>
-    expect(source).toContain('to="/blog"');
-    // The link text "Blog" appears in the JSX (possibly with surrounding whitespace)
-    expect(source).toMatch(/to="\/blog"[\s\S]*?Blog/);
+    expect(dockSource).toContain("to: '/blog'");
+    expect(dockSource).toContain("label: 'Blog'");
   });
 
   it("el header contiene un link a /galeria (Galería)", () => {
     // The component renders <Link to="/galeria">...Galería...</Link>
-    expect(source).toContain('to="/galeria"');
-    // The link text "Galería" appears in the JSX (possibly with surrounding whitespace)
-    expect(source).toMatch(/to="\/galeria"[\s\S]*?Galer/);
+    expect(dockSource).toContain("to: '/galeria'");
+    expect(dockSource).toContain("label: 'Galería'");
   });
 
-  it("el link Galería tiene estilos de estado activo (border-b-2 border-accent)", () => {
-    // Active link has border-b-2 border-accent styling
-    expect(source).toContain("border-b-2 border-accent");
+  it("el link activo utiliza el tratamiento acrílico turquesa", () => {
+    expect(dockSource).toContain("bg-primary/15 text-primary");
   });
 
   it("el header contiene un link explícito a Inicio", () => {
-    expect(source).toMatch(/to="\/"[\s\S]{0,300}Inicio/);
+    expect(dockSource).toContain("to: '/'");
+    expect(dockSource).toContain("label: 'Inicio'");
   });
 
   it("el header utiliza Link de wouter para navegación SPA", () => {
-    expect(source).toContain("import { Link, useLocation } from 'wouter'");
-    expect(source).not.toContain("window.location.href");
+    expect(dockSource).toContain("import { Link, useLocation } from 'wouter'");
+    expect(dockSource).not.toContain("window.location.href");
   });
 });
 

@@ -21,6 +21,8 @@ export function buildSitemap(siteUrl, posts = []) {
     { path: '/', priority: '1.0', changefreq: 'weekly' },
     { path: '/galeria', priority: '0.8', changefreq: 'weekly' },
     { path: '/blog', priority: '0.7', changefreq: 'weekly' },
+    { path: '/terminos', priority: '0.3', changefreq: 'yearly' },
+    { path: '/privacidad', priority: '0.3', changefreq: 'yearly' },
     ...posts.map((post) => ({
       path: `/blog/${encodeURIComponent(post.id)}`,
       priority: '0.6',

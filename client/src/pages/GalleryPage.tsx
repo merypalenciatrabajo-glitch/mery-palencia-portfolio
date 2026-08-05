@@ -1,11 +1,12 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { Link, useLocation } from 'wouter';
 import Lightbox from '@/components/Lightbox';
 import { useGalleryPage } from '@/hooks/useFirestore';
 import Seo from '@/components/Seo';
 import ContentStatus from '@/components/ContentStatus';
 import { cloudinaryImage, cloudinarySrcSet } from '@/lib/images';
+import PortfolioDock from '@/components/PortfolioDock';
+import PortfolioFooter from '@/components/PortfolioFooter';
 
 const CATEGORY_LABELS: Record<string, string> = {
   'fotografia-paisaje': 'Fotografía paisaje',
@@ -41,7 +42,6 @@ type GalleryItem = {
 
 export default function GalleryPage() {
   const { data: items, loading, error, retry } = useGalleryPage();
-  const [location] = useLocation();
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selected, setSelected] = useState<GalleryItem | null>(null);
@@ -63,8 +63,6 @@ export default function GalleryPage() {
     setSelected(item);
     setLightboxOpen(true);
   };
-
-  const isActive = (path: string) => location === path;
 
   // Orden fijo de categorías predefinidas (sin "otros", va siempre al final)
   const CATEGORY_ORDER = [
@@ -96,48 +94,19 @@ export default function GalleryPage() {
   const getCategoryLabel = (cat: string) => CATEGORY_LABELS[normalizeCategory(cat)] ?? cat;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="portfolio-page portfolio-page-enter min-h-screen bg-background">
       <Seo
         title="Galería"
         description="Galería de fotografía, ilustración digital, trabajos análogos y material creativo de Mery Palencia."
         path="/galeria"
       />
-      {/* HEADER */}
-      <header className="border-b border-border sticky top-0 bg-background z-40">
-        <div className="container h-16 flex items-center justify-between">
-          <Link to="/" className="inline-flex min-h-11 min-w-11 items-center hover:opacity-80 transition-opacity" aria-label="Ir al inicio">
-            <img src="/logo/logo.svg" alt="" aria-hidden="true" className="w-auto" style={{ height: '44px' }} />
-          </Link>
-          <nav className="flex items-center gap-1 sm:gap-2" aria-label="Navegación principal">
-            <Link to="/" className="inline-flex min-h-11 items-center px-2 font-medium transition-colors text-foreground hover:text-accent">
-              Inicio
-            </Link>
-            <Link
-              to="/blog"
-              className={`inline-flex min-h-11 items-center px-2 font-medium transition-colors ${
-                isActive('/blog') ? 'text-accent border-b-2 border-accent pb-0.5' : 'text-foreground hover:text-accent'
-              }`}
-            >
-              Blog
-            </Link>
-            <Link
-              to="/galeria"
-              aria-current="page"
-              className={`inline-flex min-h-11 items-center px-2 font-medium transition-colors ${
-                isActive('/galeria') ? 'text-accent border-b-2 border-accent pb-0.5' : 'text-foreground hover:text-accent'
-              }`}
-            >
-              Galería
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <PortfolioDock />
 
       <main id="main-content">
       {/* HERO */}
-      <section className="py-8 md:py-12 bg-background">
+      <section className="portfolio-section">
         <div className="container text-center space-y-2">
-          <p className="text-sm tracking-widest text-muted-foreground uppercase">
+          <p className="portfolio-eyebrow">
             Fotografía & Arte
           </p>
           <h1 className="text-4xl md:text-5xl font-display text-foreground">
@@ -151,13 +120,13 @@ export default function GalleryPage() {
 
       {/* FILTROS */}
       {!loading && availableCategories.length > 0 && (
-        <section className="py-6 border-b border-border bg-card">
+        <section className="border-y border-border/70 bg-card/20 py-6 backdrop-blur-sm">
           <div className="container flex items-center gap-3">
             <span className="text-sm text-muted-foreground">Filtrar por:</span>
             <div ref={dropdownRef} className="relative">
               <button
                 onClick={() => setDropdownOpen((o) => !o)}
-                className="flex min-h-11 items-center gap-2 px-4 py-2 border border-border rounded-lg bg-background text-sm text-foreground hover:border-accent transition-colors"
+                className="portfolio-button portfolio-button--secondary min-h-11 px-4 py-2 text-sm"
                 aria-expanded={dropdownOpen}
                 aria-haspopup="menu"
                 aria-controls="gallery-category-menu"
@@ -170,13 +139,13 @@ export default function GalleryPage() {
                   id="gallery-category-menu"
                   role="menu"
                   aria-label="Categorías de la galería"
-                  className="absolute left-0 top-full mt-1 z-50 min-w-[220px] bg-background border border-border rounded-lg shadow-lg overflow-hidden"
+                  className="portfolio-surface absolute left-0 top-full z-50 mt-2 min-w-[220px] overflow-hidden rounded-xl p-1"
                 >
                   <button
                     role="menuitemradio"
                     aria-checked={activeCategory === null}
                     onClick={() => { setActiveCategory(null); setDropdownOpen(false); }}
-                    className={`min-h-11 w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-secondary ${activeCategory === null ? 'text-accent font-medium' : 'text-foreground'}`}
+                    className={`portfolio-button--menu min-h-11 w-full px-4 py-2.5 text-left text-sm ${activeCategory === null ? 'text-accent font-medium' : 'text-foreground'}`}
                   >
                     Todas las categorías
                   </button>
@@ -186,7 +155,7 @@ export default function GalleryPage() {
                       role="menuitemradio"
                       aria-checked={activeCategory === cat}
                       onClick={() => { setActiveCategory(cat); setDropdownOpen(false); }}
-                      className={`min-h-11 w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-secondary ${activeCategory === cat ? 'text-accent font-medium' : 'text-foreground'}`}
+                      className={`portfolio-button--menu min-h-11 w-full px-4 py-2.5 text-left text-sm ${activeCategory === cat ? 'text-accent font-medium' : 'text-foreground'}`}
                     >
                       {getCategoryLabel(cat)}
                     </button>
@@ -197,7 +166,7 @@ export default function GalleryPage() {
             {activeCategory && (
               <button
                 onClick={() => setActiveCategory(null)}
-                className="min-h-11 text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
+                className="portfolio-button portfolio-button--quiet min-h-11 px-3 text-xs text-muted-foreground hover:text-foreground"
               >
                 Limpiar
               </button>
@@ -207,7 +176,7 @@ export default function GalleryPage() {
       )}
 
       {/* GRID */}
-      <section className="py-8 md:py-12">
+      <section className="portfolio-section pt-8 md:pt-12">
         <div className="container">
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6" role="status" aria-label="Cargando galería">
@@ -234,11 +203,11 @@ export default function GalleryPage() {
                 <button
                   type="button"
                   key={item.id}
-                  className="text-left rounded-xl"
+                  className="group text-left rounded-[1.35rem] outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   onClick={() => openLightbox(item)}
                   aria-label={`Abrir ${item.title}`}
                 >
-                  <div className="relative overflow-hidden rounded-xl">
+                  <div className="portfolio-surface relative overflow-hidden rounded-[1.35rem] p-1.5">
                     <img
                       src={cloudinaryImage(item.image, { width: 600 })}
                       srcSet={cloudinarySrcSet(item.image, [320, 480, 600, 900])}
@@ -246,7 +215,7 @@ export default function GalleryPage() {
                       alt={item.title}
                       loading="lazy"
                       decoding="async"
-                      className="w-full aspect-square object-cover"
+                      className="aspect-square w-full rounded-[1rem] object-cover transition-transform duration-500 group-hover:scale-[1.025]"
                     />
                     {/* Overlay protector — bloquea clic derecho y arrastre */}
                     <div
@@ -276,6 +245,8 @@ export default function GalleryPage() {
       </section>
 
       </main>
+
+      <PortfolioFooter />
 
       {/* LIGHTBOX */}
       {selected && (

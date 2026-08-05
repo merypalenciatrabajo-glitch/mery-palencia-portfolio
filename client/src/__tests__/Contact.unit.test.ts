@@ -30,11 +30,13 @@ describe('formulario de contacto', () => {
   });
 
   it('no publica enlaces de contacto ficticios', () => {
-    const home = readFileSync(resolve(__dirname, '../pages/Home.tsx'), 'utf-8');
-    expect(home).not.toContain('href="https://instagram.com"');
-    expect(home).not.toContain('href="https://linkedin.com"');
-    expect(home).not.toContain('mailto:mery@example.com');
-    expect(home).toContain('VITE_CONTACT_EMAIL');
+    const socialRail = readFileSync(resolve(__dirname, '../components/SocialRail.tsx'), 'utf-8');
+    expect(socialRail).not.toContain('href="https://instagram.com"');
+    expect(socialRail).not.toContain('href="https://facebook.com"');
+    expect(socialRail).not.toContain('mailto:mery@example.com');
+    expect(socialRail).toContain('VITE_CONTACT_EMAIL');
+    expect(socialRail).toContain('VITE_INSTAGRAM_URL');
+    expect(socialRail).toContain('VITE_FACEBOOK_URL');
   });
 
   it('envía al transporte configurado con los campos esperados', async () => {

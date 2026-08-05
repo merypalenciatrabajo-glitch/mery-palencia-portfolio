@@ -158,7 +158,7 @@ export default function Lightbox({ isOpen, image, title, category, description, 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="portfolio-lightbox-backdrop fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
       onClick={onClose}
       onTouchMove={(e) => e.stopPropagation()}
     >
@@ -167,28 +167,24 @@ export default function Lightbox({ isOpen, image, title, category, description, 
         role="dialog"
         aria-modal="true"
         aria-labelledby="lightbox-title"
-        className="relative animate-in fade-in zoom-in-95 duration-300 w-full"
-        style={{ maxWidth: '480px' }}
+        className="relative w-full max-w-5xl animate-in fade-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close */}
-        <button
-          ref={closeButtonRef}
-          onClick={onClose}
-          className="absolute -top-12 right-0 flex h-11 w-11 items-center justify-center text-white hover:text-gray-300 z-10"
-          aria-label="Cerrar"
-        >
-          <X size={28} />
-        </button>
-
         <div
-          className="bg-card rounded-xl shadow-2xl overflow-hidden flex flex-col"
-          style={{ maxHeight: '90vh' }}
+          className="portfolio-lightbox-panel relative grid max-h-[92svh] overflow-y-auto rounded-[1.75rem] md:grid-cols-[minmax(0,1fr)_20rem] md:overflow-hidden"
         >
+          <button
+            ref={closeButtonRef}
+            onClick={onClose}
+            className="portfolio-button portfolio-button--icon portfolio-button--secondary absolute right-4 top-4 z-40 text-white"
+            aria-label="Cerrar"
+          >
+            <X size={22} />
+          </button>
+
           {/* Slider viewport */}
           <div
-            className="relative overflow-hidden flex-shrink-0 bg-black"
-            style={{ height: '60vw', maxHeight: '65vh', minHeight: '200px' }}
+            className="relative h-[55svh] min-h-[20rem] overflow-hidden bg-black md:h-[82svh] md:max-h-[760px]"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -229,7 +225,7 @@ export default function Lightbox({ isOpen, image, title, category, description, 
                 {index > 0 && (
                   <button
                     onClick={(e) => { e.stopPropagation(); prev(); }}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                    className="portfolio-button portfolio-button--icon absolute left-3 top-1/2 -translate-y-1/2 border-white/15 bg-black/45 text-white hover:border-primary/40 hover:bg-black/60"
                     aria-label="Anterior"
                   >
                     <ChevronLeft size={18} />
@@ -238,7 +234,7 @@ export default function Lightbox({ isOpen, image, title, category, description, 
                 {index < total - 1 && (
                   <button
                     onClick={(e) => { e.stopPropagation(); next(); }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                    className="portfolio-button portfolio-button--icon absolute right-3 top-1/2 -translate-y-1/2 border-white/15 bg-black/45 text-white hover:border-primary/40 hover:bg-black/60"
                     aria-label="Siguiente"
                   >
                     <ChevronRight size={18} />
@@ -246,17 +242,17 @@ export default function Lightbox({ isOpen, image, title, category, description, 
                 )}
 
                 {/* Contador */}
-                <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/50 text-white text-xs font-medium backdrop-blur-sm" aria-live="polite">
-                  {index + 1}/{total}
+                <div className="portfolio-lightbox-counter absolute left-4 top-4" aria-live="polite">
+                  {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
                 </div>
 
                 {/* Dots */}
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                <div className="portfolio-lightbox-pagination absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1">
                   {allImages.map((_, i) => (
                     <button
                       key={i}
                       onClick={(e) => { e.stopPropagation(); goTo(i); }}
-                      className="flex h-11 w-11 items-center justify-center rounded-full"
+                      className="portfolio-lightbox-dot flex h-11 w-11 items-center justify-center rounded-full"
                       aria-label={`Foto ${i + 1}`}
                       aria-current={i === index ? 'true' : undefined}
                     >
@@ -271,21 +267,26 @@ export default function Lightbox({ isOpen, image, title, category, description, 
           </div>
 
           {/* Info */}
-          <div className="px-6 py-4 border-t border-border">
-            <div className="space-y-1">
+          <aside className="flex flex-col border-t border-border/70 p-6 pt-20 md:overflow-y-auto md:border-l md:border-t-0 md:p-7 md:pt-24">
+            <div className="space-y-4">
               {category && (
-                <span className="inline-block px-2 py-0.5 rounded-full bg-accent/10 text-accent text-[11px] font-semibold tracking-widest uppercase">
+                <span className="portfolio-tag">
                   {category}
                 </span>
               )}
-              <h3 id="lightbox-title" className="text-lg font-display text-foreground leading-snug">{title}</h3>
+              <h3 id="lightbox-title" className="text-2xl font-display leading-tight text-foreground">{title}</h3>
               {description && (
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-[0.95rem] leading-7 text-muted-foreground">
                   {parseTextWithLinks(description)}
                 </p>
               )}
             </div>
-          </div>
+            {total > 1 && (
+              <p className="mt-auto hidden border-t border-border/60 pt-5 text-xs leading-relaxed text-muted-foreground md:block">
+                Usa las flechas o desliza la imagen para recorrer la serie.
+              </p>
+            )}
+          </aside>
         </div>
       </div>
     </div>

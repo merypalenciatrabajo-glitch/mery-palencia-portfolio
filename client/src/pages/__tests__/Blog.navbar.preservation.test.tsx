@@ -26,7 +26,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 // Read the GalleryPage component source once
-const componentPath = resolve(__dirname, "../GalleryPage.tsx");
+const componentPath = resolve(__dirname, "../../components/PortfolioDock.tsx");
 const source = readFileSync(componentPath, "utf-8");
 
 /**
@@ -62,14 +62,10 @@ describe("GalleryPage – preservation de navbar (Property 2: Preservation)", ()
           fc.constantFrom(...galleryRoutes),
           (_route) => {
             // GalleryPage header must always contain a Blog link
-            const hasBlogLink =
-              headerSource.includes('to="/blog"') &&
-              /to="\/blog"[\s\S]{0,500}Blog/.test(headerSource);
+            const hasBlogLink = source.includes("to: '/blog'") && source.includes("label: 'Blog'");
 
             // GalleryPage header must always contain a Galería link
-            const hasGaleriaLink =
-              headerSource.includes('to="/galeria"') &&
-              /to="\/galeria"[\s\S]{0,500}Galer/.test(headerSource);
+            const hasGaleriaLink = source.includes("to: '/galeria'") && source.includes("label: 'Galería'");
 
             return hasBlogLink && hasGaleriaLink;
           }
@@ -86,7 +82,8 @@ describe("GalleryPage – preservation de navbar (Property 2: Preservation)", ()
    * EXPECTED TO PASS on unfixed code.
    */
   it("P2.2: Inicio está presente en el header de GalleryPage", () => {
-    expect(headerSource).toMatch(/to="\/"[\s\S]{0,300}Inicio/);
+    expect(source).toContain("to: '/'");
+    expect(source).toContain("label: 'Inicio'");
   });
 
   /**
@@ -96,8 +93,9 @@ describe("GalleryPage – preservation de navbar (Property 2: Preservation)", ()
    * EXPECTED TO PASS on unfixed code.
    */
   it('P2.3: el logo accesible en GalleryPage navega al home', () => {
-    expect(headerSource).toMatch(/<Link to="\/"[^>]*aria-label="Ir al inicio"/);
-    expect(headerSource).toMatch(/<img src="\/logo\/logo\.svg" alt="" aria-hidden="true"/);
+    expect(headerSource).toContain('to="/"');
+    expect(headerSource).toContain('aria-label="Mery Palencia, ir al inicio"');
+    expect(headerSource).toContain('<img src="/logo/logo.svg" alt="Mery Palencia"');
   });
 
   /**
@@ -108,12 +106,10 @@ describe("GalleryPage – preservation de navbar (Property 2: Preservation)", ()
    * EXPECTED TO PASS on unfixed code.
    */
   it(
-    "P2.4: el enlace 'Galería' en GalleryPage tiene clase de estilo activo (border-b-2 border-accent) cuando está en /galeria",
+    "P2.4: el enlace activo usa el tratamiento acrílico turquesa",
     () => {
-      // The active style for Galería link uses border-b-2 border-accent
-      expect(headerSource).toContain("border-b-2 border-accent");
-      // The active style is applied conditionally via isActive('/galeria')
-      expect(headerSource).toMatch(/isActive\(['"]\/galeria['"]\)/);
+      expect(headerSource).toContain("bg-primary/15 text-primary");
+      expect(headerSource).toContain("matches(location)");
     }
   );
 

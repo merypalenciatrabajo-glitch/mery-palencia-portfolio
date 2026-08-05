@@ -38,4 +38,11 @@ describe("Client router – ruta /galeria (Requirement 6.1)", () => {
     expect(appSource).toContain("Switch");
     expect(appSource).toContain("Route");
   });
+
+  it("registra páginas legales reales para términos y privacidad", () => {
+    expect(appSource).toContain('path={"/terminos"}');
+    expect(appSource).toContain('path={"/privacidad"}');
+    expect(appSource).toContain('kind="terms"');
+    expect(appSource).toContain('kind="privacy"');
+  });
 });
