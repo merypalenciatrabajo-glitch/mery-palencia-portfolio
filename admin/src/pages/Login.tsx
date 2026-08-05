@@ -76,18 +76,27 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo / Título */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
-            <Lock size={28} className="text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">Panel Admin</h1>
-          <p className="text-muted-foreground mt-1">Mery Palencia</p>
-        </div>
+    <main className="relative isolate flex min-h-screen items-center justify-center overflow-x-hidden bg-background px-4 py-10 sm:px-6">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-px bg-primary/45" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-[12%] bottom-0 h-px bg-border/70" />
 
-        <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
+      <div className="w-full max-w-[30rem]">
+        <header className="mb-7 text-center sm:mb-9">
+          <img
+            src="/brand/mery-palencia-logo.svg"
+            alt="Mery Palencia"
+            className="mx-auto h-32 w-32 object-contain sm:h-40 sm:w-40"
+          />
+          <p className="mt-3 text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-primary">
+            Administración del portafolio
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem]">
+            Panel Admin
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">Acceso privado de Mery Palencia</p>
+        </header>
+
+        <section className="rounded-[1.75rem] border border-border/90 bg-card/75 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.38)] backdrop-blur-2xl sm:p-8">
           {offlinePreview && (
             <div
               role="status"
@@ -106,10 +115,11 @@ export default function Login() {
           )}
           {step === "credentials" ? (
             <>
-              <h2 className="text-lg font-semibold text-foreground mb-6">
+              <h2 className="mb-1 text-lg font-semibold text-foreground">
                 Iniciar sesión
               </h2>
-              <form onSubmit={handleCredentials} className="space-y-4">
+              <p className="mb-6 text-sm text-muted-foreground">Ingresa con tu cuenta administrativa.</p>
+              <form onSubmit={handleCredentials} className="space-y-5">
                 <div>
                   <label htmlFor="admin-email" className="block text-sm font-medium text-foreground mb-1.5">
                     Email
@@ -127,8 +137,8 @@ export default function Login() {
                       onChange={(e) => setEmail(e.target.value)}
                       autoComplete="email"
                       required
-                      className="w-full pl-9 pr-4 py-2.5 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
-                      placeholder="admin@ejemplo.com"
+                      className="w-full rounded-xl border border-input bg-background/70 py-3 pl-10 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/55 hover:border-primary/30 focus:border-primary/50 focus:ring-2 focus:ring-ring"
+                      placeholder="Correo administrativo"
                     />
                   </div>
                 </div>
@@ -150,14 +160,14 @@ export default function Login() {
                       onChange={(e) => setPassword(e.target.value)}
                       autoComplete="current-password"
                       required
-                      className="w-full pl-9 pr-10 py-2.5 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
+                      className="w-full rounded-xl border border-input bg-background/70 py-3 pl-10 pr-11 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/55 hover:border-primary/30 focus:border-primary/50 focus:ring-2 focus:ring-ring"
                       placeholder="••••••••"
                     />
                     <button
                       type="button"
                       aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                       onClick={() => setShowPassword((p) => !p)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -174,9 +184,8 @@ export default function Login() {
                   type="submit"
                   disabled={loading}
                   className={cn(
-                    "w-full py-2.5 rounded-lg font-medium text-sm transition-all",
-                    "bg-primary text-primary-foreground hover:bg-primary/90",
-                    loading && "opacity-60 cursor-not-allowed"
+                    "w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/88",
+                    loading && "cursor-not-allowed opacity-60"
                   )}
                 >
                   {loading ? "Verificando..." : "Continuar"}
@@ -185,10 +194,8 @@ export default function Login() {
             </>
           ) : (
             <>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <ShieldCheck size={20} className="text-primary" />
-                </div>
+              <div className="mb-6 flex items-center gap-3">
+                <ShieldCheck size={26} className="shrink-0 text-primary" />
                 <div>
                   <h2 className="text-lg font-semibold text-foreground">
                     Verificación 2FA
@@ -216,7 +223,7 @@ export default function Login() {
                     }
                     autoComplete="one-time-code"
                     required
-                    className="w-full px-4 py-2.5 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm tracking-widest text-center text-lg"
+                    className="w-full rounded-xl border border-input bg-background/70 px-4 py-3 text-center text-lg tracking-[0.35em] text-foreground outline-none transition-colors hover:border-primary/30 focus:border-primary/50 focus:ring-2 focus:ring-ring"
                     placeholder="000000"
                     autoFocus
                   />
@@ -232,8 +239,7 @@ export default function Login() {
                   type="submit"
                   disabled={loading || totpCode.length !== 6}
                   className={cn(
-                    "w-full py-2.5 rounded-lg font-medium text-sm transition-all",
-                    "bg-primary text-primary-foreground hover:bg-primary/90",
+                    "w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/88",
                     (loading || totpCode.length !== 6) &&
                       "opacity-60 cursor-not-allowed"
                   )}
@@ -255,8 +261,8 @@ export default function Login() {
               </form>
             </>
           )}
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
