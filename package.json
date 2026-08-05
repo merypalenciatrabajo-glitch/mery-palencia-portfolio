@@ -4,7 +4,7 @@
   "type": "module",
   "license": "MIT",
   "engines": {
-    "node": ">=24.18.0 <25",
+    "node": ">=24.14.0 <25",
     "pnpm": ">=11.9.0 <12"
   },
   "scripts": {
@@ -120,6 +120,6 @@
   },
   "packageManager": "pnpm@11.9.0",
   "volta": {
-    "node": "24.18.0"
+    "node": "24.14.0"
   }
 }

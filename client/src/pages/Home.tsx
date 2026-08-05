@@ -11,10 +11,8 @@ import { cloudinaryImage, cloudinarySrcSet } from '@/lib/images';
 import PortfolioDock from '@/components/PortfolioDock';
 import PortfolioFooter from '@/components/PortfolioFooter';
 import AnimatedHeroBackground from '@/components/AnimatedHeroBackground';
+import { EMAILJS_CONFIG } from '@/lib/publicContactConfig';
 
-const EMAILJS_SERVICE = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-const EMAILJS_TEMPLATE = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 /**
  * DISEÑO MINIMALISTA CONTEMPORÁNEO
  * - Tipografía contemporánea y jerarquía editorial clara
@@ -235,7 +233,9 @@ export default function Home() {
   });
   const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'sent' | 'error' | 'unavailable'>('idle');
   const [formFeedback, setFormFeedback] = useState('');
-  const contactConfigured = Boolean(EMAILJS_SERVICE && EMAILJS_TEMPLATE && EMAILJS_PUBLIC_KEY);
+  const contactConfigured = Boolean(
+    EMAILJS_CONFIG.serviceId && EMAILJS_CONFIG.templateId && EMAILJS_CONFIG.publicKey,
+  );
 
   const openLightbox = (item: { id: string; title: string; image: string; category?: string; description?: string; extraImages?: { url: string; publicId: string }[] }) => {
     setSelectedImage(item);
@@ -273,9 +273,9 @@ export default function Home() {
     setFormFeedback('Enviando tu solicitud…');
     try {
       await sendContactMessage(validation.data, {
-        serviceId: EMAILJS_SERVICE,
-        templateId: EMAILJS_TEMPLATE,
-        publicKey: EMAILJS_PUBLIC_KEY,
+        serviceId: EMAILJS_CONFIG.serviceId,
+        templateId: EMAILJS_CONFIG.templateId,
+        publicKey: EMAILJS_CONFIG.publicKey,
       });
       setFormStatus('sent');
       setFormFeedback('¡Mensaje enviado! Te responderé pronto.');

@@ -1,5 +1,6 @@
 import { Facebook, Instagram, Mail } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { CONTACT_EMAIL } from '@/lib/publicContactConfig';
 
 function safePublicUrl(value: string | undefined): string {
   try {
@@ -10,14 +11,10 @@ function safePublicUrl(value: string | undefined): string {
   }
 }
 
-const email = /^\S+@\S+\.\S+$/.test(import.meta.env.VITE_CONTACT_EMAIL?.trim() ?? '')
-  ? import.meta.env.VITE_CONTACT_EMAIL.trim()
-  : '';
-
 const socialLinks = [
   {
     label: 'Correo',
-    href: email ? `mailto:${email}` : '',
+    href: `mailto:${CONTACT_EMAIL}`,
     icon: Mail,
     external: false,
   },

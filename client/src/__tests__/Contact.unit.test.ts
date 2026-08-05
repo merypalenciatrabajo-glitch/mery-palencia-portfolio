@@ -31,10 +31,14 @@ describe('formulario de contacto', () => {
 
   it('no publica enlaces de contacto ficticios', () => {
     const socialRail = readFileSync(resolve(__dirname, '../components/SocialRail.tsx'), 'utf-8');
+    const publicConfig = readFileSync(resolve(__dirname, '../lib/publicContactConfig.ts'), 'utf-8');
     expect(socialRail).not.toContain('href="https://instagram.com"');
     expect(socialRail).not.toContain('href="https://facebook.com"');
     expect(socialRail).not.toContain('mailto:mery@example.com');
-    expect(socialRail).toContain('VITE_CONTACT_EMAIL');
+    expect(publicConfig).toContain('VITE_CONTACT_EMAIL');
+    expect(publicConfig).toContain('VITE_EMAILJS_SERVICE_ID');
+    expect(publicConfig).toContain('VITE_EMAILJS_TEMPLATE_ID');
+    expect(publicConfig).toContain('VITE_EMAILJS_PUBLIC_KEY');
     expect(socialRail).toContain('VITE_INSTAGRAM_URL');
     expect(socialRail).toContain('VITE_FACEBOOK_URL');
   });
