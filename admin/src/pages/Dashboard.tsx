@@ -154,15 +154,18 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <div className="flex items-baseline gap-2 sm:text-right" aria-live="polite">
+        <div
+          className="flex min-h-12 items-center justify-center gap-3 text-center sm:justify-end sm:text-left"
+          aria-live="polite"
+        >
           {!hasResolvedCount && hasLoading ? (
             <span className="h-8 w-12 animate-pulse rounded-lg bg-muted" aria-label="Cargando total" />
           ) : (
-            <span className="text-3xl font-semibold tabular-nums text-foreground">
+            <span className="text-3xl font-semibold leading-none tabular-nums text-foreground">
               {totalItems}
             </span>
           )}
-          <span className="text-xs leading-tight text-muted-foreground">
+          <span className="text-xs leading-[1.35] text-muted-foreground">
             elementos
             <br />
             registrados
