@@ -7,12 +7,20 @@ import {
   query,
   updateDoc,
 } from "firebase/firestore";
-import { Edit2, Plus, StarOff, Upload, X } from "lucide-react";
+import {
+  Edit2,
+  ImagePlus,
+  Plus,
+  RefreshCw,
+  Sparkles,
+  StarOff,
+  Upload,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { db } from "@/lib/firebase";
-import { uploadToCloudinary } from "@/lib/cloudinary";
-import { cn } from "@/lib/utils";
 import CategorySelect from "@/components/CategorySelect";
+import { uploadToCloudinary } from "@/lib/cloudinary";
+import { db } from "@/lib/firebase";
 
 interface GalleryItem {
   id: string;
@@ -25,6 +33,8 @@ interface GalleryItem {
   featured: boolean;
   extraImages?: { url: string; publicId: string }[];
 }
+
+type LoadState = "loading" | "ready" | "error";
 
 const CATEGORIES = [
   { id: "fotografia-paisaje", label: "Fotografía paisaje" },
@@ -43,15 +53,21 @@ const EMPTY_FORM = {
   description: "",
 };
 
+const categoryLabel = (category: string) =>
+  CATEGORIES.find((item) => item.id === category)?.label ?? category;
+
 export default function Gallery() {
-  // Featured items are stored in the dedicated `gallery` collection used by Home.
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [allItems, setAllItems] = useState<GalleryItem[]>([]);
+  const [loadState, setLoadState] = useState<LoadState>("loading");
+  const [subscriptionKey, setSubscriptionKey] = useState(0);
+  const [pageError, setPageError] = useState("");
+  const [formError, setFormError] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<GalleryItem | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string>("");
+  const [preview, setPreview] = useState("");
   const [progress, setProgress] = useState(0);
   const [saving, setSaving] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
@@ -65,15 +81,42 @@ export default function Gallery() {
   const [customCategory, setCustomCategory] = useState("");
 
   useEffect(() => {
-    // Listen to all Home carousel items ordered by order.
-    const q = query(collection(db, "gallery"), orderBy("order", "asc"));
-    const unsub = onSnapshot(q, (snap) => {
-      const all = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GalleryItem, "id">) }));
-      setAllItems(all);
-      setItems(all.filter((i) => i.featured));
-    });
-    return unsub;
-  }, []);
+    setLoadState("loading");
+    setPageError("");
+
+    const galleryQuery = query(collection(db, "gallery"), orderBy("order", "asc"));
+    return onSnapshot(
+      galleryQuery,
+      (snapshot) => {
+        const all = snapshot.docs.map((item) => ({
+          id: item.id,
+          ...(item.data() as Omit<GalleryItem, "id">),
+        }));
+        setAllItems(all);
+        setItems(all.filter((item) => item.featured));
+        setLoadState("ready");
+      },
+      () => {
+        setLoadState("error");
+        setPageError("No pudimos cargar las ilustraciones destacadas.");
+      },
+    );
+  }, [subscriptionKey]);
+
+  useEffect(() => {
+    if (!showForm) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !saving) closeForm();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  });
+
+  const releaseLocalPreviews = () => {
+    if (preview.startsWith("blob:")) URL.revokeObjectURL(preview);
+    extraPreviews.forEach((source) => URL.revokeObjectURL(source));
+  };
 
   const openCreate = () => {
     setEditing(null);
@@ -84,14 +127,20 @@ export default function Gallery() {
     setExtraPreviews([]);
     setExistingExtras([]);
     setExtrasError("");
+    setFormError("");
     setCustomCategory("");
+    setProgress(0);
     setShowForm(true);
   };
 
   const openEdit = (item: GalleryItem) => {
     setEditing(item);
-    const isCustom = !CATEGORIES.find((c) => c.id === item.category);
-    setForm({ title: item.title, category: isCustom ? "otros" : item.category, description: item.description });
+    const isCustom = !CATEGORIES.some((category) => category.id === item.category);
+    setForm({
+      title: item.title,
+      category: isCustom ? "otros" : item.category,
+      description: item.description,
+    });
     setCustomCategory(isCustom ? item.category : "");
     setPreview(item.image);
     setFile(null);
@@ -99,10 +148,13 @@ export default function Gallery() {
     setExtraPreviews([]);
     setExistingExtras(item.extraImages ?? []);
     setExtrasError("");
+    setFormError("");
+    setProgress(0);
     setShowForm(true);
   };
 
   const closeForm = () => {
+    releaseLocalPreviews();
     setShowForm(false);
     setEditing(null);
     setFile(null);
@@ -112,59 +164,89 @@ export default function Gallery() {
     setExtraPreviews([]);
     setExistingExtras([]);
     setExtrasError("");
+    setFormError("");
     setCustomCategory("");
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    setFile(f);
-    setPreview(URL.createObjectURL(f));
-  };
-
-  const handleExtraFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = Array.from(e.target.files ?? []);
-    if (!selected.length) return;
-    const total = existingExtras.length + extraFiles.length + selected.length;
-    if (total > 4) {
-      setExtrasError(`Máximo 4 fotos extras. Ya tienes ${existingExtras.length + extraFiles.length}.`);
-      e.target.value = "";
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (!selectedFile) return;
+    if (!selectedFile.type.startsWith("image/")) {
+      setFormError("Selecciona un archivo de imagen válido.");
+      event.target.value = "";
       return;
     }
+
+    if (preview.startsWith("blob:")) URL.revokeObjectURL(preview);
+    setFormError("");
+    setFile(selectedFile);
+    setPreview(URL.createObjectURL(selectedFile));
+    event.target.value = "";
+  };
+
+  const handleExtraFilesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(event.target.files ?? []);
+    if (!selected.length) return;
+    if (selected.some((selectedFile) => !selectedFile.type.startsWith("image/"))) {
+      setExtrasError("Todos los archivos deben ser imágenes válidas.");
+      event.target.value = "";
+      return;
+    }
+
+    const total = existingExtras.length + extraFiles.length + selected.length;
+    if (total > 4) {
+      setExtrasError(`Puedes añadir hasta 4 fotos extras. Ya tienes ${existingExtras.length + extraFiles.length}.`);
+      event.target.value = "";
+      return;
+    }
+
     setExtrasError("");
-    setExtraFiles((prev) => [...prev, ...selected]);
-    setExtraPreviews((prev) => [...prev, ...selected.map((f) => URL.createObjectURL(f))]);
-    e.target.value = "";
+    setExtraFiles((current) => [...current, ...selected]);
+    setExtraPreviews((current) => [
+      ...current,
+      ...selected.map((selectedFile) => URL.createObjectURL(selectedFile)),
+    ]);
+    event.target.value = "";
   };
 
   const removeExtraFile = (index: number) => {
-    setExtraFiles((prev) => prev.filter((_, i) => i !== index));
-    setExtraPreviews((prev) => prev.filter((_, i) => i !== index));
+    URL.revokeObjectURL(extraPreviews[index]);
+    setExtraFiles((current) => current.filter((_, itemIndex) => itemIndex !== index));
+    setExtraPreviews((current) => current.filter((_, itemIndex) => itemIndex !== index));
     setExtrasError("");
   };
 
   const removeExistingExtra = (index: number) => {
-    setExistingExtras((prev) => prev.filter((_, i) => i !== index));
+    setExistingExtras((current) => current.filter((_, itemIndex) => itemIndex !== index));
     setExtrasError("");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!editing && !file) {
+      setFormError("Añade una imagen de portada antes de publicar.");
+      return;
+    }
+
     setSaving(true);
-    const finalCategory = form.category === "otros" ? customCategory.trim() || "otros" : form.category;
+    setFormError("");
+    setProgress(0);
+    const finalCategory =
+      form.category === "otros" ? customCategory.trim() || "otros" : form.category;
+
     try {
       const uploadedExtras: { url: string; publicId: string }[] = [];
       for (const extraFile of extraFiles) {
-        const { url, publicId } = await uploadToCloudinary(extraFile, setProgress);
-        uploadedExtras.push({ url, publicId });
+        const uploaded = await uploadToCloudinary(extraFile, setProgress);
+        uploadedExtras.push(uploaded);
       }
       const finalExtras = [...existingExtras, ...uploadedExtras];
 
       if (editing) {
         let imageData: { image?: string; publicId?: string } = {};
         if (file) {
-          const { url, publicId } = await uploadToCloudinary(file, setProgress);
-          imageData = { image: url, publicId };
+          const uploaded = await uploadToCloudinary(file, setProgress);
+          imageData = { image: uploaded.url, publicId: uploaded.publicId };
         }
         await updateDoc(doc(db, "gallery", editing.id), {
           ...form,
@@ -173,233 +255,401 @@ export default function Gallery() {
           extraImages: finalExtras,
         });
       } else {
-        if (!file) return;
-        const { url, publicId } = await uploadToCloudinary(file, setProgress);
+        if (!file) throw new Error("Missing cover image");
+        const uploaded = await uploadToCloudinary(file, setProgress);
         await addDoc(collection(db, "gallery"), {
           ...form,
           category: finalCategory,
-          image: url,
-          publicId,
+          image: uploaded.url,
+          publicId: uploaded.publicId,
           order: allItems.length,
           featured: true,
           extraImages: finalExtras,
         });
       }
+
       closeForm();
-    } catch (err) {
-      console.error(err);
+    } catch {
+      setFormError("No pudimos guardar la ilustración. Revisa tu conexión e inténtalo nuevamente.");
     } finally {
       setSaving(false);
     }
   };
 
-  // Remove from the Home carousel without deleting the `gallery` document.
   const handleUnfeature = async (item: GalleryItem) => {
     if (!confirm(`¿Quitar "${item.title}" de destacadas? La ilustración seguirá en Galería.`)) return;
+
     setTogglingId(item.id);
+    setPageError("");
     try {
       await updateDoc(doc(db, "gallery", item.id), { featured: false });
-    } catch (err) {
-      console.error(err);
+    } catch {
+      setPageError(`No pudimos quitar "${item.title}" de destacadas.`);
     } finally {
       setTogglingId(null);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 md:space-y-8">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Destacadas</h1>
-          <p className="text-muted-foreground mt-1">
-            Carrusel del Home · {items.length} ilustraciones destacadas
+          <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+            <Sparkles size={14} strokeWidth={1.8} aria-hidden="true" />
+            Portada del portafolio
+          </div>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">Destacadas</h1>
+          <p className="mt-1.5 max-w-2xl text-sm text-muted-foreground sm:text-base">
+            Selecciona las piezas que reciben mayor protagonismo en el carrusel principal.
           </p>
         </div>
+
         <button
+          type="button"
           onClick={openCreate}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-[0_10px_30px_color-mix(in_oklab,var(--primary)_18%,transparent)] transition-[background-color,transform] hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
-          <Plus size={16} />
+          <Plus size={17} strokeWidth={2} aria-hidden="true" />
           Nueva destacada
         </button>
-      </div>
+      </header>
 
-      {items.length === 0 ? (
-        <div className="text-center py-20 text-muted-foreground border border-dashed border-border rounded-xl">
-          No hay ilustraciones destacadas. Márcalas desde Galería o sube una nueva aquí.
+      <section className="admin-dashboard-surface overflow-hidden rounded-[1.6rem] border border-border/80">
+        <div className="flex flex-col gap-3 border-b border-border/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Carrusel principal</h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {loadState === "loading"
+                ? "Actualizando contenido…"
+                : `${items.length} ${items.length === 1 ? "pieza visible" : "piezas visibles"}`}
+            </p>
+          </div>
+
+          <span className="w-fit rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            Home
+          </span>
         </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {items.map((item) => (
-            <div key={item.id} className="bg-card border border-yellow-300 ring-1 ring-yellow-200 rounded-xl overflow-hidden">
-              <img src={item.image} alt={item.title} className="w-full aspect-square object-cover" />
-              <div className="p-3">
-                <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
-                <p className="text-xs text-muted-foreground capitalize mb-2">{item.category}</p>
-                <div className="flex gap-1.5">
-                  <button
-                    onClick={() => openEdit(item)}
-                    className="flex-1 flex items-center justify-center gap-1 py-1.5 border border-border rounded-lg text-xs text-foreground hover:bg-secondary transition-colors"
-                  >
-                    <Edit2 size={12} /> Editar
-                  </button>
-                  <button
-                    onClick={() => handleUnfeature(item)}
-                    disabled={togglingId === item.id}
-                    className="flex-1 flex items-center justify-center gap-1 rounded-lg border border-yellow-700/50 py-1.5 text-xs text-yellow-400 transition-colors hover:bg-yellow-950/30 disabled:opacity-50"
-                  >
-                    <StarOff size={12} /> Quitar
-                  </button>
+
+        {pageError && (
+          <div className="flex flex-col gap-3 border-b border-amber-500/20 bg-amber-500/5 px-5 py-3 text-xs text-amber-300 sm:flex-row sm:items-center sm:justify-between sm:px-6" role="alert">
+            <span>{pageError}</span>
+            {loadState === "error" && (
+              <button
+                type="button"
+                onClick={() => setSubscriptionKey((current) => current + 1)}
+                className="inline-flex w-fit items-center gap-1.5 font-semibold text-foreground hover:text-primary"
+              >
+                <RefreshCw size={13} aria-hidden="true" />
+                Reintentar
+              </button>
+            )}
+          </div>
+        )}
+
+        <div className="p-4 sm:p-5 lg:p-6">
+          {loadState === "loading" ? (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-label="Cargando destacadas">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="overflow-hidden rounded-[1.35rem] border border-border/70 bg-card/50">
+                  <div className="aspect-[4/3] animate-pulse bg-muted" />
+                  <div className="space-y-2 p-4">
+                    <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+                    <div className="h-3 w-1/3 animate-pulse rounded bg-muted" />
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
+          ) : items.length === 0 ? (
+            <div className="flex min-h-80 flex-col items-center justify-center rounded-[1.35rem] border border-dashed border-border px-6 text-center">
+              <span className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                <ImagePlus size={24} strokeWidth={1.6} aria-hidden="true" />
+              </span>
+              <h3 className="text-base font-semibold text-foreground">El carrusel está vacío</h3>
+              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                Publica una pieza nueva aquí o activa una existente desde la Galería.
+              </p>
+              <button
+                type="button"
+                onClick={openCreate}
+                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+              >
+                <Plus size={16} aria-hidden="true" />
+                Añadir la primera
+              </button>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {items.map((item) => (
+                <article
+                  key={item.id}
+                  className="group overflow-hidden rounded-[1.35rem] border border-border/80 bg-card/55 transition-[border-color,transform,box-shadow] duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-[0_20px_48px_color-mix(in_oklab,black_30%,transparent)]"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      loading="lazy"
+                      className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.025]"
+                    />
+                    <div className="absolute inset-x-0 top-0 flex items-start justify-between bg-gradient-to-b from-black/55 to-transparent p-3">
+                      <span className="rounded-full border border-white/15 bg-black/35 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-md">
+                        {categoryLabel(item.category)}
+                      </span>
+                      <span className="flex size-8 items-center justify-center rounded-full border border-primary/25 bg-black/40 text-primary backdrop-blur-md" title="Visible en el Home">
+                        <Sparkles size={14} aria-hidden="true" />
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-4">
+                    <div className="min-h-14">
+                      <h3 className="truncate text-sm font-semibold text-foreground">{item.title}</h3>
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                        {item.description || "Sin descripción añadida"}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border/70 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => openEdit(item)}
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Edit2 size={13} aria-hidden="true" />
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleUnfeature(item)}
+                        disabled={togglingId === item.id}
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-500/25 px-3 py-2 text-xs font-medium text-amber-300 transition-colors hover:bg-amber-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <StarOff size={13} aria-hidden="true" />
+                        {togglingId === item.id ? "Quitando…" : "Quitar"}
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </section>
 
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-3 backdrop-blur-md sm:p-5">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="featured-form-title"
+            className="admin-dashboard-surface max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[1.75rem] border border-border/80 shadow-2xl"
+          >
+            <div className="sticky top-0 z-10 flex items-start justify-between border-b border-border/70 bg-card/90 px-5 py-4 backdrop-blur-xl sm:px-6">
               <div>
-                <h2 className="font-semibold text-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+                  {editing ? "Editar contenido" : "Nueva publicación"}
+                </p>
+                <h2 id="featured-form-title" className="mt-1 text-lg font-semibold text-foreground">
                   {editing ? "Editar ilustración" : "Nueva ilustración destacada"}
                 </h2>
-                {!editing && (
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Se añadirá a Galería y aparecerá en el carrusel del Home
-                  </p>
-                )}
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {editing
+                    ? "Actualiza la información que aparece en el portafolio."
+                    : "Se añadirá a la Galería y al carrusel del Home."}
+                </p>
               </div>
-              <button onClick={closeForm} className="text-muted-foreground hover:text-foreground">
-                <X size={20} />
+              <button
+                type="button"
+                onClick={closeForm}
+                disabled={saving}
+                className="flex size-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40"
+                aria-label="Cerrar formulario"
+              >
+                <X size={18} aria-hidden="true" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">
-                  Foto de portada {!editing && <span className="text-destructive">*</span>}
-                </label>
+            <form onSubmit={handleSubmit} className="space-y-6 p-5 sm:p-6">
+              {formError && (
+                <p className="rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
+                  {formError}
+                </p>
+              )}
+
+              <section aria-labelledby="cover-image-label">
+                <div className="mb-2 flex items-center justify-between">
+                  <label id="cover-image-label" className="text-sm font-medium text-foreground">
+                    Imagen de portada {!editing && <span className="text-destructive">*</span>}
+                  </label>
+                  <span className="text-xs text-muted-foreground">JPG, PNG o WebP</span>
+                </div>
+
                 {preview ? (
-                  <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-secondary mb-2">
-                    <img src={preview} alt="preview" className="w-full h-full object-contain" />
-                    <button
-                      type="button"
-                      onClick={() => { setFile(null); setPreview(editing?.image || ""); }}
-                      className="absolute top-2 right-2 p-1 bg-black/60 rounded-full text-white"
-                    >
-                      <X size={14} />
-                    </button>
+                  <div className="group/preview relative aspect-video overflow-hidden rounded-2xl border border-border bg-secondary">
+                    <img src={preview} alt="Previsualización de portada" className="size-full object-contain" />
+                    <div className="absolute inset-0 flex items-end justify-end bg-gradient-to-t from-black/60 via-transparent to-transparent p-3 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover/preview:opacity-100">
+                      <button
+                        type="button"
+                        onClick={() => fileRef.current?.click()}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-black/45 px-3 py-2 text-xs font-medium text-white backdrop-blur-md hover:bg-black/65"
+                      >
+                        <Upload size={13} aria-hidden="true" />
+                        Cambiar imagen
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    className="w-full aspect-video border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                    className="flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-background/35 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <Upload size={24} />
-                    <span className="text-sm">Haz clic para subir imagen</span>
+                    <span className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                      <Upload size={20} aria-hidden="true" />
+                    </span>
+                    <span className="text-sm font-medium">Seleccionar imagen</span>
+                    <span className="text-xs text-muted-foreground">Haz clic para explorar tus archivos</span>
                   </button>
                 )}
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+
                 {saving && progress > 0 && progress < 100 && (
-                  <div className="mt-2">
-                    <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                  <div className="mt-3" aria-live="polite">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
                       <div className="h-full bg-primary transition-all" style={{ width: `${progress}%` }} />
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">{Math.round(progress)}%</p>
+                    <p className="mt-1 text-right text-xs tabular-nums text-muted-foreground">
+                      Subiendo · {Math.round(progress)}%
+                    </p>
                   </div>
                 )}
-              </div>
+              </section>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">
-                  Fotos extras <span className="text-muted-foreground font-normal">(máx. 4)</span>
-                </label>
+              <section className="border-t border-border/70 pt-5" aria-labelledby="extra-images-label">
+                <div className="mb-3 flex items-center justify-between">
+                  <label id="extra-images-label" className="text-sm font-medium text-foreground">
+                    Fotos extras
+                  </label>
+                  <span className="text-xs text-muted-foreground">
+                    {existingExtras.length + extraFiles.length}/4
+                  </span>
+                </div>
+
                 {(existingExtras.length > 0 || extraPreviews.length > 0) && (
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {existingExtras.map((img, i) => (
-                      <div key={`existing-${i}`} className="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary">
-                        <img src={img.url} alt={`extra ${i + 1}`} className="w-full h-full object-cover" />
-                        <button type="button" onClick={() => removeExistingExtra(i)} className="absolute top-0.5 right-0.5 p-0.5 bg-black/60 rounded-full text-white">
-                          <X size={10} />
+                  <div className="mb-3 grid grid-cols-4 gap-2">
+                    {existingExtras.map((image, index) => (
+                      <div key={image.publicId || image.url} className="relative aspect-square overflow-hidden rounded-xl bg-secondary">
+                        <img src={image.url} alt={`Foto extra ${index + 1}`} className="size-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeExistingExtra(index)}
+                          className="absolute right-1.5 top-1.5 flex size-6 items-center justify-center rounded-lg bg-black/65 text-white backdrop-blur-sm"
+                          aria-label={`Quitar foto extra ${index + 1}`}
+                        >
+                          <X size={12} aria-hidden="true" />
                         </button>
                       </div>
                     ))}
-                    {extraPreviews.map((src, i) => (
-                      <div key={`new-${i}`} className="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary">
-                        <img src={src} alt={`nueva ${i + 1}`} className="w-full h-full object-cover" />
-                        <button type="button" onClick={() => removeExtraFile(i)} className="absolute top-0.5 right-0.5 p-0.5 bg-black/60 rounded-full text-white">
-                          <X size={10} />
+                    {extraPreviews.map((source, index) => (
+                      <div key={source} className="relative aspect-square overflow-hidden rounded-xl bg-secondary">
+                        <img src={source} alt={`Nueva foto extra ${index + 1}`} className="size-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeExtraFile(index)}
+                          className="absolute right-1.5 top-1.5 flex size-6 items-center justify-center rounded-lg bg-black/65 text-white backdrop-blur-sm"
+                          aria-label={`Quitar nueva foto extra ${index + 1}`}
+                        >
+                          <X size={12} aria-hidden="true" />
                         </button>
                       </div>
                     ))}
                   </div>
                 )}
+
                 {existingExtras.length + extraFiles.length < 4 && (
                   <button
                     type="button"
                     onClick={() => extraFileRef.current?.click()}
-                    className="flex items-center gap-2 px-3 py-2 border border-dashed border-border rounded-lg text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                    className="inline-flex items-center gap-2 rounded-xl border border-dashed border-border px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
                   >
-                    <Upload size={14} /> Agregar fotos
+                    <Plus size={15} aria-hidden="true" />
+                    Agregar fotos
                   </button>
                 )}
-                <input ref={extraFileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleExtraFilesChange} />
-                {extrasError && <p className="text-xs text-destructive mt-1">{extrasError}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">
-                  Título <span className="text-destructive">*</span>
-                </label>
                 <input
-                  type="text"
-                  value={form.title}
-                  onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
-                  required
-                  className="w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="Ej: Retrato Botánico"
+                  ref={extraFileRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  className="hidden"
+                  onChange={handleExtraFilesChange}
                 />
-              </div>
+                {extrasError && <p className="mt-2 text-xs text-destructive">{extrasError}</p>}
+              </section>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">Categoría</label>
-                <CategorySelect
-                  categories={CATEGORIES}
-                  value={form.category}
-                  onChange={(val) => setForm((p) => ({ ...p, category: val }))}
-                  customValue={customCategory}
-                  onCustomChange={setCustomCategory}
-                />
-              </div>
+              <section className="grid gap-4 border-t border-border/70 pt-5 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label htmlFor="featured-title" className="mb-1.5 block text-sm font-medium text-foreground">
+                    Título <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    id="featured-title"
+                    type="text"
+                    value={form.title}
+                    onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+                    required
+                    className="w-full rounded-xl border border-input bg-background/60 px-3 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary/50 focus:ring-2 focus:ring-ring"
+                    placeholder="Ej: Retrato botánico"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">Descripción</label>
-                <textarea
-                  value={form.description}
-                  onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-                  rows={3}
-                  className="w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                  placeholder="Descripción breve de la ilustración"
-                />
-              </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-foreground">Categoría</label>
+                  <CategorySelect
+                    categories={CATEGORIES}
+                    value={form.category}
+                    onChange={(value) => setForm((current) => ({ ...current, category: value }))}
+                    customValue={customCategory}
+                    onCustomChange={setCustomCategory}
+                  />
+                </div>
 
-              <div className="flex gap-3 pt-2">
-                <button type="button" onClick={closeForm} className="flex-1 py-2.5 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-secondary transition-colors">
+                <div>
+                  <label htmlFor="featured-description" className="mb-1.5 block text-sm font-medium text-foreground">
+                    Descripción
+                  </label>
+                  <textarea
+                    id="featured-description"
+                    value={form.description}
+                    onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+                    rows={3}
+                    className="w-full resize-none rounded-xl border border-input bg-background/60 px-3 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary/50 focus:ring-2 focus:ring-ring"
+                    placeholder="Descripción breve de la ilustración"
+                  />
+                </div>
+              </section>
+
+              <div className="flex flex-col-reverse gap-2 border-t border-border/70 pt-5 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={closeForm}
+                  disabled={saving}
+                  className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary disabled:opacity-40"
+                >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={saving || (!editing && !file)}
-                  className={cn(
-                    "flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                    "bg-primary text-primary-foreground hover:bg-primary/90",
-                    (saving || (!editing && !file)) && "opacity-60 cursor-not-allowed"
-                  )}
+                  className="min-w-36 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {saving ? "Guardando..." : editing ? "Guardar cambios" : "Publicar"}
+                  {saving ? "Guardando…" : editing ? "Guardar cambios" : "Publicar"}
                 </button>
               </div>
             </form>
