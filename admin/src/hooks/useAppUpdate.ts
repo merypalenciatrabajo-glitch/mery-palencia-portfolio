@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import semver from 'semver';
 import { db } from '@/lib/firebase';
 
-export const CURRENT_VERSION = '1.9.0';
+export const CURRENT_VERSION = "1.9.1";
 
 export interface AppUpdateInfo {
   version: string;
