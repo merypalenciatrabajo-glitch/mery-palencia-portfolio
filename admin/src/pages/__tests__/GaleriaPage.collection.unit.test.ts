@@ -4,14 +4,14 @@ import { describe, expect, it } from "vitest";
 
 const source = readFileSync(resolve(__dirname, "../GaleriaPage.tsx"), "utf-8");
 
-describe("GaleriaPage – aislamiento de la colección pública", () => {
-  it("realiza todas sus lecturas y escrituras sobre galleryPage", () => {
-    expect(source).toContain('collection(db, "galleryPage")');
-    expect(source).toContain('doc(db, "galleryPage", editing.id)');
-    expect(source).toContain('doc(db, "galleryPage", item.id)');
+describe("GaleriaPage – colección pública unificada", () => {
+  it("realiza todas sus lecturas y escrituras sobre gallery", () => {
+    expect(source).toContain('collection(db, "gallery")');
+    expect(source).toContain('doc(db, "gallery", editing.id)');
+    expect(source).toContain('doc(db, "gallery", item.id)');
   });
 
-  it("no modifica accidentalmente la colección gallery de Destacadas", () => {
-    expect(source).not.toMatch(/(?:collection|doc)\(db, "gallery"/);
+  it("no vuelve a introducir la colección duplicada galleryPage", () => {
+    expect(source).not.toContain("galleryPage");
   });
 });

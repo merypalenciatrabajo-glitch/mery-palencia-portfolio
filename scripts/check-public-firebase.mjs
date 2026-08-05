@@ -38,7 +38,7 @@ const app = initializeApp({
 const db = getFirestore(app);
 
 const requests = [
-  ...['gallery', 'galleryPage', 'commissions', 'processSteps'].map(async (name) => {
+  ...['gallery', 'commissions', 'processSteps'].map(async (name) => {
     const snapshot = await getDocs(collection(db, name));
     return [name, snapshot.size];
   }),
@@ -54,7 +54,7 @@ const requests = [
 const results = await Promise.allSettled(requests);
 const checks = results.flatMap((result) => result.status === 'fulfilled' ? [result.value] : []);
 const failures = results.flatMap((result, index) => result.status === 'rejected'
-  ? [`${index < 4 ? ['gallery', 'galleryPage', 'commissions', 'processSteps'][index] : index === 4 ? 'publishedBlogPosts' : 'heroSettings'}: ${result.reason?.code ?? result.reason}`]
+  ? [`${index < 3 ? ['gallery', 'commissions', 'processSteps'][index] : index === 3 ? 'publishedBlogPosts' : 'heroSettings'}: ${result.reason?.code ?? result.reason}`]
   : []);
 
 console.log(Object.fromEntries(checks));

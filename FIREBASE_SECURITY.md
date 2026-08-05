@@ -8,7 +8,7 @@ The public portfolio can read published content. All writes require an authentic
 
 Custom claims must only be assigned from a trusted environment using the Firebase Admin SDK. Never assign roles from the browser or embed service-account credentials in `client/` or `admin/`.
 
-Publicly readable documents (`gallery`, `galleryPage`, published `blogPosts`,
+Publicly readable documents (`gallery`, published `blogPosts`,
 `commissions`, `processSteps`, and `settings/hero`) use closed field lists and
 type validation. Never store secrets, private email addresses, internal notes,
 or administrative data in those documents.

@@ -8,8 +8,9 @@ import {
   query,
   updateDoc,
 } from "firebase/firestore";
-import { Calendar, Clock, Edit2, Eye, Plus, Trash2, Upload, X } from "lucide-react";
+import { Calendar, Clock, Edit2, Eye, FileText, Plus, RefreshCw, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,7 @@ interface BlogPost {
 }
 
 type PublishMode = "published" | "draft" | "scheduled";
+type LoadState = "loading" | "ready" | "error";
 
 const CATEGORIES = [
   { id: "proceso", label: "Proceso Creativo" },
@@ -59,7 +61,11 @@ function toDatetimeLocal(iso: string) {
 }
 
 export default function Blog() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loadState, setLoadState] = useState<LoadState>("loading");
+  const [subscriptionKey, setSubscriptionKey] = useState(0);
+  const [pageError, setPageError] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<BlogPost | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -73,12 +79,22 @@ export default function Blog() {
 
   // Escuchar posts en tiempo real
   useEffect(() => {
+    setLoadState("loading");
+    setPageError("");
     const q = query(collection(db, "blogPosts"), orderBy("date", "desc"));
-    const unsub = onSnapshot(q, (snap) => {
-      setPosts(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<BlogPost, "id">) })));
-    });
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setPosts(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<BlogPost, "id">) })));
+        setLoadState("ready");
+      },
+      () => {
+        setLoadState("error");
+        setPageError("No pudimos cargar los artículos del blog.");
+      },
+    );
     return unsub;
-  }, []);
+  }, [subscriptionKey]);
 
   // Auto-publicar posts programados cuya fecha ya pasó
   useEffect(() => {
@@ -100,6 +116,12 @@ export default function Blog() {
     setPreview("");
     setShowForm(true);
   };
+
+  useEffect(() => {
+    if (searchParams.get("action") !== "create") return;
+    openCreate();
+    setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const openEdit = (post: BlogPost) => {
     setEditing(post);
@@ -203,33 +225,59 @@ export default function Blog() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 md:space-y-8">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Blog</h1>
-          <p className="text-muted-foreground mt-1">{posts.length} artículos</p>
+          <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+            <FileText size={14} strokeWidth={1.8} aria-hidden="true" />
+            Contenido editorial
+          </div>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">Blog</h1>
+          <p className="mt-1.5 max-w-2xl text-sm text-muted-foreground sm:text-base">
+            Redacta, programa y publica historias del proceso creativo.
+          </p>
         </div>
         <button
+          type="button"
           onClick={openCreate}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-primary/80 bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
-          <Plus size={16} />
+          <Plus size={17} aria-hidden="true" />
           Nuevo artículo
         </button>
-      </div>
+      </header>
 
-      {posts.length === 0 ? (
-        <div className="text-center py-20 text-muted-foreground border border-dashed border-border rounded-xl">
-          No hay artículos aún.
+      <section className="admin-dashboard-surface overflow-hidden rounded-[1.6rem] border border-border/80">
+        <div className="flex items-center justify-between border-b border-border/70 px-5 py-4 sm:px-6">
+          <div><h2 className="text-sm font-semibold text-foreground">Publicaciones</h2><p className="mt-0.5 text-xs text-muted-foreground">{loadState === "loading" ? "Actualizando contenido…" : `${posts.length} artículos`}</p></div>
+          <span className="rounded-full border border-border bg-background/40 px-3 py-1 text-xs font-medium text-muted-foreground">Editorial</span>
         </div>
-      ) : (
-        <div className="space-y-3">
+
+        {pageError && (
+          <div className="flex items-center justify-between border-b border-amber-500/20 bg-amber-500/5 px-5 py-3 text-xs text-amber-300 sm:px-6" role="alert">
+            <span>{pageError}</span>
+            <button type="button" onClick={() => setSubscriptionKey((current) => current + 1)} className="inline-flex items-center gap-1.5 font-semibold text-foreground hover:text-primary"><RefreshCw size={13} aria-hidden="true" /> Reintentar</button>
+          </div>
+        )}
+
+        <div className="p-4 sm:p-5 lg:p-6">
+        {loadState === "loading" ? (
+          <div className="space-y-3">{Array.from({ length: 4 }).map((_, index) => <div key={index} className="flex gap-4 rounded-2xl border border-border/70 p-3"><div className="h-24 w-32 animate-pulse rounded-xl bg-muted" /><div className="flex-1 space-y-3 py-2"><div className="h-4 w-2/3 animate-pulse rounded bg-muted" /><div className="h-3 w-1/3 animate-pulse rounded bg-muted" /></div></div>)}</div>
+        ) : posts.length === 0 ? (
+          <div className="flex min-h-80 flex-col items-center justify-center rounded-[1.35rem] border border-dashed border-border px-6 text-center">
+            <span className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15"><FileText size={24} aria-hidden="true" /></span>
+            <h3 className="text-base font-semibold text-foreground">Todavía no hay artículos</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Crea la primera historia del portafolio.</p>
+            <button type="button" onClick={openCreate} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"><Plus size={16} aria-hidden="true" /> Crear artículo</button>
+          </div>
+        ) : (
+          <div className="space-y-3">
           {posts.map((post) => {
             const status = getStatusBadge(post);
             return (
-              <div key={post.id} className="bg-card border border-border rounded-xl p-4 space-y-3">
-                <div className="flex items-start gap-3">
-                  <img src={post.image} alt={post.title} className="w-14 h-14 rounded-lg object-cover shrink-0" />
+              <article key={post.id} className="rounded-[1.35rem] border border-border/80 bg-card/50 p-3 transition-colors hover:border-primary/20 sm:p-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <img src={post.image} alt={post.title} loading="lazy" className="aspect-[16/10] w-full rounded-2xl object-cover sm:w-36 sm:shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
@@ -239,7 +287,8 @@ export default function Blog() {
                         {status.label}
                       </span>
                     </div>
-                    <p className="font-medium text-foreground truncate">{post.title}</p>
+                    <h3 className="truncate font-semibold text-foreground">{post.title}</h3>
+                    <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">{post.excerpt}</p>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5 flex-wrap">
                       <span className="flex items-center gap-1">
                         <Calendar size={11} />
@@ -256,10 +305,9 @@ export default function Blog() {
                         </span>
                       )}
                     </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
+                    <div className="mt-3 flex items-center gap-2">
                   <button
+                    type="button"
                     onClick={() => togglePublish(post)}
                     className={cn(
                       "flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors",
@@ -271,46 +319,54 @@ export default function Blog() {
                     {post.published ? "Despublicar" : "Publicar"}
                   </button>
                   <button
+                    type="button"
                     onClick={() => openEdit(post)}
-                    className="p-2 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors border border-border"
+                    className="rounded-xl border border-border p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                    aria-label={`Editar ${post.title}`}
                   >
                     <Edit2 size={16} />
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleDelete(post)}
                     disabled={deletingId === post.id}
-                    className="p-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors border border-border"
+                    className="rounded-xl border border-border p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                    aria-label={`Eliminar ${post.title}`}
                   >
                     <Trash2 size={16} />
                   </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>
       )}
+        </div>
+      </section>
 
       {/* Modal Form */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-2xl shadow-xl max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
-              <h2 className="font-semibold text-foreground">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-3 backdrop-blur-md sm:p-5">
+          <div role="dialog" aria-modal="true" aria-labelledby="blog-form-title" className="admin-dashboard-surface flex max-h-[92vh] w-full max-w-3xl flex-col rounded-[1.75rem] border border-border/80 shadow-2xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-border/70 px-5 py-4 sm:px-6">
+              <h2 id="blog-form-title" className="font-semibold text-foreground">
                 {editing ? "Editar artículo" : "Nuevo artículo"}
               </h2>
-              <button onClick={closeForm} className="text-muted-foreground hover:text-foreground">
+              <button type="button" onClick={closeForm} className="flex size-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" aria-label="Cerrar formulario">
                 <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
+            <form onSubmit={handleSubmit} className="space-y-5 overflow-y-auto p-5 sm:p-6">
               {/* Imagen */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">
                   Imagen de portada {!editing && <span className="text-destructive">*</span>}
                 </label>
                 {preview ? (
-                  <div className="relative w-full h-40 rounded-lg overflow-hidden bg-secondary mb-2">
+                  <div className="relative mb-2 h-48 w-full overflow-hidden rounded-2xl border border-border bg-secondary">
                     <img src={preview} alt="preview" className="w-full h-full object-cover" />
                     <button
                       type="button"
@@ -324,7 +380,7 @@ export default function Blog() {
                   <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    className="w-full h-32 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                    className="flex h-40 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-background/35 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
                   >
                     <Upload size={20} />
                     <span className="text-sm">Subir imagen</span>
@@ -348,7 +404,7 @@ export default function Blog() {
                   value={form.title}
                   onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
                   required
-                  className="w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full rounded-xl border border-input bg-background/60 px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-ring"
                   placeholder="Título del artículo"
                 />
               </div>
@@ -359,7 +415,7 @@ export default function Blog() {
                 <select
                   value={form.category}
                   onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
-                  className="w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full rounded-xl border border-input bg-background/60 px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-ring"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c.id} value={c.id}>{c.label}</option>
@@ -377,7 +433,7 @@ export default function Blog() {
                   onChange={(e) => setForm((p) => ({ ...p, excerpt: e.target.value }))}
                   required
                   rows={2}
-                  className="w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                  className="w-full resize-none rounded-xl border border-input bg-background/60 px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-ring"
                   placeholder="Resumen breve del artículo"
                 />
               </div>
@@ -395,7 +451,7 @@ export default function Blog() {
                   onChange={(e) => setForm((p) => ({ ...p, content: e.target.value }))}
                   required
                   rows={10}
-                  className="w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none font-mono"
+                  className="w-full resize-none rounded-xl border border-input bg-background/60 px-3 py-2.5 font-mono text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-ring"
                   placeholder="Escribe el contenido del artículo aquí..."
                 />
               </div>
@@ -409,7 +465,7 @@ export default function Blog() {
                   type="url"
                   value={form.videoUrl}
                   onChange={(e) => setForm((p) => ({ ...p, videoUrl: e.target.value }))}
-                  className="w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full rounded-xl border border-input bg-background/60 px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-ring"
                   placeholder="https://www.youtube.com/watch?v=..."
                 />
                 <p className="text-xs text-muted-foreground mt-1">
@@ -427,7 +483,7 @@ export default function Blog() {
                       type="button"
                       onClick={() => setForm((p) => ({ ...p, publishMode: mode }))}
                       className={cn(
-                        "flex-1 py-2 rounded-lg text-sm font-medium border transition-colors",
+                        "flex-1 rounded-xl border py-2 text-sm font-medium transition-colors",
                         form.publishMode === mode
                           ? "bg-primary text-primary-foreground border-primary"
                           : "bg-background text-foreground border-border hover:bg-secondary"
@@ -450,17 +506,17 @@ export default function Blog() {
                       min={new Date().toISOString().slice(0, 16)}
                       onChange={(e) => setForm((p) => ({ ...p, scheduledAt: e.target.value }))}
                       required={form.publishMode === "scheduled"}
-                      className="w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      className="w-full rounded-xl border border-input bg-background/60 px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </div>
                 )}
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col-reverse gap-2 border-t border-border/70 pt-5 sm:flex-row sm:justify-end">
                 <button
                   type="button"
                   onClick={closeForm}
-                  className="flex-1 py-2.5 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+                  className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
                 >
                   Cancelar
                 </button>
@@ -468,7 +524,7 @@ export default function Blog() {
                   type="submit"
                   disabled={saving || uploading || (!editing && !file) || (form.publishMode === "scheduled" && !form.scheduledAt)}
                   className={cn(
-                    "flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                    "min-w-40 rounded-xl px-5 py-2.5 text-sm font-semibold transition-colors",
                     "bg-primary text-primary-foreground hover:bg-primary/90",
                     (saving || uploading) && "opacity-60 cursor-not-allowed"
                   )}

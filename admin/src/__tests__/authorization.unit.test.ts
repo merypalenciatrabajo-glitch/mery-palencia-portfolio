@@ -37,7 +37,7 @@ describe("administrative authorization", () => {
     ]) {
       expect(firestoreRules).toContain(`hasContentRole() && ${validator}`);
     }
-    expect(firestoreRules.match(/allow delete: if hasContentRole\(\);/g)).toHaveLength(7);
+    expect(firestoreRules.match(/allow delete: if hasContentRole\(\);/g)).toHaveLength(6);
   });
 
   it("only exposes published blog posts to unauthenticated readers", () => {

@@ -88,9 +88,9 @@ const rawItemWithExtrasArb = fc
 // ---------------------------------------------------------------------------
 
 describe("useGalleryPage – normalización de extraImages (Property 1)", () => {
-  it("consulta la colección independiente galleryPage", () => {
+  it("consulta la colección unificada gallery", () => {
     const implementation = hookSource.slice(hookSource.indexOf("export function useGalleryPage"));
-    expect(implementation).toMatch(/\}\>\("galleryPage", \[orderBy\("order", "asc"\)\]\)/);
+    expect(implementation).toMatch(/\}\>\("gallery", \[orderBy\("order", "asc"\)\]\)/);
   });
 
   it(

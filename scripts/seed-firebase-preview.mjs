@@ -34,7 +34,7 @@ const previewDocuments = [
     featured: true,
     extraImages: [],
   }],
-  ["galleryPage/preview-gallery", {
+  ["gallery/preview-gallery", {
     title: "Obra de vista previa",
     image: "",
     publicId: "",

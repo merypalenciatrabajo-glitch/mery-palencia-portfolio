@@ -1,17 +1,17 @@
-// Feature: gallery-page, Property 7: Eliminación de documento en galleryPage
+// Feature: gallery-page, Property 7: Eliminación de documento en gallery
 // Validates: Requirements 5.5
 
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
 /**
- * Property 7: Eliminación de documento en galleryPage
+ * Property 7: Eliminación de documento en gallery
  *
  * The delete path in GaleriaPage.handleDelete (when the user confirms):
  *
  *   1. confirm(`¿Eliminar "${item.title}"?`) → user confirms
  *   2. setDeletingId(item.id)
- *   3. await deleteDoc(doc(db, "galleryPage", item.id))
+ *   3. await deleteDoc(doc(db, "gallery", item.id))
  *   4. setDeletingId(null)
  *
  * We model this as a pure function and verify:
@@ -56,7 +56,7 @@ function getDeleteDocId(item: GalleryItem): string {
  * Models the collection state after removing the target document.
  * Mirrors what Firestore's onSnapshot would emit after deleteDoc succeeds.
  *
- * @param collection - Current list of items in galleryPage
+ * @param collection - Current list of items in gallery
  * @param targetId   - ID of the document to delete
  */
 function applyDeleteToCollection(
@@ -118,10 +118,10 @@ const collectionWithTargetArb: fc.Arbitrary<{
   });
 
 // ---------------------------------------------------------------------------
-// Property 7: Eliminación de documento en galleryPage
+// Property 7: Eliminación de documento en gallery
 // ---------------------------------------------------------------------------
 
-describe("GaleriaPage – eliminación de documento en galleryPage (Property 7)", () => {
+describe("GaleriaPage – eliminación de documento en gallery (Property 7)", () => {
   it(
     "P7a: deleteDoc es llamado con el ID correcto del documento a eliminar",
     () => {

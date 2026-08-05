@@ -9,7 +9,6 @@ import {
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { CURRENT_VERSION } from "@/hooks/useAppUpdate";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -59,10 +58,7 @@ export default function Sidebar() {
         aria-label="Navegación principal del panel"
       >
         <div className="admin-dock__content flex items-center gap-1 overflow-x-auto rounded-[1.25rem] px-1 py-0.5">
-          <div
-            className="hidden shrink-0 items-center gap-2.5 pl-2 pr-3 xl:flex"
-            title={`Panel administrativo · v${CURRENT_VERSION}`}
-          >
+          <div className="hidden shrink-0 items-center gap-2.5 pl-2 pr-3 xl:flex">
             <span className="flex size-8 items-center justify-center rounded-xl bg-primary/15 text-[11px] font-bold tracking-tight text-primary ring-1 ring-primary/20">
               MP
             </span>
@@ -83,7 +79,6 @@ export default function Sidebar() {
                 to={to}
                 end={to === "/"}
                 aria-label={label}
-                title={label}
                 className={({ isActive }) =>
                   cn(
                     dockButtonClass,
@@ -110,7 +105,6 @@ export default function Sidebar() {
               "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
             )}
             aria-label={loggingOut ? "Cerrando sesión" : "Cerrar sesión"}
-            title={loggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
           >
             <LogOut size={19} strokeWidth={1.8} aria-hidden="true" />
             <span className="hidden xl:inline">

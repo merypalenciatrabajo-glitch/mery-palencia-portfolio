@@ -1,18 +1,18 @@
-// Feature: gallery-page, Property 5: Creación de documento en galleryPage
+// Feature: gallery-page, Property 5: Creación de documento en gallery
 // Validates: Requirements 5.3, 5.6
 
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
 /**
- * Property 5: Creación de documento en galleryPage
+ * Property 5: Creación de documento en gallery
  *
  * The create path in GaleriaPage.handleSubmit (when !editing && file is present):
  *
  *   1. For each extraFile, upload to Cloudinary → { url, publicId }
  *   2. finalExtras = [...existingExtras, ...uploadedExtras]
  *   3. Upload cover file → { url: coverUrl, publicId: coverPublicId }
- *   4. addDoc(collection(db, "galleryPage"), {
+ *   4. addDoc(collection(db, "gallery"), {
  *        ...form,           // title, category, description
  *        image: coverUrl,
  *        publicId: coverPublicId,
@@ -126,10 +126,10 @@ const uploadedExtrasArb: fc.Arbitrary<CloudinaryResult[]> = fc.array(cloudinaryR
 const itemsLengthArb = fc.integer({ min: 0, max: 100 });
 
 // ---------------------------------------------------------------------------
-// Property 5: Creación de documento en galleryPage
+// Property 5: Creación de documento en gallery
 // ---------------------------------------------------------------------------
 
-describe("GaleriaPage – creación de documento en galleryPage (Property 5)", () => {
+describe("GaleriaPage – creación de documento en gallery (Property 5)", () => {
   it(
     "P5: para cualquier formulario válido, el documento creado contiene title, image, publicId, category, description, order y extraImages correctos",
     () => {

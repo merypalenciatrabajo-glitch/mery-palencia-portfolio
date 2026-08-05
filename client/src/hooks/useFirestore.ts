@@ -90,7 +90,7 @@ export function useGalleryPage() {
     description: string;
     order: number;
     extraImages?: { url: string; publicId: string }[];
-  }>("galleryPage", [orderBy("order", "asc")]);
+  }>("gallery", [orderBy("order", "asc")]);
 
   // Normalize legacy items that have no extraImages field
   return {

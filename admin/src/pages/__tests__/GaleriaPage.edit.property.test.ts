@@ -1,11 +1,11 @@
-// Feature: gallery-page, Property 6: Edición de documento en galleryPage
+// Feature: gallery-page, Property 6: Edición de documento en gallery
 // Validates: Requirements 5.4
 
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
 /**
- * Property 6: Edición de documento en galleryPage
+ * Property 6: Edición de documento en gallery
  *
  * The edit path in GaleriaPage.handleSubmit (when editing !== null):
  *
@@ -16,7 +16,7 @@ import { describe, expect, it } from "vitest";
  *        imageData = { image: newCoverUrl, publicId: newCoverPublicId }
  *      Else:
  *        imageData = {}  (keep existing image)
- *   4. updateDoc(doc(db, "galleryPage", editing.id), {
+ *   4. updateDoc(doc(db, "gallery", editing.id), {
  *        ...form,        // title, category, description
  *        ...imageData,   // optional new image
  *        extraImages: finalExtras,
@@ -110,7 +110,7 @@ function buildUpdatePayload(
  * Models the full collection state after applying an update to one document.
  * All other documents remain unchanged.
  *
- * @param collection  - Current list of items in galleryPage
+ * @param collection  - Current list of items in gallery
  * @param targetId    - ID of the document being edited
  * @param payload     - The update payload (fields to merge)
  */
@@ -200,10 +200,10 @@ const collectionWithTargetArb: fc.Arbitrary<{
   });
 
 // ---------------------------------------------------------------------------
-// Property 6: Edición de documento en galleryPage
+// Property 6: Edición de documento en gallery
 // ---------------------------------------------------------------------------
 
-describe("GaleriaPage – edición de documento en galleryPage (Property 6)", () => {
+describe("GaleriaPage – edición de documento en gallery (Property 6)", () => {
   it(
     "P6a: el payload de updateDoc contiene title, category, description y extraImages",
     () => {

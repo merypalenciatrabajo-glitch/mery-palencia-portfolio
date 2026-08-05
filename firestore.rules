@@ -98,12 +98,6 @@ service cloud.firestore {
       allow delete: if hasContentRole();
     }
 
-    match /galleryPage/{documentId} {
-      allow read: if true;
-      allow create, update: if hasContentRole() && validGallery(request.resource.data);
-      allow delete: if hasContentRole();
-    }
-
     match /blogPosts/{documentId} {
       allow read: if hasContentRole() || resource.data.published == true;
       allow create, update: if hasContentRole() && validBlogPost(request.resource.data);

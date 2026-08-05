@@ -12,12 +12,12 @@ import {
   ImagePlus,
   Plus,
   RefreshCw,
-  Sparkles,
   StarOff,
   Upload,
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import CategorySelect from "@/components/CategorySelect";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { db } from "@/lib/firebase";
@@ -57,6 +57,7 @@ const categoryLabel = (category: string) =>
   CATEGORIES.find((item) => item.id === category)?.label ?? category;
 
 export default function Gallery() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [allItems, setAllItems] = useState<GalleryItem[]>([]);
   const [loadState, setLoadState] = useState<LoadState>("loading");
@@ -132,6 +133,12 @@ export default function Gallery() {
     setProgress(0);
     setShowForm(true);
   };
+
+  useEffect(() => {
+    if (searchParams.get("action") !== "create") return;
+    openCreate();
+    setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const openEdit = (item: GalleryItem) => {
     setEditing(item);
@@ -295,7 +302,7 @@ export default function Gallery() {
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-            <Sparkles size={14} strokeWidth={1.8} aria-hidden="true" />
+            <ImagePlus size={14} strokeWidth={1.8} aria-hidden="true" />
             Portada del portafolio
           </div>
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">Destacadas</h1>
@@ -307,7 +314,7 @@ export default function Gallery() {
         <button
           type="button"
           onClick={openCreate}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-[0_10px_30px_color-mix(in_oklab,var(--primary)_18%,transparent)] transition-[background-color,transform] hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-primary/80 bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <Plus size={17} strokeWidth={2} aria-hidden="true" />
           Nueva destacada
@@ -315,7 +322,7 @@ export default function Gallery() {
       </header>
 
       <section className="admin-dashboard-surface overflow-hidden rounded-[1.6rem] border border-border/80">
-        <div className="flex flex-col gap-3 border-b border-border/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="border-b border-border/70 px-5 py-4 sm:px-6">
           <div>
             <h2 className="text-sm font-semibold text-foreground">Carrusel principal</h2>
             <p className="mt-0.5 text-xs text-muted-foreground">
@@ -324,10 +331,6 @@ export default function Gallery() {
                 : `${items.length} ${items.length === 1 ? "pieza visible" : "piezas visibles"}`}
             </p>
           </div>
-
-          <span className="w-fit rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            Home
-          </span>
         </div>
 
         {pageError && (
@@ -391,12 +394,9 @@ export default function Gallery() {
                       loading="lazy"
                       className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.025]"
                     />
-                    <div className="absolute inset-x-0 top-0 flex items-start justify-between bg-gradient-to-b from-black/55 to-transparent p-3">
+                    <div className="absolute inset-x-0 top-0 flex items-start bg-gradient-to-b from-black/55 to-transparent p-3">
                       <span className="rounded-full border border-white/15 bg-black/35 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-md">
                         {categoryLabel(item.category)}
-                      </span>
-                      <span className="flex size-8 items-center justify-center rounded-full border border-primary/25 bg-black/40 text-primary backdrop-blur-md" title="Visible en el Home">
-                        <Sparkles size={14} aria-hidden="true" />
                       </span>
                     </div>
                   </div>
