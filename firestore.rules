@@ -13,7 +13,7 @@ service cloud.firestore {
     function validGallery(data) {
       return data.keys().hasOnly([
         'title', 'image', 'publicId', 'category', 'description', 'order',
-        'featured', 'extraImages'
+        'featured', 'extraImages', 'hashtags'
       ]) &&
       data.keys().hasAll(['title', 'image', 'category', 'description', 'order']) &&
       data.title is string && data.title.size() > 0 && data.title.size() <= 160 &&
@@ -23,7 +23,8 @@ service cloud.firestore {
       data.order is number &&
       (!('publicId' in data) || data.publicId is string) &&
       (!('featured' in data) || data.featured is bool) &&
-      (!('extraImages' in data) || (data.extraImages is list && data.extraImages.size() <= 4));
+      (!('extraImages' in data) || (data.extraImages is list && data.extraImages.size() <= 4)) &&
+      (!('hashtags' in data) || (data.hashtags is list && data.hashtags.size() <= 10));
     }
 
     function validBlogPost(data) {

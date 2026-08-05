@@ -7,9 +7,9 @@ import { describe, expect, it } from "vitest";
 /**
  * Property 7: Eliminación de documento en gallery
  *
- * The delete path in GaleriaPage.handleDelete (when the user confirms):
+ * The delete path in GaleriaPage.handleDelete (after confirming in ConfirmDialog):
  *
- *   1. confirm(`¿Eliminar "${item.title}"?`) → user confirms
+ *   1. ConfirmDialog returns the selected item
  *   2. setDeletingId(item.id)
  *   3. await deleteDoc(doc(db, "gallery", item.id))
  *   4. setDeletingId(null)

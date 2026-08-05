@@ -19,6 +19,12 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import CategorySelect from "@/components/CategorySelect";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import HashtagInput, {
+  HashtagLinks,
+  normalizeHashtagEntries,
+  type HashtagEntry,
+} from "@/components/HashtagInput";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { db } from "@/lib/firebase";
 
@@ -29,6 +35,7 @@ interface GalleryItem {
   publicId: string;
   category: string;
   description: string;
+  hashtags?: HashtagEntry[] | string[];
   order: number;
   featured: boolean;
   extraImages?: { url: string; publicId: string }[];
@@ -51,6 +58,7 @@ const EMPTY_FORM = {
   title: "",
   category: "fotografia-paisaje",
   description: "",
+  hashtags: [] as HashtagEntry[],
 };
 
 const categoryLabel = (category: string) =>
@@ -72,6 +80,7 @@ export default function Gallery() {
   const [progress, setProgress] = useState(0);
   const [saving, setSaving] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [itemToUnfeature, setItemToUnfeature] = useState<GalleryItem | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const extraFileRef = useRef<HTMLInputElement>(null);
 
@@ -147,6 +156,7 @@ export default function Gallery() {
       title: item.title,
       category: isCustom ? "otros" : item.category,
       description: item.description,
+      hashtags: normalizeHashtagEntries(item.hashtags),
     });
     setCustomCategory(isCustom ? item.category : "");
     setPreview(item.image);
@@ -284,12 +294,11 @@ export default function Gallery() {
   };
 
   const handleUnfeature = async (item: GalleryItem) => {
-    if (!confirm(`¿Quitar "${item.title}" de destacadas? La ilustración seguirá en Galería.`)) return;
-
     setTogglingId(item.id);
     setPageError("");
     try {
       await updateDoc(doc(db, "gallery", item.id), { featured: false });
+      setItemToUnfeature(null);
     } catch {
       setPageError(`No pudimos quitar "${item.title}" de destacadas.`);
     } finally {
@@ -407,6 +416,7 @@ export default function Gallery() {
                       <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
                         {item.description || "Sin descripción añadida"}
                       </p>
+                      <HashtagLinks value={item.hashtags} limit={4} />
                     </div>
 
                     <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border/70 pt-3">
@@ -420,7 +430,7 @@ export default function Gallery() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => void handleUnfeature(item)}
+                        onClick={() => setItemToUnfeature(item)}
                         disabled={togglingId === item.id}
                         className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-500/25 px-3 py-2 text-xs font-medium text-amber-300 transition-colors hover:bg-amber-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
                       >
@@ -633,6 +643,14 @@ export default function Gallery() {
                     placeholder="Descripción breve de la ilustración"
                   />
                 </div>
+
+                <div className="sm:col-span-2">
+                  <label className="mb-1.5 block text-sm font-medium text-foreground">Etiquetas</label>
+                  <HashtagInput
+                    value={form.hashtags}
+                    onChange={(hashtags) => setForm((current) => ({ ...current, hashtags }))}
+                  />
+                </div>
               </section>
 
               <div className="flex flex-col-reverse gap-2 border-t border-border/70 pt-5 sm:flex-row sm:justify-end">
@@ -656,6 +674,19 @@ export default function Gallery() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(itemToUnfeature)}
+        title="Quitar de destacadas"
+        description={`“${itemToUnfeature?.title ?? "Esta ilustración"}” dejará de aparecer en la portada, pero seguirá disponible en Galería.`}
+        confirmLabel="Quitar de la portada"
+        destructive={false}
+        busy={Boolean(itemToUnfeature && togglingId === itemToUnfeature.id)}
+        onClose={() => setItemToUnfeature(null)}
+        onConfirm={() => {
+          if (itemToUnfeature) return handleUnfeature(itemToUnfeature);
+        }}
+      />
     </div>
   );
 }

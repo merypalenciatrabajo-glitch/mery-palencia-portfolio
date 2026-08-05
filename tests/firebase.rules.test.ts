@@ -100,6 +100,21 @@ describe("Firestore rules", () => {
       setDoc(doc(adminDb, "gallery", "admin-write"), validGalleryItem)
     );
     await assertSucceeds(
+      setDoc(doc(adminDb, "gallery", "tagged-write"), {
+        ...validGalleryItem,
+        hashtags: [
+          { tag: "infantil", platforms: ["instagram", "facebook"] },
+          { tag: "retrato-familiar", platforms: ["x"] },
+        ],
+      })
+    );
+    await assertFails(
+      setDoc(doc(adminDb, "gallery", "too-many-tags"), {
+        ...validGalleryItem,
+        hashtags: Array.from({ length: 11 }, (_, index) => `tag-${index}`),
+      })
+    );
+    await assertSucceeds(
       setDoc(doc(editorDb, "commissions", "editor-write"), {
         name: "Editor",
         price: "A convenir",

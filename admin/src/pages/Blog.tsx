@@ -8,9 +8,11 @@ import {
   query,
   updateDoc,
 } from "firebase/firestore";
-import { Calendar, Clock, Edit2, Eye, FileText, Plus, RefreshCw, Trash2, Upload, X } from "lucide-react";
+import { BookOpen, Calendar, Clock, Edit2, Eye, FileText, Plus, RefreshCw, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import AdminSelect from "@/components/AdminSelect";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { cn } from "@/lib/utils";
@@ -60,6 +62,10 @@ function toDatetimeLocal(iso: string) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+function defaultScheduledAt() {
+  return toDatetimeLocal(new Date(Date.now() + 60 * 60 * 1000).toISOString());
+}
+
 export default function Blog() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -75,6 +81,7 @@ export default function Blog() {
   const [progress, setProgress] = useState(0);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [postToDelete, setPostToDelete] = useState<BlogPost | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Escuchar posts en tiempo real
@@ -201,10 +208,10 @@ export default function Blog() {
   };
 
   const handleDelete = async (post: BlogPost) => {
-    if (!confirm(`¿Eliminar "${post.title}"?`)) return;
     setDeletingId(post.id);
     try {
       await deleteDoc(doc(db, "blogPosts", post.id));
+      setPostToDelete(null);
     } finally {
       setDeletingId(null);
     }
@@ -219,9 +226,9 @@ export default function Blog() {
     CATEGORIES.find((c) => c.id === id)?.label || id;
 
   const getStatusBadge = (post: BlogPost) => {
-    if (post.published) return { label: "Publicado", cls: "bg-emerald-900/40 text-emerald-400" };
-    if (post.scheduledAt) return { label: "Programado", cls: "bg-blue-900/40 text-blue-400" };
-    return { label: "Borrador", cls: "bg-secondary text-muted-foreground" };
+    if (post.published) return { label: "Publicado", text: "text-emerald-300", dot: "bg-emerald-400" };
+    if (post.scheduledAt) return { label: "Programado", text: "text-sky-300", dot: "bg-sky-400" };
+    return { label: "Borrador", text: "text-muted-foreground", dot: "bg-muted-foreground" };
   };
 
   return (
@@ -250,7 +257,7 @@ export default function Blog() {
       <section className="admin-dashboard-surface overflow-hidden rounded-[1.6rem] border border-border/80">
         <div className="flex items-center justify-between border-b border-border/70 px-5 py-4 sm:px-6">
           <div><h2 className="text-sm font-semibold text-foreground">Publicaciones</h2><p className="mt-0.5 text-xs text-muted-foreground">{loadState === "loading" ? "Actualizando contenido…" : `${posts.length} artículos`}</p></div>
-          <span className="rounded-full border border-border bg-background/40 px-3 py-1 text-xs font-medium text-muted-foreground">Editorial</span>
+          <BookOpen size={17} className="text-primary" aria-hidden="true" />
         </div>
 
         {pageError && (
@@ -279,11 +286,13 @@ export default function Blog() {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                   <img src={post.image} alt={post.title} loading="lazy" className="aspect-[16/10] w-full rounded-2xl object-cover sm:w-36 sm:shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                    <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.11em] text-primary">
+                        <BookOpen size={12} strokeWidth={1.8} aria-hidden="true" />
                         {getCategoryLabel(post.category)}
                       </span>
-                      <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", status.cls)}>
+                      <span className={cn("inline-flex items-center gap-1.5 text-[11px] font-medium", status.text)}>
+                        <span className={cn("size-1.5 rounded-full", status.dot)} aria-hidden="true" />
                         {status.label}
                       </span>
                     </div>
@@ -328,7 +337,7 @@ export default function Blog() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDelete(post)}
+                    onClick={() => setPostToDelete(post)}
                     disabled={deletingId === post.id}
                     className="rounded-xl border border-border p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                     aria-label={`Eliminar ${post.title}`}
@@ -349,31 +358,42 @@ export default function Blog() {
       {/* Modal Form */}
       {showForm && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-3 backdrop-blur-md sm:p-5">
-          <div role="dialog" aria-modal="true" aria-labelledby="blog-form-title" className="admin-dashboard-surface flex max-h-[92vh] w-full max-w-3xl flex-col rounded-[1.75rem] border border-border/80 shadow-2xl">
-            <div className="flex shrink-0 items-center justify-between border-b border-border/70 px-5 py-4 sm:px-6">
-              <h2 id="blog-form-title" className="font-semibold text-foreground">
-                {editing ? "Editar artículo" : "Nuevo artículo"}
-              </h2>
+          <div role="dialog" aria-modal="true" aria-labelledby="blog-form-title" className="admin-dashboard-surface flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[1.75rem] border border-border/80 shadow-2xl">
+            <div className="flex shrink-0 items-start justify-between border-b border-border/70 bg-card/85 px-5 py-4 backdrop-blur-xl sm:px-6">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+                  {editing ? "Editar contenido" : "Nueva publicación"}
+                </p>
+                <h2 id="blog-form-title" className="mt-1 text-lg font-semibold text-foreground">
+                  {editing ? "Editar artículo" : "Nuevo artículo"}
+                </h2>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {editing ? "Actualiza la historia y su estado editorial." : "Prepara una historia para el portafolio."}
+                </p>
+              </div>
               <button type="button" onClick={closeForm} className="flex size-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" aria-label="Cerrar formulario">
-                <X size={20} />
+                <X size={18} aria-hidden="true" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5 overflow-y-auto p-5 sm:p-6">
               {/* Imagen */}
-              <div>
+              <section aria-labelledby="blog-cover-label">
                 <label className="block text-sm font-medium text-foreground mb-1.5">
+                  <span id="blog-cover-label">
                   Imagen de portada {!editing && <span className="text-destructive">*</span>}
+                  </span>
                 </label>
                 {preview ? (
-                  <div className="relative mb-2 h-48 w-full overflow-hidden rounded-2xl border border-border bg-secondary">
-                    <img src={preview} alt="preview" className="w-full h-full object-cover" />
+                  <div className="group/preview relative mb-2 aspect-video w-full overflow-hidden rounded-2xl border border-border bg-secondary">
+                    <img src={preview} alt="Previsualización de portada" className="size-full object-contain" />
                     <button
                       type="button"
                       onClick={() => { setFile(null); setPreview(editing?.image || ""); }}
-                      className="absolute top-2 right-2 p-1 bg-black/60 rounded-full text-white"
+                      className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-xl border border-white/15 bg-black/45 text-white backdrop-blur-md transition-colors hover:bg-black/65"
+                      aria-label="Quitar imagen seleccionada"
                     >
-                      <X size={14} />
+                      <X size={15} aria-hidden="true" />
                     </button>
                   </div>
                 ) : (
@@ -382,20 +402,21 @@ export default function Blog() {
                     onClick={() => fileRef.current?.click()}
                     className="flex h-40 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-background/35 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
                   >
-                    <Upload size={20} />
-                    <span className="text-sm">Subir imagen</span>
+                    <span className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary"><Upload size={20} aria-hidden="true" /></span>
+                    <span className="text-sm font-medium">Seleccionar imagen</span>
+                    <span className="text-xs text-muted-foreground">JPG, PNG o WebP</span>
                   </button>
                 )}
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFileChange} />
                 {uploading && (
                   <div className="mt-2 h-1.5 bg-secondary rounded-full overflow-hidden">
                     <div className="h-full bg-primary transition-all" style={{ width: `${progress}%` }} />
                   </div>
                 )}
-              </div>
+              </section>
 
               {/* Título */}
-              <div>
+              <div className="border-t border-border/70 pt-5">
                 <label className="block text-sm font-medium text-foreground mb-1.5">
                   Título <span className="text-destructive">*</span>
                 </label>
@@ -412,15 +433,12 @@ export default function Blog() {
               {/* Categoría */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">Categoría</label>
-                <select
+                <AdminSelect
                   value={form.category}
-                  onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
-                  className="w-full rounded-xl border border-input bg-background/60 px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-2 focus:ring-ring"
-                >
-                  {CATEGORIES.map((c) => (
-                    <option key={c.id} value={c.id}>{c.label}</option>
-                  ))}
-                </select>
+                  options={CATEGORIES.map((category) => ({ value: category.id, label: category.label }))}
+                  onChange={(category) => setForm((current) => ({ ...current, category }))}
+                  ariaLabel="Categoría del artículo"
+                />
               </div>
 
               {/* Extracto */}
@@ -481,7 +499,16 @@ export default function Blog() {
                     <button
                       key={mode}
                       type="button"
-                      onClick={() => setForm((p) => ({ ...p, publishMode: mode }))}
+                      onClick={() =>
+                        setForm((current) => ({
+                          ...current,
+                          publishMode: mode,
+                          scheduledAt:
+                            mode === "scheduled" && !current.scheduledAt
+                              ? defaultScheduledAt()
+                              : current.scheduledAt,
+                        }))
+                      }
                       className={cn(
                         "flex-1 rounded-xl border py-2 text-sm font-medium transition-colors",
                         form.publishMode === mode
@@ -500,19 +527,17 @@ export default function Blog() {
                     <label className="block text-xs text-muted-foreground mb-1.5">
                       Fecha y hora de publicación
                     </label>
-                    <input
-                      type="datetime-local"
+                    <ScheduleDateTimeField
                       value={form.scheduledAt}
-                      min={new Date().toISOString().slice(0, 16)}
-                      onChange={(e) => setForm((p) => ({ ...p, scheduledAt: e.target.value }))}
-                      required={form.publishMode === "scheduled"}
-                      className="w-full rounded-xl border border-input bg-background/60 px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                      onChange={(scheduledAt) =>
+                        setForm((current) => ({ ...current, scheduledAt }))
+                      }
                     />
                   </div>
                 )}
               </div>
 
-              <div className="flex flex-col-reverse gap-2 border-t border-border/70 pt-5 sm:flex-row sm:justify-end">
+              <div className="sticky -bottom-6 z-10 -mx-5 flex flex-col-reverse gap-2 border-t border-border/70 bg-card/90 px-5 pb-0 pt-4 backdrop-blur-xl sm:-mx-6 sm:flex-row sm:justify-end sm:px-6">
                 <button
                   type="button"
                   onClick={closeForm}
@@ -536,6 +561,89 @@ export default function Blog() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(postToDelete)}
+        title="Eliminar artículo"
+        description={`“${postToDelete?.title ?? "Este artículo"}” se eliminará definitivamente del blog.`}
+        confirmLabel="Eliminar artículo"
+        busy={Boolean(postToDelete && deletingId === postToDelete.id)}
+        onClose={() => setPostToDelete(null)}
+        onConfirm={() => {
+          if (postToDelete) return handleDelete(postToDelete);
+        }}
+      />
+    </div>
+  );
+}
+
+function ScheduleDateTimeField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const normalized = value || defaultScheduledAt();
+  const [datePart, timePart = "00:00"] = normalized.split("T");
+  const [year, month, day] = datePart.split("-");
+  const [hour, minute] = timePart.split(":");
+  const currentYear = new Date().getFullYear();
+  const daysInMonth = new Date(Number(year), Number(month), 0).getDate();
+
+  const update = (part: "year" | "month" | "day" | "hour" | "minute", next: string) => {
+    const nextYear = part === "year" ? next : year;
+    const nextMonth = part === "month" ? next : month;
+    const maxDay = new Date(Number(nextYear), Number(nextMonth), 0).getDate();
+    const nextDay = part === "day" ? next : String(Math.min(Number(day), maxDay)).padStart(2, "0");
+    const nextHour = part === "hour" ? next : hour;
+    const nextMinute = part === "minute" ? next : minute;
+    onChange(`${nextYear}-${nextMonth}-${nextDay}T${nextHour}:${nextMinute}`);
+  };
+
+  const numericOptions = (start: number, end: number, suffix = "") =>
+    Array.from({ length: end - start + 1 }, (_, index) => {
+      const number = start + index;
+      const optionValue = String(number).padStart(2, "0");
+      return { value: optionValue, label: `${optionValue}${suffix}` };
+    });
+
+  return (
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+      <AdminSelect
+        value={year}
+        options={Array.from({ length: 6 }, (_, index) => ({
+          value: String(currentYear + index),
+          label: String(currentYear + index),
+        }))}
+        onChange={(next) => update("year", next)}
+        ariaLabel="Año de publicación"
+        className="col-span-2 sm:col-span-1"
+      />
+      <AdminSelect
+        value={month}
+        options={numericOptions(1, 12)}
+        onChange={(next) => update("month", next)}
+        ariaLabel="Mes de publicación"
+      />
+      <AdminSelect
+        value={day}
+        options={numericOptions(1, daysInMonth)}
+        onChange={(next) => update("day", next)}
+        ariaLabel="Día de publicación"
+      />
+      <AdminSelect
+        value={hour}
+        options={numericOptions(0, 23, " h")}
+        onChange={(next) => update("hour", next)}
+        ariaLabel="Hora de publicación"
+      />
+      <AdminSelect
+        value={minute}
+        options={["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"].map((item) => ({ value: item, label: `${item} min` }))}
+        onChange={(next) => update("minute", next)}
+        ariaLabel="Minuto de publicación"
+      />
     </div>
   );
 }

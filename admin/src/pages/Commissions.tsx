@@ -12,6 +12,8 @@ import {
 import { BriefcaseBusiness, Check, Edit2, ListChecks, Plus, Save, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import AdminSelect from "@/components/AdminSelect";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { db } from "@/lib/firebase";
 import { cn } from "@/lib/utils";
 
@@ -78,6 +80,8 @@ export default function Commissions() {
   const [pageError, setPageError] = useState("");
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [tierToDelete, setTierToDelete] = useState<CommissionTier | null>(null);
+  const [stepToDelete, setStepToDelete] = useState<ProcessStep | null>(null);
 
   useEffect(() => {
     const q = query(collection(db, "commissions"), orderBy("order", "asc"));
@@ -131,10 +135,10 @@ export default function Commissions() {
 
   // ── Eliminar tier ───────────────────────────────────────────────────────────
   const deleteTier = async (tier: CommissionTier) => {
-    if (!confirm(`¿Eliminar el servicio "${tier.name}"?`)) return;
     setDeletingId(tier.id);
     try {
       await deleteDoc(doc(db, "commissions", tier.id));
+      setTierToDelete(null);
     } finally {
       setDeletingId(null);
     }
@@ -169,10 +173,10 @@ export default function Commissions() {
 
   // ── Eliminar paso ───────────────────────────────────────────────────────────
   const deleteStep = async (step: ProcessStep) => {
-    if (!confirm(`¿Eliminar el paso "${step.title}"?`)) return;
     setDeletingId(step.id);
     try {
       await deleteDoc(doc(db, "processSteps", step.id));
+      setStepToDelete(null);
     } finally {
       setDeletingId(null);
     }
@@ -261,7 +265,7 @@ export default function Commissions() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => deleteTier(tier)}
+                  onClick={() => setTierToDelete(tier)}
                   disabled={deletingId === tier.id}
                   className="flex size-8 items-center justify-center rounded-xl border border-destructive/25 text-destructive transition-colors hover:bg-destructive/10"
                   aria-label={`Eliminar ${tier.name}`}
@@ -304,7 +308,7 @@ export default function Commissions() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => deleteStep(step)}
+                  onClick={() => setStepToDelete(step)}
                   disabled={deletingId === step.id}
                   className="flex size-8 items-center justify-center rounded-xl border border-destructive/25 text-destructive transition-colors hover:bg-destructive/10"
                   aria-label={`Eliminar ${step.title}`}
@@ -340,6 +344,30 @@ export default function Commissions() {
           onClose={() => setEditingStep(null)}
         />
       )}
+
+      <ConfirmDialog
+        open={Boolean(tierToDelete)}
+        title="Eliminar servicio"
+        description={`“${tierToDelete?.name ?? "Este servicio"}” dejará de aparecer entre las comisiones disponibles.`}
+        confirmLabel="Eliminar servicio"
+        busy={Boolean(tierToDelete && deletingId === tierToDelete.id)}
+        onClose={() => setTierToDelete(null)}
+        onConfirm={() => {
+          if (tierToDelete) return deleteTier(tierToDelete);
+        }}
+      />
+
+      <ConfirmDialog
+        open={Boolean(stepToDelete)}
+        title="Eliminar paso"
+        description={`“${stepToDelete?.title ?? "Este paso"}” se eliminará del proceso creativo.`}
+        confirmLabel="Eliminar paso"
+        busy={Boolean(stepToDelete && deletingId === stepToDelete.id)}
+        onClose={() => setStepToDelete(null)}
+        onConfirm={() => {
+          if (stepToDelete) return deleteStep(stepToDelete);
+        }}
+      />
     </div>
   );
 }
@@ -373,11 +401,15 @@ function TierModal({
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-3 backdrop-blur-md sm:p-5">
-      <div role="dialog" aria-modal="true" aria-labelledby="commission-form-title" className="admin-dashboard-surface flex max-h-[92vh] w-full max-w-lg flex-col rounded-[1.75rem] border border-border/80 shadow-2xl">
-        <div className="flex shrink-0 items-center justify-between border-b border-border/70 px-5 py-4 sm:px-6">
-          <h2 id="commission-form-title" className="font-semibold text-foreground">{isNew ? "Nuevo servicio" : "Editar servicio"}</h2>
+      <div role="dialog" aria-modal="true" aria-labelledby="commission-form-title" className="admin-dashboard-surface flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-[1.75rem] border border-border/80 shadow-2xl">
+        <div className="flex shrink-0 items-start justify-between border-b border-border/70 bg-card/85 px-5 py-4 backdrop-blur-xl sm:px-6">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">Servicio de comisión</p>
+            <h2 id="commission-form-title" className="mt-1 text-lg font-semibold text-foreground">{isNew ? "Nuevo servicio" : "Editar servicio"}</h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">Define alcance, precio y entregables.</p>
+          </div>
           <button type="button" onClick={onClose} className="flex size-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" aria-label="Cerrar formulario">
-            <X size={20} />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
         <div className="space-y-4 overflow-y-auto p-5 sm:p-6">
@@ -400,14 +432,13 @@ function TierModal({
                 className={cn(inputCls, "flex-1")}
                 placeholder="Vacío = Consultar"
               />
-              <select
-                value={tier.priceCurrency ?? 'COP'}
-                onChange={(e) => onChange({ ...tier, priceCurrency: e.target.value as 'COP' | 'USD' })}
-                className="rounded-xl border border-input bg-background/60 px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="COP">COP</option>
-                <option value="USD">USD</option>
-              </select>
+              <AdminSelect
+                value={tier.priceCurrency ?? "COP"}
+                options={[{ value: "COP", label: "COP" }, { value: "USD", label: "USD" }]}
+                onChange={(priceCurrency) => onChange({ ...tier, priceCurrency: priceCurrency as "COP" | "USD" })}
+                ariaLabel="Moneda del servicio"
+                className="w-28 shrink-0"
+              />
             </div>
             {(tier.priceAmount ?? 0) > 0 && (
               <p className="text-xs text-muted-foreground mt-1">
@@ -424,7 +455,7 @@ function TierModal({
               placeholder="Descripción breve del servicio"
             />
           </Field>
-          <div>
+          <div className="border-t border-border/70 pt-5">
             <label className="block text-sm font-medium text-foreground mb-1.5">Incluye</label>
             <div className="space-y-2">
               {tier.includes.map((item, i) => (
@@ -455,7 +486,7 @@ function TierModal({
             </div>
           </div>
         </div>
-        <div className="flex shrink-0 gap-3 border-t border-border/70 px-5 py-4 sm:px-6">
+        <div className="flex shrink-0 gap-3 border-t border-border/70 bg-card/85 px-5 py-4 backdrop-blur-xl sm:px-6">
           <button
             onClick={onClose}
             className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
@@ -499,13 +530,17 @@ function StepModal({
 }) {
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-3 backdrop-blur-md sm:p-5">
-      <div role="dialog" aria-modal="true" aria-labelledby="process-step-form-title" className="admin-dashboard-surface w-full max-w-md rounded-[1.75rem] border border-border/80 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-border/70 px-5 py-4 sm:px-6">
-          <h2 id="process-step-form-title" className="font-semibold text-foreground">
-            {isNew ? "Nuevo paso" : `Editar paso ${step.number}`}
-          </h2>
+      <div role="dialog" aria-modal="true" aria-labelledby="process-step-form-title" className="admin-dashboard-surface w-full max-w-md overflow-hidden rounded-[1.75rem] border border-border/80 shadow-2xl">
+        <div className="flex items-start justify-between border-b border-border/70 bg-card/85 px-5 py-4 backdrop-blur-xl sm:px-6">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">Proceso creativo</p>
+            <h2 id="process-step-form-title" className="mt-1 text-lg font-semibold text-foreground">
+              {isNew ? "Nuevo paso" : `Editar paso ${step.number}`}
+            </h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">Ordena y explica esta etapa del servicio.</p>
+          </div>
           <button type="button" onClick={onClose} className="flex size-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" aria-label="Cerrar formulario">
-            <X size={20} />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
         <div className="space-y-4 p-5 sm:p-6">
@@ -537,7 +572,7 @@ function StepModal({
             />
           </Field>
         </div>
-        <div className="flex gap-3 border-t border-border/70 px-5 py-4 sm:px-6">
+        <div className="flex gap-3 border-t border-border/70 bg-card/85 px-5 py-4 backdrop-blur-xl sm:px-6">
           <button
             onClick={onClose}
             className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"

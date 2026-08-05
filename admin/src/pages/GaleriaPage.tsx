@@ -15,6 +15,12 @@ import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { cn } from "@/lib/utils";
 import CategorySelect from "@/components/CategorySelect";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import HashtagInput, {
+  HashtagLinks,
+  normalizeHashtagEntries,
+  type HashtagEntry,
+} from "@/components/HashtagInput";
 
 interface GalleryItem {
   id: string;
@@ -23,6 +29,7 @@ interface GalleryItem {
   publicId: string;
   category: string;
   description: string;
+  hashtags?: HashtagEntry[] | string[];
   order: number;
   featured?: boolean;
   extraImages?: { url: string; publicId: string }[];
@@ -45,6 +52,7 @@ const EMPTY_FORM = {
   title: "",
   category: "fotografia-paisaje",
   description: "",
+  hashtags: [] as HashtagEntry[],
 };
 
 export default function GaleriaPage() {
@@ -61,6 +69,7 @@ export default function GaleriaPage() {
   const [progress, setProgress] = useState(0);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<GalleryItem | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const extraFileRef = useRef<HTMLInputElement>(null);
@@ -111,7 +120,12 @@ export default function GaleriaPage() {
   const openEdit = (item: GalleryItem) => {
     setEditing(item);
     const isCustom = !CATEGORIES.find((c) => c.id === item.category);
-    setForm({ title: item.title, category: isCustom ? "otros" : item.category, description: item.description });
+    setForm({
+      title: item.title,
+      category: isCustom ? "otros" : item.category,
+      description: item.description,
+      hashtags: normalizeHashtagEntries(item.hashtags),
+    });
     setCustomCategory(isCustom ? item.category : "");
     setPreview(item.image);
     setFile(null);
@@ -226,10 +240,10 @@ export default function GaleriaPage() {
   };
 
   const handleDelete = async (item: GalleryItem) => {
-    if (!confirm(`¿Eliminar "${item.title}"?`)) return;
     setDeletingId(item.id);
     try {
       await deleteDoc(doc(db, "gallery", item.id));
+      setItemToDelete(null);
     } finally {
       setDeletingId(null);
     }
@@ -311,11 +325,15 @@ export default function GaleriaPage() {
                     </div>
                   </div>
                   <div className="p-4">
-                    <div className="min-h-14"><h3 className="truncate text-sm font-semibold text-foreground">{item.title}</h3><p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{item.description || "Sin descripción añadida"}</p></div>
+                    <div className="min-h-14">
+                      <h3 className="truncate text-sm font-semibold text-foreground">{item.title}</h3>
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{item.description || "Sin descripción añadida"}</p>
+                      <HashtagLinks value={item.hashtags} limit={4} />
+                    </div>
                     <div className="mt-4 flex gap-2 border-t border-border/70 pt-3">
                       <button type="button" onClick={() => openEdit(item)} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors hover:bg-secondary"><Edit2 size={13} aria-hidden="true" /> Editar</button>
                       <button type="button" onClick={() => void handleToggleFeatured(item)} disabled={togglingId === item.id} className={cn("inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition-colors disabled:opacity-50", item.featured ? "border-amber-500/25 text-amber-300 hover:bg-amber-500/10" : "border-primary/25 text-primary hover:bg-primary/10")}>{item.featured ? <><StarOff size={13} aria-hidden="true" /> Quitar</> : <><Star size={13} aria-hidden="true" /> Destacar</>}</button>
-                      <button type="button" onClick={() => void handleDelete(item)} disabled={deletingId === item.id} className="flex size-9 items-center justify-center rounded-xl border border-destructive/25 text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50" aria-label={`Eliminar ${item.title}`}><Trash2 size={13} aria-hidden="true" /></button>
+                      <button type="button" onClick={() => setItemToDelete(item)} disabled={deletingId === item.id} className="flex size-9 items-center justify-center rounded-xl border border-destructive/25 text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50" aria-label={`Eliminar ${item.title}`}><Trash2 size={13} aria-hidden="true" /></button>
                     </div>
                   </div>
                 </article>
@@ -447,6 +465,14 @@ export default function GaleriaPage() {
                 />
               </div>
 
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Etiquetas</label>
+                <HashtagInput
+                  value={form.hashtags}
+                  onChange={(hashtags) => setForm((current) => ({ ...current, hashtags }))}
+                />
+              </div>
+
               <div className="flex flex-col-reverse gap-2 border-t border-border/70 pt-5 sm:flex-row sm:justify-end">
                 <button type="button" onClick={closeForm} className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary">
                   Cancelar
@@ -467,6 +493,18 @@ export default function GaleriaPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(itemToDelete)}
+        title="Eliminar ilustración"
+        description={`“${itemToDelete?.title ?? "Esta ilustración"}” se eliminará definitivamente de la galería y de la portada si estaba destacada.`}
+        confirmLabel="Eliminar ilustración"
+        busy={Boolean(itemToDelete && deletingId === itemToDelete.id)}
+        onClose={() => setItemToDelete(null)}
+        onConfirm={() => {
+          if (itemToDelete) return handleDelete(itemToDelete);
+        }}
+      />
     </div>
   );
 }
