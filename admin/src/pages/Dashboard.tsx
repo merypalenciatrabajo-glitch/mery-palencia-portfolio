@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { collection, getCountFromServer } from "firebase/firestore";
+import { useEffect, useMemo, useState } from "react";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import {
   ArrowUpRight,
   BookOpen,
@@ -19,7 +19,9 @@ interface DashboardStat {
   label: string;
   description: string;
   collectionName: string;
-  count: number;
+  featuredOnly?: boolean;
+  count: number | null;
+  loadState: LoadState;
   icon: React.ElementType;
   color: string;
   glow: string;
@@ -30,7 +32,9 @@ const INITIAL_STATS: DashboardStat[] = [
     label: "Destacadas",
     description: "Portada principal",
     collectionName: "gallery",
-    count: 0,
+    featuredOnly: true,
+    count: null,
+    loadState: "loading",
     icon: Image,
     color: "text-blue-400",
     glow: "bg-blue-500/12 ring-blue-400/15",
@@ -39,7 +43,8 @@ const INITIAL_STATS: DashboardStat[] = [
     label: "Galería",
     description: "Archivo visual",
     collectionName: "galleryPage",
-    count: 0,
+    count: null,
+    loadState: "loading",
     icon: GalleryHorizontal,
     color: "text-cyan-400",
     glow: "bg-cyan-500/12 ring-cyan-400/15",
@@ -48,7 +53,8 @@ const INITIAL_STATS: DashboardStat[] = [
     label: "Posts del blog",
     description: "Contenido editorial",
     collectionName: "blogPosts",
-    count: 0,
+    count: null,
+    loadState: "loading",
     icon: BookOpen,
     color: "text-purple-400",
     glow: "bg-purple-500/12 ring-purple-400/15",
@@ -57,7 +63,8 @@ const INITIAL_STATS: DashboardStat[] = [
     label: "Comisiones",
     description: "Servicios disponibles",
     collectionName: "commissions",
-    count: 0,
+    count: null,
+    loadState: "loading",
     icon: Layers,
     color: "text-emerald-400",
     glow: "bg-emerald-500/12 ring-emerald-400/15",
@@ -93,38 +100,50 @@ const QUICK_ACTIONS = [
 
 export default function Dashboard() {
   const [stats, setStats] = useState(INITIAL_STATS);
-  const [loadState, setLoadState] = useState<LoadState>("loading");
-
-  const fetchCounts = useCallback(async () => {
-    setLoadState("loading");
-
-    try {
-      const snapshots = await Promise.all(
-        INITIAL_STATS.map((stat) =>
-          getCountFromServer(collection(db, stat.collectionName)),
-        ),
-      );
-
-      setStats((current) =>
-        current.map((stat, index) => ({
-          ...stat,
-          count: snapshots[index].data().count,
-        })),
-      );
-      setLoadState("ready");
-    } catch {
-      setLoadState("error");
-    }
-  }, []);
+  const [subscriptionKey, setSubscriptionKey] = useState(0);
 
   useEffect(() => {
-    void fetchCounts();
-  }, [fetchCounts]);
+    setStats((current) =>
+      current.map((stat) => ({ ...stat, count: null, loadState: "loading" })),
+    );
+
+    const unsubscribers = INITIAL_STATS.map((stat, index) => {
+      const source = stat.featuredOnly
+        ? query(collection(db, stat.collectionName), where("featured", "==", true))
+        : query(collection(db, stat.collectionName));
+
+      return onSnapshot(
+        source,
+        (snapshot) => {
+          setStats((current) =>
+            current.map((currentStat, currentIndex) =>
+              currentIndex === index
+                ? { ...currentStat, count: snapshot.size, loadState: "ready" }
+                : currentStat,
+            ),
+          );
+        },
+        () => {
+          setStats((current) =>
+            current.map((currentStat, currentIndex) =>
+              currentIndex === index
+                ? { ...currentStat, count: null, loadState: "error" }
+                : currentStat,
+            ),
+          );
+        },
+      );
+    });
+
+    return () => unsubscribers.forEach((unsubscribe) => unsubscribe());
+  }, [subscriptionKey]);
 
   const totalItems = useMemo(
-    () => stats.reduce((total, stat) => total + stat.count, 0),
+    () => stats.reduce((total, stat) => total + (stat.count ?? 0), 0),
     [stats],
   );
+  const hasLoading = stats.some((stat) => stat.loadState === "loading");
+  const hasError = stats.some((stat) => stat.loadState === "error");
 
   return (
     <div className="space-y-6 md:space-y-8">
@@ -141,11 +160,11 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-baseline gap-2 sm:text-right" aria-live="polite">
-          {loadState === "loading" ? (
+          {hasLoading ? (
             <span className="h-8 w-12 animate-pulse rounded-lg bg-muted" aria-label="Cargando total" />
           ) : (
             <span className="text-3xl font-semibold tabular-nums text-foreground">
-              {loadState === "error" ? "—" : totalItems}
+              {hasError ? "—" : totalItems}
             </span>
           )}
           <span className="text-xs leading-tight text-muted-foreground">
@@ -169,10 +188,10 @@ export default function Dashboard() {
               <p className="mt-0.5 text-xs text-muted-foreground">Contenido organizado por sección</p>
             </div>
 
-            {loadState === "error" && (
+            {hasError && (
               <button
                 type="button"
-                onClick={() => void fetchCounts()}
+                onClick={() => setSubscriptionKey((current) => current + 1)}
                 className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <RefreshCw size={14} aria-hidden="true" />
@@ -182,7 +201,7 @@ export default function Dashboard() {
           </div>
 
           <div className="grid sm:grid-cols-2">
-            {stats.map(({ label, description, count, icon: Icon, color, glow }, index) => (
+            {stats.map(({ label, description, count, loadState, icon: Icon, color, glow }, index) => (
               <div
                 key={label}
                 className={cn(
@@ -216,9 +235,9 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {loadState === "error" && (
+          {hasError && (
             <p className="border-t border-border/70 px-5 py-3 text-xs text-amber-300 sm:px-6" role="status">
-              No pudimos actualizar los totales. El resto del panel sigue disponible.
+              Uno o más conteos no están disponibles. Las demás cifras siguen actualizándose en tiempo real.
             </p>
           )}
         </section>
