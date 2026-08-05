@@ -229,7 +229,7 @@ export default function GalleryPage() {
                       alt={item.title}
                       loading="lazy"
                       decoding="async"
-                      className="h-full min-h-[16rem] w-full object-cover transition-transform duration-700 group-hover:scale-[1.035]"
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.035]"
                     />
                     {/* Overlay protector — bloquea clic derecho y arrastre */}
                     <div
