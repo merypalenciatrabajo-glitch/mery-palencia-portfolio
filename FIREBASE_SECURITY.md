@@ -41,7 +41,7 @@ writes. Configure Firebase Admin credentials plus short-lived expired and
 revoked test ID tokens, then run:
 
 ```bash
-pnpm run test:firebase-live
+pnpm run quality:firebase-live
 ```
 
 The command fails before starting Vitest when credentials or either token are

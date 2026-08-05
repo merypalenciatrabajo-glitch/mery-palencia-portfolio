@@ -18,7 +18,7 @@
     "android:sync": "pnpm build && cap sync android",
     "android:sync:offline-preview": "pnpm build:offline-preview && cap sync android",
     "release:build": "pnpm android:sync",
-    "test": "vitest --run"
+    "quality": "vitest --run"
   },
   "dependencies": {
     "@capacitor/android": "^8.2.0",

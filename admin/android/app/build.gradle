@@ -31,6 +31,14 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    sourceSets {
+        test {
+            java.srcDirs = ['src/quality/java']
+        }
+        androidTest {
+            java.srcDirs = ['src/instrumentationQuality/java']
+        }
+    }
     signingConfigs {
         release {
             if (keystorePropertiesFile.exists()) {

@@ -13,8 +13,8 @@
     "generate:sitemap": "node scripts/generate-sitemap.mjs",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
-    "test": "vitest --run",
-    "test:watch": "vitest"
+    "quality": "vitest --run",
+    "quality:watch": "vitest"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
