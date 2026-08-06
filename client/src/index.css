@@ -907,27 +907,113 @@
     height: 2.35rem;
     align-items: center;
     justify-content: center;
+    border: 0;
     border-radius: 0.75rem;
+    background: transparent;
     color: var(--muted-foreground);
+    cursor: pointer;
     outline: none;
     transition: color 180ms ease, background-color 180ms ease, transform 180ms ease;
   }
 
-  .portfolio-social-rail__link[href]:hover {
+  .portfolio-social-rail__link:hover,
+  .portfolio-social-rail__link--active {
     transform: translateX(0.15rem);
     background: color-mix(in oklab, var(--primary) 11%, transparent);
     color: var(--primary);
   }
 
-  .portfolio-social-rail__link[href]:focus-visible {
+  .portfolio-social-rail__link:focus-visible {
     background: color-mix(in oklab, var(--primary) 13%, transparent);
     color: var(--primary);
     box-shadow: 0 0 0 2px var(--ring);
   }
 
-  .portfolio-social-rail__link--disabled {
-    cursor: not-allowed;
-    color: color-mix(in oklab, var(--muted-foreground) 38%, transparent);
+  .portfolio-social-rail__instagram {
+    position: relative;
+    display: flex;
+  }
+
+  .portfolio-social-rail__profiles {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 0.7rem);
+    width: min(15rem, calc(100vw - 4.5rem));
+    overflow: hidden;
+    transform: translateY(-50%);
+    border: 1px solid color-mix(in oklab, var(--primary) 20%, var(--border));
+    border-radius: 1rem;
+    background: color-mix(in oklab, var(--card) 84%, transparent);
+    padding: 0.45rem;
+    box-shadow:
+      14px 18px 44px color-mix(in oklab, black 34%, transparent),
+      inset 0 1px 0 color-mix(in oklab, white 8%, transparent);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    backdrop-filter: blur(24px) saturate(150%);
+    animation: portfolio-social-profiles-in 180ms ease-out both;
+  }
+
+  .portfolio-social-rail__profiles-title {
+    margin: 0;
+    padding: 0.5rem 0.65rem 0.4rem;
+    color: color-mix(in oklab, var(--muted-foreground) 82%, transparent);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .portfolio-social-rail__profile {
+    display: flex;
+    min-height: 3.55rem;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: 0.72rem;
+    padding: 0.55rem 0.65rem;
+    color: var(--muted-foreground);
+    outline: none;
+    transition: background-color 180ms ease, color 180ms ease;
+  }
+
+  .portfolio-social-rail__profile svg {
+    flex: 0 0 auto;
+    color: var(--primary);
+  }
+
+  .portfolio-social-rail__profile span {
+    display: grid;
+    gap: 0.08rem;
+  }
+
+  .portfolio-social-rail__profile strong {
+    color: var(--foreground);
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+
+  .portfolio-social-rail__profile small {
+    font-size: 0.7rem;
+  }
+
+  .portfolio-social-rail__profile:hover,
+  .portfolio-social-rail__profile:focus-visible {
+    background: color-mix(in oklab, var(--primary) 10%, transparent);
+    color: var(--primary);
+  }
+
+  .portfolio-social-rail__profile:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--ring);
+  }
+
+  @keyframes portfolio-social-profiles-in {
+    from {
+      transform: translate(-0.35rem, -50%);
+      opacity: 0;
+    }
+    to {
+      transform: translate(0, -50%);
+      opacity: 1;
+    }
   }
 
   .portfolio-footer {
@@ -1094,12 +1180,17 @@
       height: 2.2rem;
       border-radius: 0.7rem;
     }
+
+    .portfolio-social-rail__profiles {
+      left: calc(100% + 0.5rem);
+    }
   }
 
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .portfolio-dock,
     .portfolio-surface,
-    .portfolio-social-rail {
+    .portfolio-social-rail,
+    .portfolio-social-rail__profiles {
       background: var(--card);
     }
   }

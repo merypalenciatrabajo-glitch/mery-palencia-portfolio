@@ -34,13 +34,19 @@ describe('formulario de contacto', () => {
     const publicConfig = readFileSync(resolve(__dirname, '../lib/publicContactConfig.ts'), 'utf-8');
     expect(socialRail).not.toContain('href="https://instagram.com"');
     expect(socialRail).not.toContain('href="https://facebook.com"');
+    expect(socialRail).not.toContain('Facebook');
+    expect(socialRail).not.toContain('VITE_FACEBOOK_URL');
     expect(socialRail).not.toContain('mailto:mery@example.com');
     expect(publicConfig).toContain('VITE_CONTACT_EMAIL');
     expect(publicConfig).toContain('VITE_EMAILJS_SERVICE_ID');
     expect(publicConfig).toContain('VITE_EMAILJS_TEMPLATE_ID');
     expect(publicConfig).toContain('VITE_EMAILJS_PUBLIC_KEY');
-    expect(socialRail).toContain('VITE_INSTAGRAM_URL');
-    expect(socialRail).toContain('VITE_FACEBOOK_URL');
+    expect(socialRail).toContain('VITE_INSTAGRAM_PHOTO_URL');
+    expect(socialRail).toContain('VITE_INSTAGRAM_EDITING_URL');
+    expect(socialRail).toContain('VITE_WHATSAPP_URL');
+    expect(socialRail).toContain('meryphotoart');
+    expect(socialRail).toContain('edicion_mp');
+    expect(socialRail).toContain('wa.me/573164757898');
   });
 
   it('envía al transporte configurado con los campos esperados', async () => {
