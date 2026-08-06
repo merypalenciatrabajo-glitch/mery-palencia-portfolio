@@ -47,6 +47,11 @@ export async function sendContactMessage(
         config.serviceId,
         config.templateId,
         {
+          // La plantilla activa usa `name`/`email` en sus cabeceras y
+          // `from_name`/`from_email` en el contenido. Enviamos ambos pares
+          // para mantenerlos sincronizados y evitar valores sin resolver.
+          name: data.name,
+          email: data.email,
           from_name: data.name,
           from_email: data.email,
           reply_to: data.email,

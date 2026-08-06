@@ -50,8 +50,13 @@ describe('formulario de contacto', () => {
     }, { transport });
 
     expect(transport).toHaveBeenCalledWith('service', 'template', expect.objectContaining({
+      name: 'Mery Palencia',
+      email: 'mery@example.com',
       from_name: 'Mery Palencia',
+      from_email: 'mery@example.com',
       reply_to: 'mery@example.com',
+      project: 'Diseño de personaje',
+      message: 'Necesito una ilustración para un proyecto editorial.',
     }), 'public');
   });
 
